@@ -14,8 +14,9 @@ from PyQt5 import QtCore, QtGui
 import pyforms
 from argparse import Namespace
 from googleapiclient.http import MediaFileUpload
+from googleapiclient.errors import HttpError
 from pyforms import BaseWidget
-from pyforms.controls import ControlText
+from pyforms.controls import ControlText, ControlFile
 from pyforms.controls import ControlTextArea, ControlList
 from pyforms.controls import ControlCombo, ControlProgress
 from pyforms.controls import ControlButton, ControlCheckBox
@@ -46,6 +47,7 @@ class Melee_Uploader(BaseWidget):
         self._ename = ControlText("Event Name")
         self._pID = ControlText(" Playlist ID")
         # Match Values
+        self._file = ControlFile("File")
         self._p1 = ControlText("Player 1")
         self._p2 = ControlText("Player 2")
         self._p1char = ControlCombo("P1 Character")
@@ -61,7 +63,7 @@ class Melee_Uploader(BaseWidget):
         self._button = ControlButton('Submit')
 
         # Form Layout
-        self.formset = [{"-Match": [(' ', "_mtype", ' '), (' ', "_p1", ' '), (' ', "_p1char", ' '), (' ', "_p2", ' '), (' ', "_p2char", ' ')],
+        self.formset = [{"-Match": ["_file", (' ', "_mtype", ' '), (' ', "_p1", ' '), (' ', "_p1char", ' '), (' ', "_p2", ' '), (' ', "_p2char", ' ')],
                          "-Status-": ["_output"],
                          "Event-": [(' ', "_where", ' '), (' ', "_ename", ' '), (' ', "_pID", ' ')]},
                         (' ', '_button', ' ')]
@@ -74,14 +76,11 @@ class Melee_Uploader(BaseWidget):
         self._mtype += "Pools"
         self._mtype += "Winners"
         self._mtype += "Losers"
-        self._mtype += "Winners Quarterfinals"
-        self._mtype += "Losers Quarterfinals"
-        self._mtype += "Winners Semifinals"
-        self._mtype += "Losers Semifinals"
         self._mtype += "Winners Finals"
         self._mtype += "Losers Finals"
         self._mtype += "Grand Finals"
         self._mtype += "Money Match"
+        self._mtype += "Crew Battle"
         chars = ['Fox', 'Falco', 'Marth', 'Sheik', 'Jigglypuff', 'Peach', 'Captain Falcon', 'Ice Climbers', 'Pikachu', 'Samus', 'Dr. Mario', 'Yoshi', 'Luigi', 'Ganondorf', 'Mario', 'Young Link', 'Donkey Kong', 'Link', 'Mr. Game & Watch', 'Mewtwo', 'Roy', 'Zelda', 'Ness', 'Pichu', 'Bowser', 'Kirby']
         for char in chars:
             self._p1char += char
@@ -108,23 +107,16 @@ class Melee_Uploader(BaseWidget):
                                 6: self._p1char,
                                 7: self._p2char,
                             }
-                            if any(i == k for k in (14, 15)):
-                                if val == "no":
-                                    switcher[i].value = False
-                                else:
-                                    switcher[i].value = True
-                            else:
-                                switcher[i].value = val
+                            switcher[i].value = val
                         i = i + 1
                     break
         except (IOError, OSError, StopIteration) as e:
             print("No form_values.csv to read from, continuing with default values and creating file")
             with open("form_values.csv", "w+") as csvf:  # if the file doesn't exist
-                csvf.write(''.join(str(x) for x in [","] * 18))
+                csvf.write(''.join(str(x) for x in [","] * 7))
 
     def __buttonAction(self):
         """Button action event"""
-        self._files = list(reversed([f for f in os.listdir(self._where) if os.path.isfile(os.path.join(self._where, f))]))
         reader = None
         try:
             reader = csv.reader(open('form_values.csv'))
@@ -150,18 +142,19 @@ class Melee_Uploader(BaseWidget):
         writer.writerow(row)
 
     def _init(self):
-        title = "{ename} - {mtype} - {p1}({p1char} vs {p2}({p2char})".format(mtype=self._mtype.value, ename=self._ename.value, p1=self._p1.value, p2=self._p2.value, p1char=self._p1char.value, p2char=self._p2char.value)
-        self._file = None
-        for f in self._files:
-            fl = f.lower()
-            if all(k in fl for k in (self._p1.value.lower(), self._p2.value.lower(), self._mtype.value.lower())):
-                self._file = f
-                break
+        title = "{ename} - {mtype} - ({p1char}) {p1} vs {p2} ({p2char})".format(mtype=self._mtype.value, ename=self._ename.value, p1=self._p1.value, p2=self._p2.value, p1char=self._p1char.value, p2char=self._p2char.value)
+##        for f in self._files:
+##            fl = f.lower()
+##            if all(k in fl for k in (self._p1.value.lower(), self._p2.value.lower(), self._mtype.value.lower())):
+##                self._file = f
+##                break
         descrip = "Uploaded with Melee-Youtube-Uploader (https://github.com/NikhilNarayana/Melee-YouTube-Uploader) by Nikhil Narayana"
         tags = ["Melee", "Super Smash Brothers Melee", "Smash Brother", "Super Smash Bros. Melee"]
         tags.append(self._p1char.value)
         tags.append(self._p2char.value)
         tags.append(self._ename.value)
+        tags.append(self._p1.value)
+        tags.append(self._p2.value)
         body = dict(
             snippet=dict(
                 title=title,
@@ -175,7 +168,7 @@ class Melee_Uploader(BaseWidget):
         insert_request = self._youtube.videos().insert(
             part=",".join(body.keys()),
             body=body,
-            media_body=MediaFileUpload(self._where.value + self._file,
+            media_body=MediaFileUpload(self._file.value,
                                        chunksize=10485760,
                                        resumable=True),)
         vid = self._upload(insert_request)
@@ -198,7 +191,7 @@ class Melee_Uploader(BaseWidget):
             ACCEPTABLE_ERRNO += (errno.WSAECONNABORTED,)
         except AttributeError:
             pass  # Not windows
-        print("Uploading {} of size {}".format(self._file, file_size(self._where.value + self._file)))
+        print("Uploading {}".format(self._file.value))
         while True:
             try:
                 status, response = insert_request.next_chunk()
