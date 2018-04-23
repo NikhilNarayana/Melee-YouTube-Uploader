@@ -6,6 +6,7 @@ except ImportError:
     import httplib
 import httplib2
 import os
+import socket
 
 from googleapiclient.discovery import build
 from oauth2client.client import flow_from_clientsecrets
@@ -14,7 +15,7 @@ from oauth2client.tools import argparser, run_flow
 
 httplib2.RETRIES = 1
 
-RETRIABLE_EXCEPTIONS = (httplib2.HttpLib2Error, IOError, httplib.NotConnected,
+RETRIABLE_EXCEPTIONS = (socket.error, httplib2.HttpLib2Error, IOError, httplib.NotConnected,
                         httplib.IncompleteRead, httplib.ImproperConnectionState,
                         httplib.CannotSendRequest, httplib.CannotSendHeader,
                         httplib.ResponseNotReady, httplib.BadStatusLine)
