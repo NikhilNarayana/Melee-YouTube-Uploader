@@ -3,6 +3,7 @@
 import os
 import csv
 import sys
+import json
 import errno
 import socket
 import threading
@@ -20,7 +21,7 @@ from pyforms import BaseWidget
 from pyforms.controls import ControlText, ControlFile
 from pyforms.controls import ControlTextArea, ControlList
 from pyforms.controls import ControlCombo, ControlProgress
-from pyforms.controls import ControlButton, ControlCheckBox
+from pyforms.controls import ControlButton, ControlCheckBox, ControlCheckBoxList
 
 
 class EmittingStream(QtCore.QObject):
@@ -51,8 +52,8 @@ class Melee_Uploader(BaseWidget):
         self._file = ControlFile("File")
         self._p1 = ControlText("Player 1")
         self._p2 = ControlText("Player 2")
-        self._p1char = ControlCombo("P1 Character")
-        self._p2char = ControlCombo("P2 Character")
+        self._p1char = ControlCheckBoxList("P1 Characters")
+        self._p2char = ControlCheckBoxList("P2 Characters")
         self._mtype = ControlCombo("Match Type")
         self._i = 0
 
@@ -82,33 +83,23 @@ class Melee_Uploader(BaseWidget):
         self._mtype += "Crew Battle"
         chars = ['Fox', 'Falco', 'Marth', 'Sheik', 'Jigglypuff', 'Peach', 'Captain Falcon', 'Ice Climbers', 'Pikachu', 'Samus', 'Dr. Mario', 'Yoshi', 'Luigi', 'Ganondorf', 'Mario', 'Young Link', 'Donkey Kong', 'Link', 'Mr. Game & Watch', 'Mewtwo', 'Roy', 'Zelda', 'Ness', 'Pichu', 'Bowser', 'Kirby']
         for char in chars:
-            self._p1char += char
-            self._p2char += char
+            self._p1char += (char, False)
+            self._p2char += (char, False)
 
         # Define the button action
         self._button.value = self.__buttonAction
 
         # Get latest values from form_values.csv
         try:
-            with open('form_values.csv') as csvfile:
-                reader = csv.reader(csvfile, delimiter=',', quotechar='|')
+            with open(os.path.join(os.path.expanduser("~"), 'melee_form_values.txt')) as f:
                 i = 0
-                for row in reader:
-                    for val in row:
-                        if val is not "":
-                            switcher = {
-                                0: self._ename,
-                                1: self._pID,
-                                2: self._mtype,
-                                3: self._p1,
-                                4: self._p2,
-                                5: self._p1char,
-                                6: self._p2char,
-                                7: self._bracket
-                            }
-                            switcher[i].value = val
-                        i = i + 1
-                    break
+                row = json.loads(f.read())
+                for val, var in zip(row, [self._ename, self._pID, self._mtype, self._p1, self._p2, self._p1char, self._p2char, self._bracket, self._file]):
+                    if isinstance(val, (list, dict)):
+                    	var.load_form(dict(selected=val))
+                    elif val:
+                        var.value = val
+                    i = i + 1
         except (IOError, OSError, StopIteration) as e:
             print("No form_values.csv to read from, continuing with default values and creating file")
             with open("form_values.csv", "w+") as csvf:  # if the file doesn't exist
@@ -134,22 +125,18 @@ class Melee_Uploader(BaseWidget):
         row[5] = self._p1char.value
         row[6] = self._p2char.value
         row[7] = self._bracket.value
+        row[8] = self._file.value
         thr = threading.Thread(target=self._init)
         thr.daemon = True
         thr.start()
-        writer = csv.writer(open('form_values.csv', 'w'))
-        writer.writerow(row)
+        with open(os.path.join(os.path.expanduser("~"), 'melee_form_values.txt'), 'w') as f:
+        	f.write(json.dumps(row))
 
     def _init(self):
-        title = "{ename} - {mtype} - ({p1char}) {p1} vs {p2} ({p2char})".format(mtype=self._mtype.value, ename=self._ename.value, p1=self._p1.value, p2=self._p2.value, p1char=self._p1char.value, p2char=self._p2char.value)
-        # for f in self._files:
-        #     fl = f.lower()
-        #     if all(k in fl for k in (self._p1.value.lower(), self._p2.value.lower(), self._mtype.value.lower())):
-        #         self._file = f
-        #         break
+        title = "{ename} - {mtype} - ({p1char}) {p1} vs {p2} ({p2char})".format(mtype=self._mtype.value, ename=self._ename.value, p1=self._p1.value, p2=self._p2.value, p1char="/".join(self._p1char.value), p2char="/".join(self._p2char.value))
         credit = "Uploaded with Melee-Youtube-Uploader (https://github.com/NikhilNarayana/Melee-YouTube-Uploader) by Nikhil Narayana"
         descrip = ("""Bracket: {}\n\n""".format(self._bracket.value) + credit) if self._bracket.value else credit
-        tags = ["Melee", "Super Smash Brothers Melee", "Smash Brother", "Super Smash Bros. Melee"]
+        tags = ["Melee", "Super Smash Brothers Melee", "Smash Brother", "Super Smash Bros. Melee", "meleeuploader"]
         tags.append(self._p1char.value)
         tags.append(self._p2char.value)
         tags.append(self._ename.value)
@@ -169,7 +156,7 @@ class Melee_Uploader(BaseWidget):
             part=",".join(body.keys()),
             body=body,
             media_body=MediaFileUpload(self._file.value,
-                                       chunksize=os.stat(self._file.value).st_size/20,
+                                       chunksize=104857600,
                                        resumable=True),)
         vid = self._upload(insert_request)
         self._youtube.playlistItems().insert(
