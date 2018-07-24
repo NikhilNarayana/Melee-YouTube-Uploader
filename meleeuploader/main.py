@@ -9,7 +9,7 @@ import threading
 from time import sleep
 from decimal import Decimal
 
-from youtubeAuthenticate import *
+from .youtubeAuthenticate import *
 
 from PyQt5 import QtCore, QtGui
 import pyforms
@@ -44,7 +44,6 @@ class Melee_Uploader(BaseWidget):
         self._youtube = get_youtube_service()
         # Create form fields
         # Event Values
-        self._where = ControlCombo("File Location")
         self._ename = ControlText("Event Name")
         self._pID = ControlText("Playlist ID")
         self._bracket = ControlText("Bracket Link")
@@ -67,14 +66,12 @@ class Melee_Uploader(BaseWidget):
         # Form Layout
         self.formset = [{"-Match": ["_file", (' ', "_mtype", ' '), (' ', "_p1", ' '), (' ', "_p1char", ' '), (' ', "_p2", ' '), (' ', "_p2char", ' ')],
                          "-Status-": ["_output"],
-                         "Event-": [(' ', "_where", ' '), (' ', "_ename", ' '), (' ', "_pID", ' '), (' ', "_bracket", ' ')]},
+                         "Event-": [(' ', "_ename", ' '), (' ', "_pID", ' '), (' ', "_bracket", ' ')]},
                         (' ', '_button', ' ')]
 
         # Set TBA check
 
         # Add ControlCombo values
-        self._where += ("Parent Folder", "../")
-        self._where += ("Same Folder", "")
         self._mtype += "Pools"
         self._mtype += "Winners"
         self._mtype += "Losers"
@@ -100,15 +97,14 @@ class Melee_Uploader(BaseWidget):
                     for val in row:
                         if val is not "":
                             switcher = {
-                                0: self._where,
-                                1: self._ename,
-                                2: self._pID,
-                                3: self._mtype,
-                                4: self._p1,
-                                5: self._p2,
-                                6: self._p1char,
-                                7: self._p2char,
-                                8: self._bracket
+                                0: self._ename,
+                                1: self._pID,
+                                2: self._mtype,
+                                3: self._p1,
+                                4: self._p2,
+                                5: self._p1char,
+                                6: self._p2char,
+                                7: self._bracket
                             }
                             switcher[i].value = val
                         i = i + 1
@@ -128,17 +124,16 @@ class Melee_Uploader(BaseWidget):
                 csvf.write(''.join(str(x) for x in [","] * 8))
             reader = csv.reader(open("form_values.csv"))
         row = next(reader)
-        row[0] = self._where.value
-        row[1] = self._ename.value
+        row[0] = self._ename.value
         f = self._pID.value.find("PL")
         self._pID.value = self._pID.value[f:f + 34]
-        row[2] = self._pID.value
-        row[3] = self._mtype.value
-        row[4] = self._p1.value
-        row[5] = self._p2.value
-        row[6] = self._p1char.value
-        row[7] = self._p2char.value
-        row[8] = self._bracket.value
+        row[1] = self._pID.value
+        row[2] = self._mtype.value
+        row[3] = self._p1.value
+        row[4] = self._p2.value
+        row[5] = self._p1char.value
+        row[6] = self._p2char.value
+        row[7] = self._bracket.value
         thr = threading.Thread(target=self._init)
         thr.daemon = True
         thr.start()
@@ -174,7 +169,7 @@ class Melee_Uploader(BaseWidget):
             part=",".join(body.keys()),
             body=body,
             media_body=MediaFileUpload(self._file.value,
-                                       chunksize=10485760,
+                                       chunksize=os.stat(self._file.value).st_size/20,
                                        resumable=True),)
         vid = self._upload(insert_request)
         self._youtube.playlistItems().insert(
@@ -189,6 +184,7 @@ class Melee_Uploader(BaseWidget):
         print("DONE\n")
 
     def _upload(self, insert_request):
+        response = None
         retry_exceptions = get_retry_exceptions()
         retry_status_codes = get_retry_status_codes()
         ACCEPTABLE_ERRNO = (errno.EPIPE, errno.EINVAL, errno.ECONNRESET)
