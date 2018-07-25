@@ -55,7 +55,6 @@ class Melee_Uploader(BaseWidget):
         self._p1char = ControlCheckBoxList("P1 Characters")
         self._p2char = ControlCheckBoxList("P2 Characters")
         self._mtype = ControlCombo("Match Type")
-        self._i = 0
 
         # Output Box
         self._output = ControlTextArea()
@@ -234,9 +233,9 @@ def main():
             subprocess.call(['sudo', 'python3', sys.argv[0]])
     get_youtube_service()
     if internet():
-        pyforms.start_app(Melee_Uploader, geometry=(100, 100, 1, 1))  # 1, 1 shrinks it to the smallest possible size
+        sys.exit(pyforms.start_app(Melee_Uploader, geometry=(100, 100, 1, 1)))
     else:
-        return
+        sys.exit(1)
 
 
 if __name__ == "__main__":

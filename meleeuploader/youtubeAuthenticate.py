@@ -25,7 +25,7 @@ RETRIABLE_STATUS_CODES = [500, 502, 503, 504]
 YOUTUBE_API_SERVICE_NAME = "youtube"
 YOUTUBE_API_VERSION = "v3"
 
-YOUTUBE_UPLOAD_SCOPE = """https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube https://www.googleapis.com/auth/youtube.readonly https://www.googleapis.com/auth/youtube.force-ssl"""
+YOUTUBE_UPLOAD_SCOPE = "https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube https://www.googleapis.com/auth/youtube.readonly https://www.googleapis.com/auth/youtube.force-ssl"
 SPREADSHEETS_SCOPE = "https://www.googleapis.com/auth/spreadsheets"
 
 
