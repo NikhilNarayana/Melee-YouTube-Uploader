@@ -13,15 +13,15 @@ from decimal import Decimal
 from .youtubeAuthenticate import *
 
 from PyQt5 import QtCore, QtGui
-import pyforms
+import pyforms_lite
 from argparse import Namespace
 from googleapiclient.http import MediaFileUpload
 from googleapiclient.errors import HttpError
-from pyforms import BaseWidget
-from pyforms.controls import ControlText, ControlFile
-from pyforms.controls import ControlTextArea, ControlList
-from pyforms.controls import ControlCombo, ControlProgress
-from pyforms.controls import ControlButton, ControlCheckBox, ControlCheckBoxList
+from pyforms_lite import BaseWidget
+from pyforms_lite.controls import ControlText, ControlFile
+from pyforms_lite.controls import ControlTextArea, ControlList
+from pyforms_lite.controls import ControlCombo, ControlProgress
+from pyforms_lite.controls import ControlButton, ControlCheckBox, ControlCheckBoxList
 
 
 class EmittingStream(QtCore.QObject):
@@ -233,7 +233,7 @@ def main():
             subprocess.call(['sudo', 'python3', sys.argv[0]])
     get_youtube_service()
     if internet():
-        sys.exit(pyforms.start_app(Melee_Uploader, geometry=(100, 100, 1, 1)))
+        sys.exit(pyforms_lite.start_app(Melee_Uploader, geometry=(100, 100, 1, 1)))
     else:
         sys.exit(1)
 
