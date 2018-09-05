@@ -69,6 +69,13 @@ class Melee_Uploader(BaseWidget):
                          "Event-": [(' ', "_ename", ' '), (' ', "_pID", ' '), (' ', "_bracket", ' ')]},
                         (' ', '_button', ' ')]
 
+        # Main Menu Layout
+        self.mainmenu = [{
+            'Settings': [{
+                'Remove Youtube Credentials': self.__reset_cred_event
+                }]
+        }]
+
         # Set TBA check
 
         # Add ControlCombo values
@@ -80,6 +87,7 @@ class Melee_Uploader(BaseWidget):
         self._mtype += "Grand Finals"
         self._mtype += "Money Match"
         self._mtype += "Crew Battle"
+        self._mtype += "Friendlies"
         chars = ['Fox', 'Falco', 'Marth', 'Sheik', 'Jigglypuff', 'Peach', 'Captain Falcon', 'Ice Climbers', 'Pikachu', 'Samus', 'Dr. Mario', 'Yoshi', 'Luigi', 'Ganondorf', 'Mario', 'Young Link', 'Donkey Kong', 'Link', 'Mr. Game & Watch', 'Mewtwo', 'Roy', 'Zelda', 'Ness', 'Pichu', 'Bowser', 'Kirby']
         for char in chars:
             self._p1char += (char, False)
@@ -210,6 +218,11 @@ class Melee_Uploader(BaseWidget):
         self._output.value += text
         self._output._form.plainTextEdit.moveCursor(QtGui.QTextCursor.End)
         print(text, file=sys.__stdout__, end='')
+
+    def __reset_cred_event(self):
+        os.remove(os.path.join(os.path.expanduser("~"), ".melee-oauth2-youtube.json"))
+        # os.remove(os.path.join(os.path.expanduser("~"), ".melee-oauth2-spreadsheet.json"))
+        sys.exit(0)
 
 
 def internet(host="www.google.com", port=80, timeout=4):
