@@ -8,6 +8,7 @@ import errno
 import socket
 import threading
 from time import sleep
+from queue import Queue
 from decimal import Decimal
 
 from .youtubeAuthenticate import *
@@ -22,7 +23,6 @@ from pyforms_lite.controls import ControlText, ControlFile
 from pyforms_lite.controls import ControlTextArea, ControlList
 from pyforms_lite.controls import ControlCombo, ControlProgress
 from pyforms_lite.controls import ControlButton, ControlCheckBox, ControlCheckBoxList
-
 
 class EmittingStream(QtCore.QObject):
 
@@ -41,6 +41,12 @@ class Melee_Uploader(BaseWidget):
         super(Melee_Uploader, self).__init__("Melee YouTube Uploader")
         # Redirct print output
         sys.stdout = EmittingStream(textWritten=self.writePrint)
+
+        # Queue
+        self._queue = Queue()
+        self._queueref = []
+        self._firstrun = True
+
         # get YouTube
         self._youtube = get_youtube_service()
         # Create form fields
@@ -59,13 +65,17 @@ class Melee_Uploader(BaseWidget):
         # Output Box
         self._output = ControlTextArea()
         self._output.readonly = True
+        self._qview = ControlList("Queue", select_entire_row=True)
+        self._qview.cell_double_clicked_event = self.__ignore_job
+        self._qview.readonly = True
+        self._qview.horizontal_headers = ["Player 1", "Player 2", "Match Type"]
 
         # Button
         self._button = ControlButton('Submit')
 
         # Form Layout
         self.formset = [{"-Match": ["_file", (' ', "_mtype", ' '), (' ', "_p1", ' '), (' ', "_p1char", ' '), (' ', "_p2", ' '), (' ', "_p2char", ' ')],
-                         "-Status-": ["_output"],
+                         "-Status-": ["_output", "=", "_qview"],
                          "Event-": [(' ', "_ename", ' '), (' ', "_pID", ' '), (' ', "_bracket", ' ')]},
                         (' ', '_button', ' ')]
 
@@ -98,7 +108,7 @@ class Melee_Uploader(BaseWidget):
 
         # Get latest values from form_values.csv
         try:
-            with open(os.path.join(os.path.expanduser("~"), 'melee_form_values.txt')) as f:
+            with open(os.path.join(os.path.expanduser("~"), '.melee_form_values.txt')) as f:
                 i = 0
                 row = json.loads(f.read())
                 for val, var in zip(row, [self._ename, self._pID, self._mtype, self._p1, self._p2, self._p1char, self._p2char, self._bracket, self._file]):
@@ -109,46 +119,58 @@ class Melee_Uploader(BaseWidget):
                     i = i + 1
         except (IOError, OSError, StopIteration) as e:
             print("No form_values.csv to read from, continuing with default values and creating file")
-            with open("form_values.csv", "w+") as csvf:  # if the file doesn't exist
+            with open(os.path.join(os.path.expanduser("~"), '.melee_form_values.txt'), "w+") as csvf:  # if the file doesn't exist
                 csvf.write(''.join(str(x) for x in [","] * 8))
 
     def __buttonAction(self):
         """Button action event"""
         reader = None
+        options = Namespace()
         try:
-            reader = csv.reader(open('form_values.csv'))
+            reader = csv.reader(open(os.path.join(os.path.expanduser("~"), '.melee_form_values.txt')))
         except (StopIteration, IOError, OSError) as e:
-            with open("form_values.csv", "w+") as csvf:  # if the file doesn't exist
+            with open(os.path.join(os.path.expanduser("~"), '.melee_form_values.txt'), "w+") as csvf:  # if the file doesn't exist
                 csvf.write(''.join(str(x) for x in [","] * 8))
-            reader = csv.reader(open("form_values.csv"))
-        row = next(reader)
-        row[0] = self._ename.value
+            reader = csv.reader(open(os.path.join(os.path.expanduser("~"), '.melee_form_values.txt')))
+        row = next(reader) 
+        options.ename = row[0] = self._ename.value
         f = self._pID.value.find("PL")
         self._pID.value = self._pID.value[f:f + 34]
-        row[1] = self._pID.value
-        row[2] = self._mtype.value
-        row[3] = self._p1.value
-        row[4] = self._p2.value
-        row[5] = self._p1char.value
-        row[6] = self._p2char.value
-        row[7] = self._bracket.value
-        row[8] = self._file.value
-        thr = threading.Thread(target=self._init)
-        thr.daemon = True
-        thr.start()
-        with open(os.path.join(os.path.expanduser("~"), 'melee_form_values.txt'), 'w') as f:
+        options.pID = row[1] = self._pID.value
+        options.mtype = row[2] = self._mtype.value
+        options.p1 = row[3] = self._p1.value
+        options.p2 = row[4] = self._p2.value
+        options.p1char = row[5] = self._p1char.value
+        options.p2char = row[6] = self._p2char.value
+        options.bracket = row[7] = self._bracket.value
+        options.file = row[8] = self._file.value
+        options.ignore = False
+        self._p1char.clear()
+        self._p2char.clear()
+        self._p1.value = ""
+        self._p2.value = ""
+        self._qview += (options.p1, options.p2, options.mtype)
+        self._queue.put(options)
+        self._queueref.append(options)
+        self._qview.resize_rows_contents()
+        if self._firstrun:
+            thr = threading.Thread(target=self.__worker)
+            thr.daemon = True
+            thr.start()
+            self._firstrun = False
+        with open(os.path.join(os.path.expanduser("~"), '.melee_form_values.txt'), 'w') as f:
         	f.write(json.dumps(row))
 
-    def _init(self):
-        title = "{ename} - {mtype} - ({p1char}) {p1} vs {p2} ({p2char})".format(mtype=self._mtype.value, ename=self._ename.value, p1=self._p1.value, p2=self._p2.value, p1char="/".join(self._p1char.value), p2char="/".join(self._p2char.value))
+    def _init(self, opts):
+        title = "{ename} - {mtype} - ({p1char}) {p1} vs {p2} ({p2char})".format(mtype=opts.mtype, ename=opts.ename, p1=opts.p1, p2=opts.p2, p1char="/".join(opts.p1char), p2char="/".join(opts.p2char))
         credit = "Uploaded with Melee-Youtube-Uploader (https://github.com/NikhilNarayana/Melee-YouTube-Uploader) by Nikhil Narayana"
-        descrip = ("""Bracket: {}\n\n""".format(self._bracket.value) + credit) if self._bracket.value else credit
+        descrip = ("""Bracket: {}\n\n""".format(opts.bracket) + credit) if opts.bracket else credit
         tags = ["Melee", "Super Smash Brothers Melee", "Smash Brother", "Super Smash Bros. Melee", "meleeuploader"]
-        tags.append(self._p1char.value)
-        tags.append(self._p2char.value)
-        tags.append(self._ename.value)
-        tags.append(self._p1.value)
-        tags.append(self._p2.value)
+        tags.append(opts.p1char)
+        tags.append(opts.p2char)
+        tags.append(opts.ename)
+        tags.append(opts.p1)
+        tags.append(opts.p2)
         body = dict(
             snippet=dict(
                 title=title,
@@ -162,7 +184,7 @@ class Melee_Uploader(BaseWidget):
         insert_request = self._youtube.videos().insert(
             part=",".join(body.keys()),
             body=body,
-            media_body=MediaFileUpload(self._file.value,
+            media_body=MediaFileUpload(opts.file,
                                        chunksize=104857600,
                                        resumable=True),)
         vid = self._upload(insert_request)
@@ -170,7 +192,7 @@ class Melee_Uploader(BaseWidget):
             part="snippet",
             body=dict(
                 snippet=dict(
-                    playlistId=self._pID.value,
+                    playlistId=opts.pID,
                     resourceId=dict(
                         kind='youtube#video',
                         videoId=vid)))).execute()
@@ -223,6 +245,21 @@ class Melee_Uploader(BaseWidget):
         os.remove(os.path.join(os.path.expanduser("~"), ".melee-oauth2-youtube.json"))
         # os.remove(os.path.join(os.path.expanduser("~"), ".melee-oauth2-spreadsheet.json"))
         sys.exit(0)
+
+    def __worker(self):
+        while True:
+            options = self._queue.get()
+            if not options.ignore:
+                options.then = datetime.now()
+                self._init(options)
+                self._qview -= 0
+                self._queueref.pop(0)
+            self._queue.task_done()
+
+    def __ignore_job(self, row, column):
+        self._qview -= row
+        self._queueref[row + 1].ignore = True
+        self._queueref.pop(row + 1)
 
 
 def internet(host="www.google.com", port=80, timeout=4):
