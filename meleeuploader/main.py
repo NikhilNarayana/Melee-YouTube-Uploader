@@ -113,26 +113,19 @@ class Melee_Uploader(BaseWidget):
                 row = json.loads(f.read())
                 for val, var in zip(row, [self._ename, self._pID, self._mtype, self._p1, self._p2, self._p1char, self._p2char, self._bracket, self._file]):
                     if isinstance(val, (list, dict)):
-                    	var.load_form(dict(selected=val))
+                        var.load_form(dict(selected=val))
                     elif val:
                         var.value = val
                     i = i + 1
-        except (IOError, OSError, StopIteration) as e:
-            print("No form_values.csv to read from, continuing with default values and creating file")
-            with open(os.path.join(os.path.expanduser("~"), '.melee_form_values.txt'), "w+") as csvf:  # if the file doesn't exist
-                csvf.write(''.join(str(x) for x in [","] * 8))
+        except (IOError, OSError, StopIteration, json.decoder.JSONDecodeError) as e:
+            print("No melee_form_values.txt to read from, continuing with default values and creating file")
+            with open(os.path.join(os.path.expanduser("~"), '.melee_form_values.txt'), "w+") as f:  # if the file doesn't exist
+                f.write("Initial Data")
 
     def __buttonAction(self):
         """Button action event"""
-        reader = None
         options = Namespace()
-        try:
-            reader = csv.reader(open(os.path.join(os.path.expanduser("~"), '.melee_form_values.txt')))
-        except (StopIteration, IOError, OSError) as e:
-            with open(os.path.join(os.path.expanduser("~"), '.melee_form_values.txt'), "w+") as csvf:  # if the file doesn't exist
-                csvf.write(''.join(str(x) for x in [","] * 8))
-            reader = csv.reader(open(os.path.join(os.path.expanduser("~"), '.melee_form_values.txt')))
-        row = next(reader) 
+        row = [0] * 10
         options.ename = row[0] = self._ename.value
         f = self._pID.value.find("PL")
         self._pID.value = self._pID.value[f:f + 34]
@@ -145,8 +138,8 @@ class Melee_Uploader(BaseWidget):
         options.bracket = row[7] = self._bracket.value
         options.file = row[8] = self._file.value
         options.ignore = False
-        self._p1char.clear()
-        self._p2char.clear()
+        self._p1char.load_form(dict(selected=[]))
+        self._p2char.load_form(dict(selected=[]))
         self._p1.value = ""
         self._p2.value = ""
         self._qview += (options.p1, options.p2, options.mtype)
@@ -159,10 +152,11 @@ class Melee_Uploader(BaseWidget):
             thr.start()
             self._firstrun = False
         with open(os.path.join(os.path.expanduser("~"), '.melee_form_values.txt'), 'w') as f:
-        	f.write(json.dumps(row))
+            f.write(json.dumps(row))
 
     def _init(self, opts):
         title = "{ename} - {mtype} - ({p1char}) {p1} vs {p2} ({p2char})".format(mtype=opts.mtype, ename=opts.ename, p1=opts.p1, p2=opts.p2, p1char="/".join(opts.p1char), p2char="/".join(opts.p2char))
+        print(f"Uploading {title}")
         credit = "Uploaded with Melee-Youtube-Uploader (https://github.com/NikhilNarayana/Melee-YouTube-Uploader) by Nikhil Narayana"
         descrip = ("""Bracket: {}\n\n""".format(opts.bracket) + credit) if opts.bracket else credit
         tags = ["Melee", "Super Smash Brothers Melee", "Smash Brother", "Super Smash Bros. Melee", "meleeuploader"]
@@ -250,16 +244,20 @@ class Melee_Uploader(BaseWidget):
         while True:
             options = self._queue.get()
             if not options.ignore:
-                options.then = datetime.now()
                 self._init(options)
                 self._qview -= 0
                 self._queueref.pop(0)
             self._queue.task_done()
 
     def __ignore_job(self, row, column):
-        self._qview -= row
-        self._queueref[row + 1].ignore = True
-        self._queueref.pop(row + 1)
+        if not row:
+            print("Can't remove the current job")
+        else:
+            print(self._queueref, row)
+            self._qview -= row
+            self._queueref[row].ignore = True
+            self._queueref.pop(row)
+            print(self._queueref)
 
 
 def internet(host="www.google.com", port=80, timeout=4):
