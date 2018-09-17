@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import os
-import csv
 import sys
 import json
 import errno
@@ -86,8 +85,6 @@ class Melee_Uploader(BaseWidget):
                 }]
         }]
 
-        # Set TBA check
-
         # Add ControlCombo values
         self._mtype += "Pools"
         self._mtype += "Winners"
@@ -106,7 +103,7 @@ class Melee_Uploader(BaseWidget):
         # Define the button action
         self._button.value = self.__buttonAction
 
-        # Get latest values from form_values.csv
+        # Get latest values from form_values.txt
         try:
             with open(os.path.join(os.path.expanduser("~"), '.melee_form_values.txt')) as f:
                 i = 0
@@ -125,7 +122,7 @@ class Melee_Uploader(BaseWidget):
     def __buttonAction(self):
         """Button action event"""
         options = Namespace()
-        row = [0] * 10
+        row = [0] * 9
         options.ename = row[0] = self._ename.value
         f = self._pID.value.find("PL")
         self._pID.value = self._pID.value[f:f + 34]
@@ -202,7 +199,6 @@ class Melee_Uploader(BaseWidget):
             ACCEPTABLE_ERRNO += (errno.WSAECONNABORTED,)
         except AttributeError:
             pass  # Not windows
-        print("Uploading {}".format(self._file.value))
         while True:
             try:
                 status, response = insert_request.next_chunk()
@@ -253,11 +249,9 @@ class Melee_Uploader(BaseWidget):
         if not row:
             print("Can't remove the current job")
         else:
-            print(self._queueref, row)
             self._qview -= row
             self._queueref[row].ignore = True
             self._queueref.pop(row)
-            print(self._queueref)
 
 
 def internet(host="www.google.com", port=80, timeout=4):
