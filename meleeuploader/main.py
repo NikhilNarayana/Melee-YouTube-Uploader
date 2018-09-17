@@ -10,6 +10,7 @@ from time import sleep
 from queue import Queue
 from decimal import Decimal
 
+from .viewer import *
 from .youtubeAuthenticate import *
 
 from PyQt5 import QtCore, QtGui
@@ -34,10 +35,10 @@ class EmittingStream(QtCore.QObject):
         pass
 
 
-class Melee_Uploader(BaseWidget):
+class MeleeUploader(BaseWidget):
 
     def __init__(self):
-        super(Melee_Uploader, self).__init__("Melee YouTube Uploader")
+        super(MeleeUploader, self).__init__("Melee YouTube Uploader")
         # Redirct print output
         sys.stdout = EmittingStream(textWritten=self.writePrint)
 
@@ -65,7 +66,7 @@ class Melee_Uploader(BaseWidget):
         self._output = ControlTextArea()
         self._output.readonly = True
         self._qview = ControlList("Queue", select_entire_row=True)
-        self._qview.cell_double_clicked_event = self.__ignore_job
+        self._qview.cell_double_clicked_event = self.__show_o_view
         self._qview.readonly = True
         self._qview.horizontal_headers = ["Player 1", "Player 2", "Match Type"]
 
@@ -245,13 +246,10 @@ class Melee_Uploader(BaseWidget):
                 self._queueref.pop(0)
             self._queue.task_done()
 
-    def __ignore_job(self, row, column):
-        if not row:
-            print("Can't remove the current job")
-        else:
-            self._qview -= row
-            self._queueref[row].ignore = True
-            self._queueref.pop(row)
+    def __show_o_view(self, row, column):
+        win = OptionsViewer(row, self._queueref[row])
+        win.parent = self
+        win.show()
 
 
 def internet(host="www.google.com", port=80, timeout=4):
@@ -275,7 +273,7 @@ def main():
             subprocess.call(['sudo', 'python3', sys.argv[0]])
     get_youtube_service()
     if internet():
-        sys.exit(pyforms_lite.start_app(Melee_Uploader, geometry=(100, 100, 1, 1)))
+        sys.exit(pyforms_lite.start_app(MeleeUploader, geometry=(100, 100, 1, 1)))
     else:
         sys.exit(1)
 
