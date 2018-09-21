@@ -8,17 +8,18 @@ import socket
 import threading
 from time import sleep
 from queue import Queue
+from copy import deepcopy
 from decimal import Decimal
 
 from .viewer import *
 from .youtubeAuthenticate import *
 
-from PyQt5 import QtCore, QtGui
 import pyforms_lite
 from argparse import Namespace
-from googleapiclient.http import MediaFileUpload
-from googleapiclient.errors import HttpError
+from PyQt5 import QtCore, QtGui
 from pyforms_lite import BaseWidget
+from googleapiclient.errors import HttpError
+from googleapiclient.http import MediaFileUpload
 from pyforms_lite.controls import ControlText, ControlFile
 from pyforms_lite.controls import ControlTextArea, ControlList
 from pyforms_lite.controls import ControlCombo, ControlProgress
@@ -97,6 +98,7 @@ class MeleeUploader(BaseWidget):
         self._mtype += "Crew Battle"
         self._mtype += "Friendlies"
         chars = ['Fox', 'Falco', 'Marth', 'Sheik', 'Jigglypuff', 'Peach', 'Captain Falcon', 'Ice Climbers', 'Pikachu', 'Samus', 'Dr. Mario', 'Yoshi', 'Luigi', 'Ganondorf', 'Mario', 'Young Link', 'Donkey Kong', 'Link', 'Mr. Game & Watch', 'Mewtwo', 'Roy', 'Zelda', 'Ness', 'Pichu', 'Bowser', 'Kirby']
+        self.minchars = {'Jigglypuff': "Puff", 'Captain Falcon': "Falcon", 'Ice Climbers': "Icies", 'Pikachu': "Pika", 'Dr. Mario': "Doc", 'Ganondorf': "Ganon", 'Young Link': "YLink", 'Donkey Kong': "DK", 'Mr. Game & Watch': "G&W"}
         for char in chars:
             self._p1char += (char, False)
             self._p2char += (char, False)
@@ -131,8 +133,10 @@ class MeleeUploader(BaseWidget):
         options.mtype = row[2] = self._mtype.value
         options.p1 = row[3] = self._p1.value
         options.p2 = row[4] = self._p2.value
-        options.p1char = row[5] = self._p1char.value
-        options.p2char = row[6] = self._p2char.value
+        options.p1char = self._p1char.value
+        options.p2char = self._p2char.value
+        row[5] = deepcopy(self._p1char.value)
+        row[6] = deepcopy(self._p2char.value)
         options.bracket = row[7] = self._bracket.value
         options.file = row[8] = self._file.value
         options.ignore = False
@@ -154,6 +158,19 @@ class MeleeUploader(BaseWidget):
 
     def _init(self, opts):
         title = "{ename} - {mtype} - ({p1char}) {p1} vs {p2} ({p2char})".format(mtype=opts.mtype, ename=opts.ename, p1=opts.p1, p2=opts.p2, p1char="/".join(opts.p1char), p2char="/".join(opts.p2char))
+        if len(title) > 100:
+            for i in range(len(opts.p1char)):
+                if opts.p1char[i] in self.minchars:
+                    opts.p1char[i] = self.minchars[opts.p1char[i]]
+            for i in range(len(opts.p2char)):
+                if opts.p2char[i] in self.minchars:
+                    opts.p2char[i] = self.minchars[opts.p2char[i]]
+        title = "{ename} - {mtype} - ({p1char}) {p1} vs {p2} ({p2char})".format(mtype=opts.mtype, ename=opts.ename, p1=opts.p1, p2=opts.p2, p1char="/".join(opts.p1char), p2char="/".join(opts.p2char))
+        if len(title) > 100:
+            print("Title is greater than 100 characters after minifying character names")
+            print(title)
+            print("Killing this thread now\n\n")
+            return
         print(f"Uploading {title}")
         credit = "Uploaded with Melee-Youtube-Uploader (https://github.com/NikhilNarayana/Melee-YouTube-Uploader) by Nikhil Narayana"
         descrip = ("""Bracket: {}\n\n""".format(opts.bracket) + credit) if opts.bracket else credit
