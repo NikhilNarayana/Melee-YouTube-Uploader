@@ -98,7 +98,7 @@ class MeleeUploader(BaseWidget):
         self._mtype += "Crew Battle"
         self._mtype += "Friendlies"
         chars = ['Fox', 'Falco', 'Marth', 'Sheik', 'Jigglypuff', 'Peach', 'Captain Falcon', 'Ice Climbers', 'Pikachu', 'Samus', 'Dr. Mario', 'Yoshi', 'Luigi', 'Ganondorf', 'Mario', 'Young Link', 'Donkey Kong', 'Link', 'Mr. Game & Watch', 'Mewtwo', 'Roy', 'Zelda', 'Ness', 'Pichu', 'Bowser', 'Kirby']
-        self.minchars = {'Jigglypuff': "Puff", 'Captain Falcon': "Falcon", 'Ice Climbers': "Icies", 'Pikachu': "Pika", 'Dr. Mario': "Doc", 'Ganondorf': "Ganon", 'Young Link': "YLink", 'Donkey Kong': "DK", 'Mr. Game & Watch': "G&W"}
+        self.minchars = {'Jigglypuff': "Puff", 'Captain Falcon': "Falcon", 'Ice Climbers': "Icies", 'Pikachu': "Pika", 'Dr. Mario': "Doc", 'Ganondorf': "Ganon", 'Young Link': "YLink", 'Donkey Kong': "DK", 'Mr. Game & Watch': "G&W", "Fox/Falco": "Spacies"}
         for char in chars:
             self._p1char += (char, False)
             self._p2char += (char, False)
@@ -108,19 +108,19 @@ class MeleeUploader(BaseWidget):
 
         # Get latest values from form_values.txt
         try:
-            with open(os.path.join(os.path.expanduser("~"), '.melee_form_values.txt')) as f:
+            with open(os.path.join(os.path.expanduser("~"), '.melee_form_values.json')) as f:
                 i = 0
-                row = json.loads(f.read())
-                for val, var in zip(row, [self._ename, self._pID, self._mtype, self._p1, self._p2, self._p1char, self._p2char, self._bracket, self._file]):
+                values = json.loads(f.read())
+                for val, var in zip(values, [self._ename, self._pID, self._mtype, self._p1, self._p2, self._p1char, self._p2char, self._bracket, self._file]):
                     if isinstance(val, (list, dict)):
                         var.load_form(dict(selected=val))
                     elif val:
                         var.value = val
                     i = i + 1
         except (IOError, OSError, StopIteration, json.decoder.JSONDecodeError) as e:
-            print("No melee_form_values.txt to read from, continuing with default values and creating file")
-            with open(os.path.join(os.path.expanduser("~"), '.melee_form_values.txt'), "w+") as f:  # if the file doesn't exist
-                f.write("Initial Data")
+            print("No melee_form_values.json to read from, continuing with default values and creating file")
+            with open(os.path.join(os.path.expanduser("~"), '.melee_form_values.json'), "w+") as f:  # if the file doesn't exist
+                f.write(json.dumps(["No Data"]))
 
     def __buttonAction(self):
         """Button action event"""
@@ -153,11 +153,11 @@ class MeleeUploader(BaseWidget):
             thr.daemon = True
             thr.start()
             self._firstrun = False
-        with open(os.path.join(os.path.expanduser("~"), '.melee_form_values.txt'), 'w') as f:
+        with open(os.path.join(os.path.expanduser("~"), '.melee_form_values.json'), 'w') as f:
             f.write(json.dumps(row))
 
     def _init(self, opts):
-        title = "{ename} - {mtype} - ({p1char}) {p1} vs {p2} ({p2char})".format(mtype=opts.mtype, ename=opts.ename, p1=opts.p1, p2=opts.p2, p1char="/".join(opts.p1char), p2char="/".join(opts.p2char))
+        title = f"{opts.ename} - {opts.mtype} - ({'/'.join(opts.p1char)}) {opts.p1} vs {opts.p2} ({'/'.join(opts.p2char)})"
         if len(title) > 100:
             for i in range(len(opts.p1char)):
                 if opts.p1char[i] in self.minchars:
@@ -165,7 +165,7 @@ class MeleeUploader(BaseWidget):
             for i in range(len(opts.p2char)):
                 if opts.p2char[i] in self.minchars:
                     opts.p2char[i] = self.minchars[opts.p2char[i]]
-        title = "{ename} - {mtype} - ({p1char}) {p1} vs {p2} ({p2char})".format(mtype=opts.mtype, ename=opts.ename, p1=opts.p1, p2=opts.p2, p1char="/".join(opts.p1char), p2char="/".join(opts.p2char))
+        title = f"{opts.ename} - {opts.mtype} - ({'/'.join(opts.p1char)}) {opts.p1} vs {opts.p2} ({'/'.join(opts.p2char)})"
         if len(title) > 100:
             print("Title is greater than 100 characters after minifying character names")
             print(title)
