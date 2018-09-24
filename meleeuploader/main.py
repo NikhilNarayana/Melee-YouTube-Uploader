@@ -173,13 +173,9 @@ class MeleeUploader(BaseWidget):
             return
         print(f"Uploading {title}")
         credit = "Uploaded with Melee-Youtube-Uploader (https://github.com/NikhilNarayana/Melee-YouTube-Uploader) by Nikhil Narayana"
-        descrip = ("""Bracket: {}\n\n""".format(opts.bracket) + credit) if opts.bracket else credit
+        descrip = (f"Bracket: {opts.bracket}\n\n" + credit) if opts.bracket else credit
         tags = ["Melee", "Super Smash Brothers Melee", "Smash Brother", "Super Smash Bros. Melee", "meleeuploader"]
-        tags.append(opts.p1char)
-        tags.append(opts.p2char)
-        tags.append(opts.ename)
-        tags.append(opts.p1)
-        tags.append(opts.p2)
+        tags.extend((opts.p1char, opts.p2char, opts.ename, opts.p1, opts.p2))
         body = dict(
             snippet=dict(
                 title=title,
@@ -222,12 +218,12 @@ class MeleeUploader(BaseWidget):
                 status, response = insert_request.next_chunk()
                 if status is not None:
                     percent = Decimal(int(status.resumable_progress) / int(status.total_size))
-                    print("{}% uploaded".format(round(100 * percent, 2)))
+                    print(f"{round(100 * percent, 2)}% uploaded")
             except HttpError as e:
                 if e.resp.status in retry_status_codes:
-                    print("A retriable HTTP error {} occurred:\n{}".format(e.resp.status, e.content))
+                    print(f"A retriable HTTP error {e.resp.status} occurred:\n{e.content}")
             except retry_exceptions as e:
-                print("A retriable error occurred: {}".format(e))
+                print(f"A retriable error occurred: {e}")
 
             except Exception as e:
                 if e in ACCEPTABLE_ERRNO:
@@ -237,7 +233,7 @@ class MeleeUploader(BaseWidget):
                 pass
             if response:
                 if "id" in response:
-                    print("Video link is https://www.youtube.com/watch?v={}".format(response['id']))
+                    print(f"Video link is https://www.youtube.com/watch?v={response['id']}")
                     return response['id']
                 else:
                     print(response)
@@ -290,7 +286,8 @@ def main():
             subprocess.call(['sudo', 'python3', sys.argv[0]])
     get_youtube_service()
     if internet():
-        sys.exit(pyforms_lite.start_app(MeleeUploader, geometry=(100, 100, 1, 1)))
+        pyforms_lite.start_app(MeleeUploader, geometry=(100, 100, 1, 1))
+        sys.exit(0)
     else:
         sys.exit(1)
 
