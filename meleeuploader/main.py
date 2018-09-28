@@ -144,6 +144,7 @@ class MeleeUploader(BaseWidget):
         self._p2char.load_form(dict(selected=[]))
         self._p1.value = ""
         self._p2.value = ""
+        self._file.value = ""
         self._qview += (options.p1, options.p2, options.mtype)
         self._queue.put(options)
         self._queueref.append(options)
