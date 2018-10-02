@@ -4,6 +4,7 @@ import os
 import sys
 import json
 import errno
+import pickle
 import socket
 import threading
 from time import sleep
@@ -47,6 +48,7 @@ class MeleeUploader(BaseWidget):
         self._queue = Queue()
         self._queueref = []
         self._firstrun = True
+        self._stop_thread = False
 
         # get YouTube
         self._youtube = get_youtube_service()
@@ -84,7 +86,14 @@ class MeleeUploader(BaseWidget):
         self.mainmenu = [{
             'Settings': [{
                 'Remove Youtube Credentials': self.__reset_cred_event
-                }]
+                }, {
+                'Stop Worker': self.__stop_worker
+                }],
+            'Save/Load': [{
+                'Save Queue': self.__save_queue
+            }, {
+                'Load Queue': self.__load_queue
+            }]
         }]
 
         # Add ControlCombo values
@@ -194,15 +203,16 @@ class MeleeUploader(BaseWidget):
                                        chunksize=104857600,
                                        resumable=True),)
         vid = self._upload(insert_request)
-        self._youtube.playlistItems().insert(
-            part="snippet",
-            body=dict(
-                snippet=dict(
-                    playlistId=opts.pID,
-                    resourceId=dict(
-                        kind='youtube#video',
-                        videoId=vid)))).execute()
-        print("Added to playlist")
+        if opts.pID[:2] == "PL":
+            self._youtube.playlistItems().insert(
+                part="snippet",
+                body=dict(
+                    snippet=dict(
+                        playlistId=opts.pID,
+                        resourceId=dict(
+                            kind='youtube#video',
+                            videoId=vid)))).execute()
+            print("Added to playlist")
         print("DONE\n")
 
     def _upload(self, insert_request):
@@ -253,6 +263,9 @@ class MeleeUploader(BaseWidget):
 
     def __worker(self):
         while True:
+            if self._stop_thread:
+                print("Stopping Worker")
+                sys.exit(0)
             options = self._queue.get()
             if not options.ignore:
                 self._init(options)
@@ -261,9 +274,31 @@ class MeleeUploader(BaseWidget):
             self._queue.task_done()
 
     def __show_o_view(self, row, column):
-        win = OptionsViewer(row, self._queueref[row])
+        win = OptionsViewer(row, self._queueref[row], self._stop_thread)
         win.parent = self
         win.show()
+
+    def __stop_worker(self):
+        print("Disabling Worker")
+        self._stop_thread = True
+        self._firstrun = False
+
+    def __save_queue(self):
+        with open(os.path.join(os.path.expanduser("~"), ".melee_queue_values.txt"), "wb") as f:
+            f.write(pickle.dumps(self._queueref))
+
+    def __load_queue(self):
+        with open(os.path.join(os.path.expanduser("~"), ".melee_queue_values.txt"), "rb") as f:
+            self._queueref = pickle.load(f)
+        for options in self._queueref:
+            self._qview += (options.p1, options.p2, options.mtype)
+            self._queue.put(options)
+            self._qview.resize_rows_contents()
+        thr = threading.Thread(target=self.__worker)
+        thr.daemon = True
+        thr.start()
+        self._firstrun = False
+        self._stop_thread = False
 
 
 def internet(host="www.google.com", port=80, timeout=4):
