@@ -87,7 +87,7 @@ class MeleeUploader(BaseWidget):
             'Settings': [{
                 'Remove Youtube Credentials': self.__reset_cred_event
                 }, {
-                'Stop Worker': self.__stop_worker
+                'Toggle Queue': self.__toggle_worker
                 }],
             'Save/Load': [{
                 'Save Queue': self.__save_queue
@@ -127,12 +127,13 @@ class MeleeUploader(BaseWidget):
                         var.value = val
                     i = i + 1
         except (IOError, OSError, StopIteration, json.decoder.JSONDecodeError) as e:
-            print("No melee_form_values.json to read from, continuing with default values and creating file")
-            with open(os.path.join(os.path.expanduser("~"), '.melee_form_values.json'), "w+") as f:  # if the file doesn't exist
-                f.write(json.dumps(["No Data"]))
+            print("No melee_form_values.json to read from, continuing with default values")
 
     def __buttonAction(self):
         """Button action event"""
+        if any(not x for x in (self._ename.value, self._p1.value, self._p2.value, self._p1char.value, self._p2char.value, self._file.value)):
+            print("Missing one of the required fields")
+            return
         options = Namespace()
         row = [0] * 9
         options.ename = row[0] = self._ename.value
@@ -278,10 +279,15 @@ class MeleeUploader(BaseWidget):
         win.parent = self
         win.show()
 
-    def __stop_worker(self):
-        print("Disabling Worker")
-        self._stop_thread = True
-        self._firstrun = False
+    def __toggle_worker(self):
+        if not self._stop_thread:
+            print("Stopping Queue")
+            self._stop_thread = True
+            self._firstrun = False
+        else:
+            print("Starting Queue")
+            self._stop_thread = False
+            self._firstrun = True
 
     def __save_queue(self):
         with open(os.path.join(os.path.expanduser("~"), ".melee_queue_values.txt"), "wb") as f:
