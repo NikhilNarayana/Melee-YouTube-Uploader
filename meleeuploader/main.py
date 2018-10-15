@@ -44,6 +44,10 @@ class MeleeUploader(BaseWidget):
         # Redirct print output
         sys.stdout = EmittingStream(textWritten=self.writePrint)
 
+        # Filenames
+        self.__form_values = os.path.join(os.path.expanduser("~"), '.melee_form_values.json')
+        self.__queue_values = os.path.join(os.path.expanduser("~"), ".melee_queue_values.txt")
+
         # Queue
         self._queue = Queue()
         self._queueref = []
@@ -117,7 +121,7 @@ class MeleeUploader(BaseWidget):
 
         # Get latest values from form_values.txt
         try:
-            with open(os.path.join(os.path.expanduser("~"), '.melee_form_values.json')) as f:
+            with open(self.__form_values) as f:
                 i = 0
                 values = json.loads(f.read())
                 for val, var in zip(values, [self._ename, self._pID, self._mtype, self._p1, self._p2, self._p1char, self._p2char, self._bracket, self._file]):
@@ -164,7 +168,7 @@ class MeleeUploader(BaseWidget):
             thr.daemon = True
             thr.start()
             self._firstrun = False
-        with open(os.path.join(os.path.expanduser("~"), '.melee_form_values.json'), 'w') as f:
+        with open(self.__form_values, 'w') as f:
             f.write(json.dumps(row))
 
     def _init(self, opts):
@@ -290,11 +294,11 @@ class MeleeUploader(BaseWidget):
             self._firstrun = True
 
     def __save_queue(self):
-        with open(os.path.join(os.path.expanduser("~"), ".melee_queue_values.txt"), "wb") as f:
+        with open(self.__queue_values, "wb") as f:
             f.write(pickle.dumps(self._queueref))
 
     def __load_queue(self):
-        with open(os.path.join(os.path.expanduser("~"), ".melee_queue_values.txt"), "rb") as f:
+        with open(self.__queue_values, "rb") as f:
             self._queueref = pickle.load(f)
         for options in self._queueref:
             self._qview += (options.p1, options.p2, options.mtype)
@@ -302,9 +306,9 @@ class MeleeUploader(BaseWidget):
             self._qview.resize_rows_contents()
         thr = threading.Thread(target=self.__worker)
         thr.daemon = True
-        thr.start()
         self._firstrun = False
         self._stop_thread = False
+        thr.start()
 
 
 def internet(host="www.google.com", port=80, timeout=4):
