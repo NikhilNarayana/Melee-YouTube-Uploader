@@ -61,13 +61,15 @@ class MeleeUploader(BaseWidget):
         self._ename = ControlText("Event Name")
         self._pID = ControlText("Playlist ID")
         self._bracket = ControlText("Bracket Link")
+        self._tags = ControlText("Tags")
         # Match Values
         self._file = ControlFile("File")
-        self._p1 = ControlText("Player 1")
-        self._p2 = ControlText("Player 2")
+        self._p1 = ControlText("P1")
+        self._p2 = ControlText("P2")
         self._p1char = ControlCheckBoxList("P1 Characters")
         self._p2char = ControlCheckBoxList("P2 Characters")
-        self._mtype = ControlCombo("Match Type")
+        self._mtype = ControlCombo()
+        self._mextra = ControlText()
 
         # Output Box
         self._output = ControlTextArea()
@@ -81,9 +83,9 @@ class MeleeUploader(BaseWidget):
         self._button = ControlButton('Submit')
 
         # Form Layout
-        self.formset = [{"-Match": ["_file", (' ', "_mtype", ' '), (' ', "_p1", ' '), (' ', "_p1char", ' '), (' ', "_p2", ' '), (' ', "_p2char", ' ')],
+        self.formset = [{"-Match": ["_file", (' ', "_mtype", "_mextra", ' '), (' ', "_p1", ' '), (' ', "_p1char", ' '), (' ', "_p2", ' '), (' ', "_p2char", ' ')],
                          "-Status-": ["_output", "=", "_qview"],
-                         "Event-": [(' ', "_ename", ' '), (' ', "_pID", ' '), (' ', "_bracket", ' ')]},
+                         "Event-": [(' ', "_ename", ' '), (' ', "_pID", ' '), (' ', "_bracket", ' '), (' ', "_tags", ' ')]},
                         (' ', '_button', ' ')]
 
         # Main Menu Layout
@@ -111,7 +113,7 @@ class MeleeUploader(BaseWidget):
         self._mtype += "Crew Battle"
         self._mtype += "Friendlies"
         chars = ['Fox', 'Falco', 'Marth', 'Sheik', 'Jigglypuff', 'Peach', 'Captain Falcon', 'Ice Climbers', 'Pikachu', 'Samus', 'Dr. Mario', 'Yoshi', 'Luigi', 'Ganondorf', 'Mario', 'Young Link', 'Donkey Kong', 'Link', 'Mr. Game & Watch', 'Mewtwo', 'Roy', 'Zelda', 'Ness', 'Pichu', 'Bowser', 'Kirby']
-        self.minchars = {'Jigglypuff': "Puff", 'Captain Falcon': "Falcon", 'Ice Climbers': "Icies", 'Pikachu': "Pika", 'Dr. Mario': "Doc", 'Ganondorf': "Ganon", 'Young Link': "YLink", 'Donkey Kong': "DK", 'Mr. Game & Watch': "G&W", "Fox/Falco": "Spacies"}
+        self.minchars = {'Jigglypuff': "Puff", 'Captain Falcon': "Falcon", 'Ice Climbers': "Icies", 'Pikachu': "Pika", 'Dr. Mario': "Doc", 'Ganondorf': "Ganon", 'Young Link': "YLink", 'Donkey Kong': "DK", 'Mr. Game & Watch': "G&W"}
         for char in chars:
             self._p1char += (char, False)
             self._p2char += (char, False)
@@ -124,7 +126,7 @@ class MeleeUploader(BaseWidget):
             with open(self.__form_values) as f:
                 i = 0
                 values = json.loads(f.read())
-                for val, var in zip(values, [self._ename, self._pID, self._mtype, self._p1, self._p2, self._p1char, self._p2char, self._bracket, self._file]):
+                for val, var in zip(values, [self._ename, self._pID, self._mtype, self._p1, self._p2, self._p1char, self._p2char, self._bracket, self._file, self._tags]):
                     if isinstance(val, (list, dict)):
                         var.load_form(dict(selected=val))
                     elif val:
@@ -139,7 +141,7 @@ class MeleeUploader(BaseWidget):
             print("Missing one of the required fields")
             return
         options = Namespace()
-        row = [0] * 9
+        row = [0] * 11
         options.ename = row[0] = self._ename.value
         f = self._pID.value.find("PL")
         self._pID.value = self._pID.value[f:f + 34]
@@ -153,7 +155,11 @@ class MeleeUploader(BaseWidget):
         row[6] = deepcopy(self._p2char.value)
         options.bracket = row[7] = self._bracket.value
         options.file = row[8] = self._file.value
+        options.tags = row[9] = self._tags.value
+        options.mextra = row[10] = self._mextra.value
         options.ignore = False
+        self._p1char.add_popup_menu_option("Reset", self.__reset_p1_char)
+        self._p2char.add_popup_menu_option("Reset", self.__reset_p2_char)
         self._p1char.load_form(dict(selected=[]))
         self._p2char.load_form(dict(selected=[]))
         self._p1.value = ""
@@ -172,6 +178,8 @@ class MeleeUploader(BaseWidget):
             f.write(json.dumps(row))
 
     def _init(self, opts):
+        if opts.mextra:
+            opts.mtype = " ".join((opts.mtype, opts.mextra))
         title = f"{opts.ename} - {opts.mtype} - ({'/'.join(opts.p1char)}) {opts.p1} vs {opts.p2} ({'/'.join(opts.p2char)})"
         if len(title) > 100:
             for i in range(len(opts.p1char)):
@@ -184,13 +192,16 @@ class MeleeUploader(BaseWidget):
         if len(title) > 100:
             print("Title is greater than 100 characters after minifying character names")
             print(title)
+            print(len(title))
             print("Killing this thread now\n\n")
             return
         print(f"Uploading {title}")
         credit = "Uploaded with Melee-Youtube-Uploader (https://github.com/NikhilNarayana/Melee-YouTube-Uploader) by Nikhil Narayana"
         descrip = (f"Bracket: {opts.bracket}\n\n" + credit) if opts.bracket else credit
-        tags = ["Melee", "Super Smash Brothers Melee", "Smash Brother", "Super Smash Bros. Melee", "meleeuploader"]
+        tags = ["Melee", "Super Smash Brothers Melee", "Smash Brothers", "Super Smash Bros. Melee", "meleeuploader"]
         tags.extend((opts.p1char, opts.p2char, opts.ename, opts.p1, opts.p2))
+        if opts.tags:
+            tags.extend(options.tags.split(","))
         body = dict(
             snippet=dict(
                 title=title,
@@ -309,6 +320,12 @@ class MeleeUploader(BaseWidget):
         self._firstrun = False
         self._stop_thread = False
         thr.start()
+
+    def __reset_p1_char(self):
+        self._p1char.load_form(dict(selected=[]))
+
+    def __reset_p2_char(self):
+        self._p2char.load_form(dict(selected=[]))
 
 
 def internet(host="www.google.com", port=80, timeout=4):

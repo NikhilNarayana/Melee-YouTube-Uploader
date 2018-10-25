@@ -28,7 +28,7 @@ setup(
     ],
     entry_points=dict(console_scripts=['meleeuploader = meleeuploader.main:main']),
     python_requires='~=3.5',
-    version='1.3.1',
+    version='1.3.2',
     packages=["meleeuploader"],
     install_requires=[
         'CacheControl',
