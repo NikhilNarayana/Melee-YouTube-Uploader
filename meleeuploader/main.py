@@ -126,7 +126,7 @@ class MeleeUploader(BaseWidget):
             with open(self.__form_values) as f:
                 i = 0
                 values = json.loads(f.read())
-                for val, var in zip(values, [self._ename, self._pID, self._mtype, self._p1, self._p2, self._p1char, self._p2char, self._bracket, self._file, self._tags]):
+                for val, var in zip(values, [self._ename, self._pID, self._mtype, self._p1, self._p2, self._p1char, self._p2char, self._bracket, self._file, self._tags, self._mextra]):
                     if isinstance(val, (list, dict)):
                         var.load_form(dict(selected=val))
                     elif val:
@@ -201,7 +201,7 @@ class MeleeUploader(BaseWidget):
         tags = ["Melee", "Super Smash Brothers Melee", "Smash Brothers", "Super Smash Bros. Melee", "meleeuploader"]
         tags.extend((opts.p1char, opts.p2char, opts.ename, opts.p1, opts.p2))
         if opts.tags:
-            tags.extend(options.tags.split(","))
+            tags.extend(opts.tags.split(","))
         body = dict(
             snippet=dict(
                 title=title,
