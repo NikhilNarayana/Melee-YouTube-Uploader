@@ -26,6 +26,7 @@ from pyforms_lite.controls import ControlTextArea, ControlList
 from pyforms_lite.controls import ControlCombo, ControlProgress
 from pyforms_lite.controls import ControlButton, ControlCheckBox, ControlCheckBoxList
 
+
 class EmittingStream(QtCore.QObject):
 
     textWritten = QtCore.pyqtSignal(str)
@@ -69,7 +70,8 @@ class MeleeUploader(BaseWidget):
         self._p1char = ControlCheckBoxList("P1 Characters")
         self._p2char = ControlCheckBoxList("P2 Characters")
         self._mtype = ControlCombo()
-        self._mextra = ControlText()
+        self._mextraleft = ControlText()
+        self._mextraright = ControlText()
 
         # Output Box
         self._output = ControlTextArea()
@@ -83,7 +85,7 @@ class MeleeUploader(BaseWidget):
         self._button = ControlButton('Submit')
 
         # Form Layout
-        self.formset = [{"-Match": ["_file", (' ', "_mtype", "_mextra", ' '), (' ', "_p1", ' '), (' ', "_p1char", ' '), (' ', "_p2", ' '), (' ', "_p2char", ' ')],
+        self.formset = [{"-Match": ["_file", (' ', "_mextraleft", "_mtype", "_mextraright", ' '), (' ', "_p1", ' '), (' ', "_p1char", ' '), (' ', "_p2", ' '), (' ', "_p2char", ' ')],
                          "-Status-": ["_output", "=", "_qview"],
                          "Event-": [(' ', "_ename", ' '), (' ', "_pID", ' '), (' ', "_bracket", ' '), (' ', "_tags", ' ')]},
                         (' ', '_button', ' ')]
@@ -91,10 +93,8 @@ class MeleeUploader(BaseWidget):
         # Main Menu Layout
         self.mainmenu = [{
             'Settings': [{
-                'Remove Youtube Credentials': self.__reset_cred_event
-                }, {
-                'Toggle Queue': self.__toggle_worker
-                }],
+                'Remove Youtube Credentials': self.__reset_cred_event}, {
+                'Toggle Queue': self.__toggle_worker}],
             'Save/Load': [{
                 'Save Queue': self.__save_queue
             }, {
@@ -126,7 +126,7 @@ class MeleeUploader(BaseWidget):
             with open(self.__form_values) as f:
                 i = 0
                 values = json.loads(f.read())
-                for val, var in zip(values, [self._ename, self._pID, self._mtype, self._p1, self._p2, self._p1char, self._p2char, self._bracket, self._file, self._tags, self._mextra]):
+                for val, var in zip(values, [self._ename, self._pID, self._mtype, self._p1, self._p2, self._p1char, self._p2char, self._bracket, self._file, self._tags, self._mextraright, self._mextraleft]):
                     if isinstance(val, (list, dict)):
                         var.load_form(dict(selected=val))
                     elif val:
@@ -141,7 +141,7 @@ class MeleeUploader(BaseWidget):
             print("Missing one of the required fields")
             return
         options = Namespace()
-        row = [0] * 11
+        row = [0] * 12
         options.ename = row[0] = self._ename.value
         f = self._pID.value.find("PL")
         self._pID.value = self._pID.value[f:f + 34]
@@ -156,7 +156,8 @@ class MeleeUploader(BaseWidget):
         options.bracket = row[7] = self._bracket.value
         options.file = row[8] = self._file.value
         options.tags = row[9] = self._tags.value
-        options.mextra = row[10] = self._mextra.value
+        options.mextraright = row[10] = self._mextraright.value
+        options.mextraleft = row[11] = self._mextraleft.value
         options.ignore = False
         self._p1char.add_popup_menu_option("Reset", self.__reset_p1_char)
         self._p2char.add_popup_menu_option("Reset", self.__reset_p2_char)
@@ -165,6 +166,7 @@ class MeleeUploader(BaseWidget):
         self._p1.value = ""
         self._p2.value = ""
         self._file.value = ""
+        self._mextraright.value = ""
         self._qview += (options.p1, options.p2, options.mtype)
         self._queue.put(options)
         self._queueref.append(options)
@@ -178,8 +180,12 @@ class MeleeUploader(BaseWidget):
             f.write(json.dumps(row))
 
     def _init(self, opts):
-        if opts.mextra:
-            opts.mtype = " ".join((opts.mtype, opts.mextra))
+        if opts.mextraleft and opts.mextraright:
+            opts.mtype = " ".join((opts.mextralef, opts.mtype, opts.mextraright))
+        else if opts.mextraleft:
+            opts.mtype = " ".join((opts.mextralef, opts.mtype))
+        else if opts.mextraright:
+            opts.mtype = " ".join((opts.mtype, opts.mextraright))
         title = f"{opts.ename} - {opts.mtype} - ({'/'.join(opts.p1char)}) {opts.p1} vs {opts.p2} ({'/'.join(opts.p2char)})"
         if len(title) > 100:
             for i in range(len(opts.p1char)):
