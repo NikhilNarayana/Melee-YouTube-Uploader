@@ -91,16 +91,9 @@ class MeleeUploader(BaseWidget):
                         (' ', '_button', ' ')]
 
         # Main Menu Layout
-        self.mainmenu = [{
-            'Settings': [{
-                'Remove Youtube Credentials': self.__reset_cred_event}, {
-                'Toggle Queue': self.__toggle_worker}],
-            'Save/Load': [{
-                'Save Queue': self.__save_queue
-            }, {
-                'Load Queue': self.__load_queue
-            }]
-        }]
+        self.mainmenu = [
+            {'Settings': [{'Clear Match Values': self.__reset_match}, {'Clear Event Values': self.__reset_event}, {'Clear All Forms': self.__reset_forms}, {'Remove Youtube Credentials': self.__reset_cred_event}, {'Toggle Queue': self.__toggle_worker}],
+                'Save/Load': [{'Save Queue': self.__save_queue}, {'Load Queue': self.__load_queue}]}]
 
         # Add ControlCombo values
         self._mtype += "Pools"
@@ -159,15 +152,13 @@ class MeleeUploader(BaseWidget):
         options.mextraright = row[10] = self._mextraright.value
         options.mextraleft = row[11] = self._mextraleft.value
         options.ignore = False
-        self._p1char.add_popup_menu_option("Reset", self.__reset_p1_char)
-        self._p2char.add_popup_menu_option("Reset", self.__reset_p2_char)
         self._p1char.load_form(dict(selected=[]))
         self._p2char.load_form(dict(selected=[]))
         self._p1.value = ""
         self._p2.value = ""
         self._file.value = ""
         self._mextraright.value = ""
-        self._qview += (options.p1, options.p2, options.mtype)
+        self._qview += (options.p1, options.p2, " ".join((options.mextraleft, options.mtype, options.mextraright)))
         self._queue.put(options)
         self._queueref.append(options)
         self._qview.resize_rows_contents()
@@ -181,10 +172,10 @@ class MeleeUploader(BaseWidget):
 
     def _init(self, opts):
         if opts.mextraleft and opts.mextraright:
-            opts.mtype = " ".join((opts.mextralef, opts.mtype, opts.mextraright))
-        else if opts.mextraleft:
-            opts.mtype = " ".join((opts.mextralef, opts.mtype))
-        else if opts.mextraright:
+            opts.mtype = " ".join((opts.mextraleft, opts.mtype, opts.mextraright))
+        elif opts.mextraleft:
+            opts.mtype = " ".join((opts.mextraleft, opts.mtype))
+        elif opts.mextraright:
             opts.mtype = " ".join((opts.mtype, opts.mextraright))
         title = f"{opts.ename} - {opts.mtype} - ({'/'.join(opts.p1char)}) {opts.p1} vs {opts.p2} ({'/'.join(opts.p2char)})"
         if len(title) > 100:
@@ -283,6 +274,26 @@ class MeleeUploader(BaseWidget):
         # os.remove(os.path.join(os.path.expanduser("~"), ".melee-oauth2-spreadsheet.json"))
         sys.exit(0)
 
+    def __reset_match(self):
+        self._file.value = ""
+        self._p1char.load_form(dict(selected=[]))
+        self._p2char.load_form(dict(selected=[]))
+        self._p1.value = ""
+        self._p2.value = ""
+        self._file.value = ""
+        self._mextraright.value = ""
+        self._mextraleft.value = ""
+
+    def __reset_event(self):
+        self._ename.value = ""
+        self._pID.value = ""
+        self._bracket.value = ""
+        self._tags.value = ""
+
+    def __reset_forms(self):
+        self.__reset_match()
+        self.__reset_event()
+
     def __worker(self):
         while True:
             if self._stop_thread:
@@ -326,12 +337,6 @@ class MeleeUploader(BaseWidget):
         self._firstrun = False
         self._stop_thread = False
         thr.start()
-
-    def __reset_p1_char(self):
-        self._p1char.load_form(dict(selected=[]))
-
-    def __reset_p2_char(self):
-        self._p2char.load_form(dict(selected=[]))
 
 
 def internet(host="www.google.com", port=80, timeout=4):
