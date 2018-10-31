@@ -94,9 +94,9 @@ class MeleeUploader(BaseWidget):
 
         # Main Menu Layout
         self.mainmenu = [
-            {'Settings': [{'Remove Youtube Credentials': self.__reset_cred_event}, {'Toggle Queue': self.__toggle_worker}],
+            {'Settings': [{'Save Form': self.__save_form}, {'Remove Youtube Credentials': self.__reset_cred_event}],
                 'Clear': [{'Clear Match Values': self.__reset_match}, {'Clear Event Values': self.__reset_event}, {'Clear All': self.__reset_forms}],
-                'Save/Load': [{'Save Queue': self.__save_queue}, {'Load Queue': self.__load_queue}]}]
+                'Queue': [{'Toggle Queue': self.__toggle_worker}, {'Save Queue': self.__save_queue}, {'Load Queue': self.__load_queue}]}]
 
         # Add ControlCombo values
         self._mtype += "Pools"
@@ -352,6 +352,27 @@ class MeleeUploader(BaseWidget):
         self._firstrun = False
         self._stop_thread = False
         thr.start()
+
+    def __save_form(self):
+        row = [0] * 14
+        f = self._pID.value.find("PL")
+        self._pID.value = self._pID.value[f:f + 34]
+        row[0] = deepcopy(self._ename.value)
+        row[1] = deepcopy(self._pID.value)
+        row[2] = deepcopy(self._mtype.value)
+        row[3] = deepcopy(self._p1.value)
+        row[4] = deepcopy(self._p2.value)
+        row[5] = deepcopy(self._p1char.value)
+        row[6] = deepcopy(self._p2char.value)
+        row[7] = deepcopy(self._bracket.value)
+        row[8] = deepcopy(self._file.value)
+        row[9] = deepcopy(self._tags.value)
+        row[10] = deepcopy(self._mextraright.value)
+        row[11] = deepcopy(self._mextraleft.value)
+        row[12] = deepcopy(self._p1sponsor.value)
+        row[13] = deepcopy(self._p2sponsor.value)
+        with open(self.__form_values, 'w') as f:
+            f.write(json.dumps(row))
 
 
 def internet(host="www.google.com", port=80, timeout=4):

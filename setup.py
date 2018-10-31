@@ -4,6 +4,7 @@ from codecs import open
 from os import path
 
 here = path.abspath(path.dirname(__file__))
+version = '1.4.2'
 
 long_des = ""
 with open(path.join(here, 'README.md')) as f:
@@ -28,7 +29,7 @@ setup(
     ],
     entry_points=dict(console_scripts=['meleeuploader = meleeuploader.main:main']),
     python_requires='~=3.5',
-    version='1.4.1',
+    version=version,
     packages=["meleeuploader"],
     install_requires=[
         'CacheControl',
