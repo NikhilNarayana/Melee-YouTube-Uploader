@@ -65,8 +65,10 @@ class MeleeUploader(BaseWidget):
         self._tags = ControlText("Tags")
         # Match Values
         self._file = ControlFile("File")
-        self._p1 = ControlText("P1")
-        self._p2 = ControlText("P2")
+        self._p1 = ControlText()
+        self._p2 = ControlText()
+        self._p1sponsor = ControlText("P1", helptext="Sponsor Tag")
+        self._p2sponsor = ControlText("P2", helptext="Sponsor Tag")
         self._p1char = ControlCheckBoxList("P1 Characters")
         self._p2char = ControlCheckBoxList("P2 Characters")
         self._mtype = ControlCombo()
@@ -85,7 +87,7 @@ class MeleeUploader(BaseWidget):
         self._button = ControlButton('Submit')
 
         # Form Layout
-        self.formset = [{"-Match": ["_file", (' ', "_mextraleft", "_mtype", "_mextraright", ' '), (' ', "_p1", ' '), (' ', "_p1char", ' '), (' ', "_p2", ' '), (' ', "_p2char", ' ')],
+        self.formset = [{"-Match": ["_file", (' ', "_mextraleft", "_mtype", "_mextraright", ' '), (' ', "_p1sponsor", "_p1", ' '), (' ', "_p1char", ' '), (' ', "_p2sponsor", "_p2", ' '), (' ', "_p2char", ' ')],
                          "-Status-": ["_output", "=", "_qview"],
                          "Event-": [(' ', "_ename", ' '), (' ', "_pID", ' '), (' ', "_bracket", ' '), (' ', "_tags", ' ')]},
                         (' ', '_button', ' ')]
@@ -119,7 +121,7 @@ class MeleeUploader(BaseWidget):
             with open(self.__form_values) as f:
                 i = 0
                 values = json.loads(f.read())
-                for val, var in zip(values, [self._ename, self._pID, self._mtype, self._p1, self._p2, self._p1char, self._p2char, self._bracket, self._file, self._tags, self._mextraright, self._mextraleft]):
+                for val, var in zip(values, [self._ename, self._pID, self._mtype, self._p1, self._p2, self._p1char, self._p2char, self._bracket, self._file, self._tags, self._mextraright, self._mextraleft, self._p1sponsor, self._p2sponsor]):
                     if isinstance(val, (list, dict)):
                         var.load_form(dict(selected=val))
                     elif val:
@@ -134,7 +136,7 @@ class MeleeUploader(BaseWidget):
             print("Missing one of the required fields")
             return
         options = Namespace()
-        row = [0] * 12
+        row = [0] * 14
         options.ename = row[0] = self._ename.value
         f = self._pID.value.find("PL")
         self._pID.value = self._pID.value[f:f + 34]
@@ -151,13 +153,14 @@ class MeleeUploader(BaseWidget):
         options.tags = row[9] = self._tags.value
         options.mextraright = row[10] = self._mextraright.value
         options.mextraleft = row[11] = self._mextraleft.value
+        if self._p1sponsor.value:
+            row[12] = self._p1sponsor.value
+            options.p1 = " | ".join((self._p1sponsor.value, options.p1))
+        if self._p2sponsor.value:
+            row[13] = self._p2sponsor.value
+            options.p2 = " | ".join((self._p2sponsor.value, options.p2))
         options.ignore = False
-        self._p1char.load_form(dict(selected=[]))
-        self._p2char.load_form(dict(selected=[]))
-        self._p1.value = ""
-        self._p2.value = ""
-        self._file.value = ""
-        self._mextraright.value = ""
+        self.__reset_match()
         self._qview += (options.p1, options.p2, " ".join((options.mextraleft, options.mtype, options.mextraright)))
         self._queue.put(options)
         self._queueref.append(options)
@@ -280,6 +283,8 @@ class MeleeUploader(BaseWidget):
         self._p2char.load_form(dict(selected=[]))
         self._p1.value = ""
         self._p2.value = ""
+        self._p1sponsor.value = ""
+        self._p2sponsor.value = ""
         self._file.value = ""
         self._mextraright.value = ""
         self._mextraleft.value = ""
