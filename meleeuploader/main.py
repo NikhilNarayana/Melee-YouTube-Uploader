@@ -117,6 +117,9 @@ class MeleeUploader(BaseWidget):
         self._button.value = self.__buttonAction
 
         # Get latest values from form_values.txt
+        self.__load_values()
+
+    def __load_values(self):
         try:
             with open(self.__form_values) as f:
                 i = 0
@@ -194,7 +197,7 @@ class MeleeUploader(BaseWidget):
             print(title)
             print(len(title))
             print("Killing this thread now\n\n")
-            return
+            return False
         print(f"Uploading {title}")
         credit = "Uploaded with Melee-Youtube-Uploader (https://github.com/NikhilNarayana/Melee-YouTube-Uploader) by Nikhil Narayana"
         descrip = (f"Bracket: {opts.bracket}\n\n" + credit) if opts.bracket else credit
@@ -218,8 +221,8 @@ class MeleeUploader(BaseWidget):
             media_body=MediaFileUpload(opts.file,
                                        chunksize=104857600,
                                        resumable=True),)
-        vid = self._upload(insert_request)
-        if opts.pID[:2] == "PL":
+        ret, vid = self._upload(insert_request)
+        if ret and opts.pID[:2] == "PL":
             self._youtube.playlistItems().insert(
                 part="snippet",
                 body=dict(
@@ -229,7 +232,11 @@ class MeleeUploader(BaseWidget):
                             kind='youtube#video',
                             videoId=vid)))).execute()
             print("Added to playlist")
-        print("DONE\n")
+        if ret:
+            print("DONE\n")
+        else:
+            print(vid)
+        return ret
 
     def _upload(self, insert_request):
         response = None
@@ -261,11 +268,11 @@ class MeleeUploader(BaseWidget):
             if response:
                 if "id" in response:
                     print(f"Video link is https://www.youtube.com/watch?v={response['id']}")
-                    return response['id']
+                    return True, response['id']
                 else:
                     print(response)
                     print(status)
-                    exit("Upload failed, no id in response")
+                    return False, "Upload failed, no id in response"
 
     def writePrint(self, text):
         self._output.value += text
@@ -303,10 +310,12 @@ class MeleeUploader(BaseWidget):
         while True:
             if self._stop_thread:
                 print("Stopping Worker")
-                sys.exit(0)
+                while self._stop_thread:
+                    sleep(1)
             options = self._queue.get()
             if not options.ignore:
-                self._init(options)
+                if self._init(options):
+                    open(self.__form_values, 'w').close()
                 self._qview -= 0
                 self._queueref.pop(0)
             self._queue.task_done()
