@@ -94,7 +94,8 @@ class MeleeUploader(BaseWidget):
 
         # Main Menu Layout
         self.mainmenu = [
-            {'Settings': [{'Clear Match Values': self.__reset_match}, {'Clear Event Values': self.__reset_event}, {'Clear All Forms': self.__reset_forms}, {'Remove Youtube Credentials': self.__reset_cred_event}, {'Toggle Queue': self.__toggle_worker}],
+            {'Settings': [{'Remove Youtube Credentials': self.__reset_cred_event}, {'Toggle Queue': self.__toggle_worker}],
+                'Clear': [{'Clear Match Values': self.__reset_match}, {'Clear Event Values': self.__reset_event}, {'Clear All': self.__reset_forms}],
                 'Save/Load': [{'Save Queue': self.__save_queue}, {'Load Queue': self.__load_queue}]}]
 
         # Add ControlCombo values
