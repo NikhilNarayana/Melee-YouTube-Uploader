@@ -170,7 +170,7 @@ class MeleeUploader(BaseWidget):
             row[13] = self._p2sponsor.value
             options.p2 = " | ".join((self._p2sponsor.value, options.p2))
         options.ignore = False
-        self.__reset_match()
+        self.__reset_match(False)
         self._qview += (options.p1, options.p2, " ".join((options.mextraleft, options.mtype, options.mextraright)))
         self._queue.put(options)
         self._queueref.append(options)
@@ -207,7 +207,7 @@ class MeleeUploader(BaseWidget):
             return False
         print(f"Uploading {title}")
         credit = "Uploaded with Melee-Youtube-Uploader (https://github.com/NikhilNarayana/Melee-YouTube-Uploader) by Nikhil Narayana"
-        descrip = (f"Bracket: {opts.bracket}\n\n" + credit) if opts.bracket else credit
+        descrip = (f"Bracket: {opts.bracket}\n\n{credit}") if opts.bracket else credit
         tags = ["Melee", "Super Smash Brothers Melee", "Smash Brothers", "Super Smash Bros. Melee", "meleeuploader"]
         tags.extend((opts.p1char, opts.p2char, opts.ename, opts.p1, opts.p2))
         if opts.tags:
@@ -291,7 +291,7 @@ class MeleeUploader(BaseWidget):
         # os.remove(os.path.join(os.path.expanduser("~"), ".melee-oauth2-spreadsheet.json"))
         sys.exit(0)
 
-    def __reset_match(self):
+    def __reset_match(self, menu=True):
         self._file.value = ""
         self._p1char.load_form(dict(selected=[]))
         self._p2char.load_form(dict(selected=[]))
@@ -301,7 +301,8 @@ class MeleeUploader(BaseWidget):
         self._p2sponsor.value = ""
         self._file.value = ""
         self._mextraright.value = ""
-        self._mextraleft.value = ""
+        if code:
+            self._mextraleft.value = ""
 
     def __reset_event(self):
         self._ename.value = ""
