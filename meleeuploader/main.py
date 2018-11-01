@@ -69,11 +69,17 @@ class MeleeUploader(BaseWidget):
         self._p2 = ControlText()
         self._p1sponsor = ControlText("P1", helptext="Sponsor Tag")
         self._p2sponsor = ControlText("P2", helptext="Sponsor Tag")
+        self._p1sponsor.form.lineEdit.setPlaceholderText("Sponsor Tag")
+        self._p2sponsor.form.lineEdit.setPlaceholderText("Sponsor Tag")
+        self._p1.form.lineEdit.setPlaceholderText("P1 Tag")
+        self._p2.form.lineEdit.setPlaceholderText("P2 Tag")
         self._p1char = ControlCheckBoxList("P1 Characters")
         self._p2char = ControlCheckBoxList("P2 Characters")
         self._mtype = ControlCombo()
         self._mextraleft = ControlText()
         self._mextraright = ControlText()
+        self._mextraleft.form.lineEdit.setPlaceholderText("Match Type Prefix")
+        self._mextraright.form.lineEdit.setPlaceholderText("Match Type Suffix")
 
         # Output Box
         self._output = ControlTextArea()
