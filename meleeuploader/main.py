@@ -45,6 +45,9 @@ class MeleeUploader(BaseWidget):
         # Redirct print output
         sys.stdout = EmittingStream(textWritten=self.writePrint)
 
+        # History
+        self.__history = []
+
         # Filenames
         self.__form_values = os.path.join(os.path.expanduser("~"), '.melee_form_values.json')
         self.__queue_values = os.path.join(os.path.expanduser("~"), ".melee_queue_values.txt")
@@ -124,21 +127,7 @@ class MeleeUploader(BaseWidget):
         self._button.value = self.__buttonAction
 
         # Get latest values from form_values.txt
-        self.__load_values()
-
-    def __load_values(self):
-        try:
-            with open(self.__form_values) as f:
-                i = 0
-                values = json.loads(f.read())
-                for val, var in zip(values, [self._ename, self._pID, self._mtype, self._p1, self._p2, self._p1char, self._p2char, self._bracket, self._file, self._tags, self._mextraright, self._mextraleft, self._p1sponsor, self._p2sponsor]):
-                    if isinstance(val, (list, dict)):
-                        var.load_form(dict(selected=val))
-                    elif val:
-                        var.value = val
-                    i = i + 1
-        except (IOError, OSError, StopIteration, json.decoder.JSONDecodeError) as e:
-            print("No melee_form_values.json to read from, continuing with default values")
+        self.__load_form()
 
     def __buttonAction(self):
         """Button action event"""
@@ -146,28 +135,24 @@ class MeleeUploader(BaseWidget):
             print("Missing one of the required fields")
             return
         options = Namespace()
-        row = [0] * 14
-        options.ename = row[0] = self._ename.value
+        self.__history.append(self.__save_form())
+        options.ename = self._ename.value
         f = self._pID.value.find("PL")
         self._pID.value = self._pID.value[f:f + 34]
-        options.pID = row[1] = self._pID.value
-        options.mtype = row[2] = self._mtype.value
-        options.p1 = row[3] = self._p1.value
-        options.p2 = row[4] = self._p2.value
+        options.pID = self._pID.value
+        options.mtype = self._mtype.value
+        options.p1 = self._p1.value
+        options.p2 = self._p2.value
         options.p1char = self._p1char.value
         options.p2char = self._p2char.value
-        row[5] = deepcopy(self._p1char.value)
-        row[6] = deepcopy(self._p2char.value)
-        options.bracket = row[7] = self._bracket.value
-        options.file = row[8] = self._file.value
-        options.tags = row[9] = self._tags.value
-        options.mextraright = row[10] = self._mextraright.value
-        options.mextraleft = row[11] = self._mextraleft.value
+        options.bracket = self._bracket.value
+        options.file = self._file.value
+        options.tags = self._tags.value
+        options.mextraright = self._mextraright.value
+        options.mextraleft = self._mextraleft.value
         if self._p1sponsor.value:
-            row[12] = self._p1sponsor.value
             options.p1 = " | ".join((self._p1sponsor.value, options.p1))
         if self._p2sponsor.value:
-            row[13] = self._p2sponsor.value
             options.p2 = " | ".join((self._p2sponsor.value, options.p2))
         options.ignore = False
         self.__reset_match(False)
@@ -195,9 +180,17 @@ class MeleeUploader(BaseWidget):
             for i in range(len(opts.p1char)):
                 if opts.p1char[i] in self.minchars:
                     opts.p1char[i] = self.minchars[opts.p1char[i]]
+            if all(x in opts.p1char for x in ("Fox", "Falco")):
+                opts.p1char.remove("Fox")
+                opts.p1char.remove("Falco")
+                opts.p1char.insert(0, "Spacies")
             for i in range(len(opts.p2char)):
                 if opts.p2char[i] in self.minchars:
                     opts.p2char[i] = self.minchars[opts.p2char[i]]
+            if all(x in opts.p2char for x in ("Fox", "Falco")):
+                opts.p2char.remove("Fox")
+                opts.p2char.remove("Falco")
+                opts.p2char.insert(0, "Spacies")
         title = f"{opts.ename} - {opts.mtype} - ({'/'.join(opts.p1char)}) {opts.p1} vs {opts.p2} ({'/'.join(opts.p2char)})"
         if len(title) > 100:
             print("Title is greater than 100 characters after minifying character names")
@@ -301,7 +294,7 @@ class MeleeUploader(BaseWidget):
         self._p2sponsor.value = ""
         self._file.value = ""
         self._mextraright.value = ""
-        if code:
+        if menu:
             self._mextraleft.value = ""
 
     def __reset_event(self):
@@ -379,7 +372,27 @@ class MeleeUploader(BaseWidget):
         row[12] = deepcopy(self._p1sponsor.value)
         row[13] = deepcopy(self._p2sponsor.value)
         with open(self.__form_values, 'w') as f:
-            f.write(json.dumps(row))
+                f.write(json.dumps(row))
+        return row
+
+    def __load_form(self, history=[]):
+        if history:
+            for val, var in zip(history, [self._ename, self._pID, self._mtype, self._p1, self._p2, self._p1char, self._p2char, self._bracket, self._file, self._tags, self._mextraright, self._mextraleft, self._p1sponsor, self._p2sponsor]):
+                if isinstance(val, (list, dict)):
+                    var.load_form(dict(selected=val))
+                elif val:
+                    var.value = val
+        else:
+            try:
+                with open(self.__form_values) as f:
+                    values = json.loads(f.read())
+                    for val, var in zip(values, [self._ename, self._pID, self._mtype, self._p1, self._p2, self._p1char, self._p2char, self._bracket, self._file, self._tags, self._mextraright, self._mextraleft, self._p1sponsor, self._p2sponsor]):
+                        if isinstance(val, (list, dict)):
+                            var.load_form(dict(selected=val))
+                        elif val:
+                            var.value = val
+            except (IOError, OSError, StopIteration, json.decoder.JSONDecodeError) as e:
+                print("No melee_form_values.json to read from, continuing with default values")
 
 
 def internet(host="www.google.com", port=80, timeout=4):
