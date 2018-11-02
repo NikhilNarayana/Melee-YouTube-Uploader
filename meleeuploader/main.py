@@ -58,8 +58,9 @@ class MeleeUploader(BaseWidget):
         self._firstrun = True
         self._stop_thread = False
 
-        # get YouTube
+        # Get YouTube
         self._youtube = get_youtube_service()
+
         # Create form fields
         # Event Values
         self._ename = ControlText("Event Name")
@@ -72,17 +73,11 @@ class MeleeUploader(BaseWidget):
         self._p2 = ControlText()
         self._p1sponsor = ControlText("P1", helptext="Sponsor Tag")
         self._p2sponsor = ControlText("P2", helptext="Sponsor Tag")
-        self._p1sponsor.form.lineEdit.setPlaceholderText("Sponsor Tag")
-        self._p2sponsor.form.lineEdit.setPlaceholderText("Sponsor Tag")
-        self._p1.form.lineEdit.setPlaceholderText("P1 Tag")
-        self._p2.form.lineEdit.setPlaceholderText("P2 Tag")
         self._p1char = ControlCheckBoxList("P1 Characters")
         self._p2char = ControlCheckBoxList("P2 Characters")
         self._mtype = ControlCombo()
         self._mextraleft = ControlText()
         self._mextraright = ControlText()
-        self._mextraleft.form.lineEdit.setPlaceholderText("Match Type Prefix")
-        self._mextraright.form.lineEdit.setPlaceholderText("Match Type Suffix")
 
         # Output Box
         self._output = ControlTextArea()
@@ -105,7 +100,8 @@ class MeleeUploader(BaseWidget):
         self.mainmenu = [
             {'Settings': [{'Save Form': self.__save_form}, {'Remove Youtube Credentials': self.__reset_cred_event}],
                 'Clear': [{'Clear Match Values': self.__reset_match}, {'Clear Event Values': self.__reset_event}, {'Clear All': self.__reset_forms}],
-                'Queue': [{'Toggle Queue': self.__toggle_worker}, {'Save Queue': self.__save_queue}, {'Load Queue': self.__load_queue}]}]
+                'Queue': [{'Toggle Queue': self.__toggle_worker}, {'Save Queue': self.__save_queue}, {'Load Queue': self.__load_queue}],
+                'History': [{'Show History': self.__show_h_view}]}]
 
         # Add ControlCombo values
         self._mtype += "Pools"
@@ -122,6 +118,14 @@ class MeleeUploader(BaseWidget):
         for char in chars:
             self._p1char += (char, False)
             self._p2char += (char, False)
+
+        # Set placeholder text
+        self._p1sponsor.form.lineEdit.setPlaceholderText("Sponsor Tag")
+        self._p2sponsor.form.lineEdit.setPlaceholderText("Sponsor Tag")
+        self._p1.form.lineEdit.setPlaceholderText("P1 Tag")
+        self._p2.form.lineEdit.setPlaceholderText("P2 Tag")
+        self._mextraleft.form.lineEdit.setPlaceholderText("Match Type Prefix")
+        self._mextraright.form.lineEdit.setPlaceholderText("Match Type Suffix")
 
         # Define the button action
         self._button.value = self.__buttonAction
@@ -323,6 +327,11 @@ class MeleeUploader(BaseWidget):
 
     def __show_o_view(self, row, column):
         win = OptionsViewer(row, self._queueref[row], self._stop_thread)
+        win.parent = self
+        win.show()
+
+    def __show_h_view(self):
+        win = HistoryViewer(self.__history, self._stop_thread, self)
         win.parent = self
         win.show()
 
