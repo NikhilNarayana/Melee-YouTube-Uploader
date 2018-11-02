@@ -169,8 +169,6 @@ class MeleeUploader(BaseWidget):
             thr.daemon = True
             thr.start()
             self._firstrun = False
-        with open(self.__form_values, 'w') as f:
-            f.write(json.dumps(row))
 
     def _init(self, opts):
         if opts.mextraleft and opts.mextraright:
@@ -320,7 +318,16 @@ class MeleeUploader(BaseWidget):
             options = self._queue.get()
             if not options.ignore:
                 if self._init(options):
-                    open(self.__form_values, 'w').close()
+                    row = [None] * 14
+                    f = self._pID.value.find("PL")
+                    self._pID.value = self._pID.value[f:f + 34]
+                    row[0] = deepcopy(self._ename.value)
+                    row[1] = deepcopy(self._pID.value)
+                    row[7] = deepcopy(self._bracket.value)
+                    row[9] = deepcopy(self._tags.value)
+                    row[11] = deepcopy(self._mextraleft.value)
+                    with open(self.__form_values, 'w') as f:
+                        f.write(json.dumps(row))
                 self._qview -= 0
                 self._queueref.pop(0)
             self._queue.task_done()
@@ -363,7 +370,7 @@ class MeleeUploader(BaseWidget):
         thr.start()
 
     def __save_form(self):
-        row = [0] * 14
+        row = [None] * 14
         f = self._pID.value.find("PL")
         self._pID.value = self._pID.value[f:f + 34]
         row[0] = deepcopy(self._ename.value)

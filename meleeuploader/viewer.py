@@ -9,21 +9,21 @@ class OptionsViewer(BaseWidget):
         super(OptionsViewer, self).__init__(f"Options #{pos}")
         self.options = options
         self._oview = ControlList()
-        self._oview.horizontal_headers = ["Key", "Value"]
         self._oview.readonly = True
-        if pos or not running:
-            self._ignorebutton = ControlButton("Toggle Ignore")
-            self._ignorebutton.value = self.__ignore_job
-            self.formset = ["_oview", "=", "_ignorebutton"]
-            self.__update_o_view()
         if history:
             self._oview.horizontal_headers = ["Value"]
             self._mainprog = mainprog
             self._loadbutton = ControlButton("Load")
             self._loadbutton.value = self.__load_row
-            self.formset.extend(["=", "_loadbutton"])
+            self.formset = ["_oview", "=", "_loadbutton"]
             for val in options:
-                self._oview += (val)
+                self._oview += (val,)
+        elif pos or not running:
+            self._oview.horizontal_headers = ["Key", "Value"]
+            self._ignorebutton = ControlButton("Toggle Ignore")
+            self._ignorebutton.value = self.__ignore_job
+            self.formset = ["_oview", "=", "_ignorebutton"]
+            self.__update_o_view()
 
     def __ignore_job(self):
         self.options.ignore = False if self.options.ignore else True
@@ -40,7 +40,7 @@ class OptionsViewer(BaseWidget):
         self._oview.resize_rows_contents()
 
     def __load_row(self):
-        self._mainprog.__load_form(options)
+        self._mainprog._MeleeUploader__load_form(self.options)  # this has got to be jank
 
 
 class HistoryViewer(BaseWidget):
