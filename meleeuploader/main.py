@@ -93,7 +93,7 @@ class MeleeUploader(BaseWidget):
         # Form Layout
         self.formset = [{"-Match": ["_file", (' ', "_mextraleft", "_mtype", "_mextraright", ' '), (' ', "_p1sponsor", "_p1", ' '), (' ', "_p1char", ' '), (' ', "_p2sponsor", "_p2", ' '), (' ', "_p2char", ' ')],
                          "-Status-": ["_output", "=", "_qview"],
-                         "Event-": [(' ', "_ename", ' '), (' ', "_pID", ' '), (' ', "_bracket", ' '), (' ', "_tags", ' ')]},
+                         "Event-": ["_ename", "_pID", "_bracket", "_tags"]},
                         (' ', '_button', ' ')]
 
         # Main Menu Layout
@@ -126,6 +126,9 @@ class MeleeUploader(BaseWidget):
         self._p2.form.lineEdit.setPlaceholderText("P2 Tag")
         self._mextraleft.form.lineEdit.setPlaceholderText("Match Type Prefix")
         self._mextraright.form.lineEdit.setPlaceholderText("Match Type Suffix")
+        self._bracket.form.lineEdit.setPlaceholderText("Include https://")
+        self._tags.form.lineEdit.setPlaceholderText("Separate with commas")
+        self._pID.form.lineEdit.setPlaceholderText("Accepts full YT link")
 
         # Define the button action
         self._button.value = self.__buttonAction
@@ -206,7 +209,7 @@ class MeleeUploader(BaseWidget):
         tags = ["Melee", "Super Smash Brothers Melee", "Smash Brothers", "Super Smash Bros. Melee", "meleeuploader"]
         tags.extend((opts.p1char, opts.p2char, opts.ename, opts.p1, opts.p2))
         if opts.tags:
-            tags.extend(opts.tags.split(","))
+            tags.extend([x.strip() for x in opts.tags.split(",")])
         body = dict(
             snippet=dict(
                 title=title,
