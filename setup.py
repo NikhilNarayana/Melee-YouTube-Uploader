@@ -4,7 +4,7 @@ from codecs import open
 from os import path
 
 here = path.abspath(path.dirname(__file__))
-version = '1.4.6'
+version = '1.4.7'
 
 long_des = ""
 with open(path.join(here, 'README.md')) as f:
@@ -27,7 +27,7 @@ setup(
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Natural Language :: English",
     ],
-    entry_points=dict(gui_scripts=['meleeuploader = meleeuploader.main:main']),
+    entry_points=dict(console_scripts=['meleeuploader = meleeuploader.main:main']),
     python_requires='~=3.5',
     version=version,
     packages=["meleeuploader"],
