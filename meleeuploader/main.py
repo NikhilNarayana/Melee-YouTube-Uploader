@@ -105,6 +105,7 @@ class MeleeUploader(BaseWidget):
 
         # Add ControlCombo values
         self._mtype += "Pools"
+        self._mtype += "Round Robin"
         self._mtype += "Winners"
         self._mtype += "Losers"
         self._mtype += "Winners Finals"
