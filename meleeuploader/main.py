@@ -367,30 +367,49 @@ class MeleeUploader(BaseWidget):
             self._qview += (options.p1, options.p2, options.mtype)
             self._queue.put(options)
             self._qview.resize_rows_contents()
+            self.__history.append(self.__save_form(options))
         thr = threading.Thread(target=self.__worker)
         thr.daemon = True
         self._firstrun = False
         self._stop_thread = False
         thr.start()
 
-    def __save_form(self):
+    def __save_form(self, queue=[]):
         row = [None] * 14
-        f = self._pID.value.find("PL")
-        self._pID.value = self._pID.value[f:f + 34]
-        row[0] = deepcopy(self._ename.value)
-        row[1] = deepcopy(self._pID.value)
-        row[2] = deepcopy(self._mtype.value)
-        row[3] = deepcopy(self._p1.value)
-        row[4] = deepcopy(self._p2.value)
-        row[5] = deepcopy(self._p1char.value)
-        row[6] = deepcopy(self._p2char.value)
-        row[7] = deepcopy(self._bracket.value)
-        row[8] = deepcopy(self._file.value)
-        row[9] = deepcopy(self._tags.value)
-        row[10] = deepcopy(self._mextraright.value)
-        row[11] = deepcopy(self._mextraleft.value)
-        row[12] = deepcopy(self._p1sponsor.value)
-        row[13] = deepcopy(self._p2sponsor.value)
+        if queue:
+            f = options.pID.find("PL")
+            options.pID = options.pID[f:f + 34]
+            row[0] = deepcopy(options.ename)
+            row[1] = deepcopy(options.pID)
+            row[2] = deepcopy(options.mtype)
+            row[3] = deepcopy(options.p1)
+            row[4] = deepcopy(options.p2)
+            row[5] = deepcopy(options.p1char)
+            row[6] = deepcopy(options.p2char)
+            row[7] = deepcopy(options.bracket)
+            row[8] = deepcopy(options.file)
+            row[9] = deepcopy(options.tags)
+            row[10] = deepcopy(options.mextraright)
+            row[11] = deepcopy(options.mextraleft)
+            row[12] = deepcopy(options.p1sponsor)
+            row[13] = deepcopy(options.p2sponsor)
+        else:
+            f = self._pID.value.find("PL")
+            self._pID.value = self._pID.value[f:f + 34]
+            row[0] = deepcopy(self._ename.value)
+            row[1] = deepcopy(self._pID.value)
+            row[2] = deepcopy(self._mtype.value)
+            row[3] = deepcopy(self._p1.value)
+            row[4] = deepcopy(self._p2.value)
+            row[5] = deepcopy(self._p1char.value)
+            row[6] = deepcopy(self._p2char.value)
+            row[7] = deepcopy(self._bracket.value)
+            row[8] = deepcopy(self._file.value)
+            row[9] = deepcopy(self._tags.value)
+            row[10] = deepcopy(self._mextraright.value)
+            row[11] = deepcopy(self._mextraleft.value)
+            row[12] = deepcopy(self._p1sponsor.value)
+            row[13] = deepcopy(self._p2sponsor.value)
         with open(self.__form_values, 'w') as f:
                 f.write(json.dumps(row))
         return row
