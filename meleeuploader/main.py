@@ -374,9 +374,9 @@ class MeleeUploader(BaseWidget):
         self._stop_thread = False
         thr.start()
 
-    def __save_form(self, queue=[]):
+    def __save_form(self, options=[]):
         row = [None] * 14
-        if queue:
+        if options:
             f = options.pID.find("PL")
             options.pID = options.pID[f:f + 34]
             row[0] = deepcopy(options.ename)
