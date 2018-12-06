@@ -391,8 +391,8 @@ class MeleeUploader(BaseWidget):
             row[9] = deepcopy(options.tags)
             row[10] = deepcopy(options.mextraright)
             row[11] = deepcopy(options.mextraleft)
-            row[12] = deepcopy(options.p1sponsor)
-            row[13] = deepcopy(options.p2sponsor)
+            row[12] = ""
+            row[13] = ""
         else:
             f = self._pID.value.find("PL")
             self._pID.value = self._pID.value[f:f + 34]
