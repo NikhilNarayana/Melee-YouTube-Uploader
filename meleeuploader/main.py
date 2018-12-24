@@ -63,6 +63,7 @@ class MeleeUploader(BaseWidget):
 
         # Create form fields
         # Event Values
+        self._privacy = ControlCombo("Video Privacy")
         self._ename = ControlText("Event Name")
         self._pID = ControlText("Playlist ID")
         self._bracket = ControlText("Bracket Link")
@@ -93,14 +94,14 @@ class MeleeUploader(BaseWidget):
         # Form Layout
         self.formset = [{"-Match": ["_file", (' ', "_mextraleft", "_mtype", "_mextraright", ' '), (' ', "_p1sponsor", "_p1", ' '), (' ', "_p1char", ' '), (' ', "_p2sponsor", "_p2", ' '), (' ', "_p2char", ' ')],
                          "-Status-": ["_output", "=", "_qview"],
-                         "Event-": ["_ename", "_pID", "_bracket", "_tags"]},
+                         "Event-": ["_privacy", "_ename", "_pID", "_bracket", "_tags"]},
                         (' ', '_button', ' ')]
 
         # Main Menu Layout
         self.mainmenu = [
             {'Settings': [{'Save Form': self.__save_form}, {'Remove Youtube Credentials': self.__reset_cred_event}],
                 'Clear': [{'Clear Match Values': self.__reset_match}, {'Clear Event Values': self.__reset_event}, {'Clear All': self.__reset_forms}],
-                'Queue': [{'Toggle Queue': self.__toggle_worker}, {'Save Queue': self.__save_queue}, {'Load Queue': self.__load_queue}],
+                'Queue': [{'Toggle Uploads': self.__toggle_worker}, {'Save Queue': self.__save_queue}, {'Load Queue': self.__load_queue}],
                 'History': [{'Show History': self.__show_h_view}]}]
 
         # Add ControlCombo values
@@ -115,8 +116,11 @@ class MeleeUploader(BaseWidget):
         self._mtype += "Crew Battle"
         self._mtype += "Ladder"
         self._mtype += "Friendlies"
+        self._privacy += "public"
+        self._privacy += "unlisted"
+        self._privacy += "private"
         chars = ['Fox', 'Falco', 'Marth', 'Sheik', 'Jigglypuff', 'Peach', 'Captain Falcon', 'Ice Climbers', 'Pikachu', 'Samus', 'Dr. Mario', 'Yoshi', 'Luigi', 'Ganondorf', 'Mario', 'Young Link', 'Donkey Kong', 'Link', 'Mr. Game & Watch', 'Mewtwo', 'Roy', 'Zelda', 'Ness', 'Pichu', 'Bowser', 'Kirby']
-        self.minchars = {'Jigglypuff': "Puff", 'Captain Falcon': "Falcon", 'Ice Climbers': "Icies", 'Pikachu': "Pika", 'Dr. Mario': "Doc", 'Ganondorf': "Ganon", 'Young Link': "YLink", 'Donkey Kong': "DK", 'Mr. Game & Watch': "G&W"}
+        self.minchars = {'Jigglypuff': "Puff", 'Captain Falcon': "Falcon", 'Ice Climbers': "Icies", 'Pikachu': "Pika", 'Dr. Mario': "Doc", 'Ganondorf': "Ganon", 'Young Link': "YLink", 'Donkey Kong': "DK", 'Mr. Game & Watch': "G&W", 'Mewtwo': "Mew2"}
         for char in chars:
             self._p1char += (char, False)
             self._p2char += (char, False)
@@ -140,8 +144,8 @@ class MeleeUploader(BaseWidget):
 
     def __buttonAction(self):
         """Button action event"""
-        if any(not x for x in (self._ename.value, self._p1.value, self._p2.value, self._p1char.value, self._p2char.value, self._file.value)):
-            print("Missing one of the required fields")
+        if any(not x for x in (self._ename.value, self._p1.value, self._p2.value, self._file.value)):
+            print("Missing one of the required fields (event name, player names, file name)")
             return
         options = Namespace()
         self.__history.append(self.__save_form())
@@ -159,6 +163,7 @@ class MeleeUploader(BaseWidget):
         options.tags = self._tags.value
         options.mextraright = self._mextraright.value
         options.mextraleft = self._mextraleft.value
+        options.privacy = self._privacy.value
         if self._p1sponsor.value:
             options.p1 = " | ".join((self._p1sponsor.value, options.p1))
         if self._p2sponsor.value:
@@ -183,6 +188,8 @@ class MeleeUploader(BaseWidget):
         elif opts.mextraright:
             opts.mtype = " ".join((opts.mtype, opts.mextraright))
         title = f"{opts.ename} - {opts.mtype} - ({'/'.join(opts.p1char)}) {opts.p1} vs {opts.p2} ({'/'.join(opts.p2char)})"
+        if not opts.p1char or not opts.p2char:
+            title = f"{opts.ename} - {opts.mtype} - {opts.p1} vs {opts.p2}"
         if len(title) > 100:
             for i in range(len(opts.p1char)):
                 if opts.p1char[i] in self.minchars:
@@ -220,7 +227,7 @@ class MeleeUploader(BaseWidget):
                 categoryID=20
             ),
             status=dict(
-                privacyStatus="public")
+                privacyStatus=opts.privacy)
         )
         insert_request = self._youtube.videos().insert(
             part=",".join(body.keys()),
@@ -293,6 +300,7 @@ class MeleeUploader(BaseWidget):
 
     def __reset_match(self, menu=True):
         self._file.value = ""
+        self._mtype.value = "Pools"
         self._p1char.load_form(dict(selected=[]))
         self._p2char.load_form(dict(selected=[]))
         self._p1.value = ""
@@ -305,6 +313,7 @@ class MeleeUploader(BaseWidget):
             self._mextraleft.value = ""
 
     def __reset_event(self):
+        self._privacy.value = "public"
         self._ename.value = ""
         self._pID.value = ""
         self._bracket.value = ""
@@ -323,14 +332,15 @@ class MeleeUploader(BaseWidget):
             options = self._queue.get()
             if not options.ignore:
                 if self._init(options):
-                    row = [None] * 14
+                    row = [None] * 20
                     f = self._pID.value.find("PL")
                     self._pID.value = self._pID.value[f:f + 34]
-                    row[0] = deepcopy(self._ename.value)
-                    row[1] = deepcopy(self._pID.value)
-                    row[7] = deepcopy(self._bracket.value)
-                    row[9] = deepcopy(self._tags.value)
-                    row[11] = deepcopy(self._mextraleft.value)
+                    row[0] = deepcopy(options.ename)
+                    row[1] = deepcopy(options.pID)
+                    row[7] = deepcopy(options.bracket)
+                    row[9] = deepcopy(options.tags)
+                    row[11] = deepcopy(options.mextraleft)
+                    row[14] = deepcopy(options.privacy)
                     with open(self.__form_values, 'w') as f:
                         f.write(json.dumps(row))
                 self._qview -= 0
@@ -349,11 +359,11 @@ class MeleeUploader(BaseWidget):
 
     def __toggle_worker(self):
         if not self._stop_thread:
-            print("Stopping Queue")
+            print("Stopping Uploads")
             self._stop_thread = True
             self._firstrun = False
         else:
-            print("Starting Queue")
+            print("Starting Uploads")
             self._stop_thread = False
             self._firstrun = True
 
@@ -376,7 +386,7 @@ class MeleeUploader(BaseWidget):
         thr.start()
 
     def __save_form(self, options=[]):
-        row = [None] * 14
+        row = [None] * 20
         if options:
             f = options.pID.find("PL")
             options.pID = options.pID[f:f + 34]
@@ -394,6 +404,7 @@ class MeleeUploader(BaseWidget):
             row[11] = deepcopy(options.mextraleft)
             row[12] = ""
             row[13] = ""
+            row[14] = deepcopy(self._privacy.value)
         else:
             f = self._pID.value.find("PL")
             self._pID.value = self._pID.value[f:f + 34]
@@ -411,13 +422,14 @@ class MeleeUploader(BaseWidget):
             row[11] = deepcopy(self._mextraleft.value)
             row[12] = deepcopy(self._p1sponsor.value)
             row[13] = deepcopy(self._p2sponsor.value)
+            row[14] = deepcopy(self._privacy.value)
         with open(self.__form_values, 'w') as f:
                 f.write(json.dumps(row))
         return row
 
     def __load_form(self, history=[]):
         if history:
-            for val, var in zip(history, [self._ename, self._pID, self._mtype, self._p1, self._p2, self._p1char, self._p2char, self._bracket, self._file, self._tags, self._mextraright, self._mextraleft, self._p1sponsor, self._p2sponsor]):
+            for val, var in zip(history, [self._ename, self._pID, self._mtype, self._p1, self._p2, self._p1char, self._p2char, self._bracket, self._file, self._tags, self._mextraright, self._mextraleft, self._p1sponsor, self._p2sponsor, self._privacy]):
                 if isinstance(val, (list, dict)):
                     var.load_form(dict(selected=val))
                 elif val:
@@ -426,7 +438,7 @@ class MeleeUploader(BaseWidget):
             try:
                 with open(self.__form_values) as f:
                     values = json.loads(f.read())
-                    for val, var in zip(values, [self._ename, self._pID, self._mtype, self._p1, self._p2, self._p1char, self._p2char, self._bracket, self._file, self._tags, self._mextraright, self._mextraleft, self._p1sponsor, self._p2sponsor]):
+                    for val, var in zip(values, [self._ename, self._pID, self._mtype, self._p1, self._p2, self._p1char, self._p2char, self._bracket, self._file, self._tags, self._mextraright, self._mextraleft, self._p1sponsor, self._p2sponsor, self._privacy]):
                         if isinstance(val, (list, dict)):
                             var.load_form(dict(selected=val))
                         elif val:
