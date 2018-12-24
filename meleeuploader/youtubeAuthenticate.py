@@ -31,10 +31,11 @@ SPREADSHEETS_SCOPE = "https://www.googleapis.com/auth/spreadsheets"
 
 def get_youtube_service():
     CLIENT_SECRETS_FILE = get_secrets([
+        os.path.join(os.path.expanduser("~"),
         sys.prefix,
         os.path.join(sys.prefix, "local"), "/usr",
         os.path.join("/usr", "local")
-    ], ["share/meleeuploader/client_secrets.json", "client_secrets.json"])
+    ], ["share/meleeuploader/client_secrets.json", "client_secrets.json", ".client_secrets.json"])
 
     flow = flow_from_clientsecrets(CLIENT_SECRETS_FILE, scope=YOUTUBE_UPLOAD_SCOPE)
 

@@ -113,6 +113,7 @@ class MeleeUploader(BaseWidget):
         self._mtype += "Grand Finals"
         self._mtype += "Money Match"
         self._mtype += "Crew Battle"
+        self._mtype += "Ladder"
         self._mtype += "Friendlies"
         chars = ['Fox', 'Falco', 'Marth', 'Sheik', 'Jigglypuff', 'Peach', 'Captain Falcon', 'Ice Climbers', 'Pikachu', 'Samus', 'Dr. Mario', 'Yoshi', 'Luigi', 'Ganondorf', 'Mario', 'Young Link', 'Donkey Kong', 'Link', 'Mr. Game & Watch', 'Mewtwo', 'Roy', 'Zelda', 'Ness', 'Pichu', 'Bowser', 'Kirby']
         self.minchars = {'Jigglypuff': "Puff", 'Captain Falcon': "Falcon", 'Ice Climbers': "Icies", 'Pikachu': "Pika", 'Dr. Mario': "Doc", 'Ganondorf': "Ganon", 'Young Link': "YLink", 'Donkey Kong': "DK", 'Mr. Game & Watch': "G&W"}
