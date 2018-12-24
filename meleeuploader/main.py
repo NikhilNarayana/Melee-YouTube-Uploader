@@ -99,7 +99,7 @@ class MeleeUploader(BaseWidget):
 
         # Main Menu Layout
         self.mainmenu = [
-            {'Settings': [{'Save Form': self.__save_form}, {'Remove Youtube Credentials': self.__reset_cred_event}],
+            {'Settings': [{'Save Form': self.__save_form}, {'Remove YouTube Credentials': self.__reset_cred_event}],
                 'Clear': [{'Clear Match Values': self.__reset_match}, {'Clear Event Values': self.__reset_event}, {'Clear All': self.__reset_forms}],
                 'Queue': [{'Toggle Uploads': self.__toggle_worker}, {'Save Queue': self.__save_queue}, {'Load Queue': self.__load_queue}],
                 'History': [{'Show History': self.__show_h_view}]}]
@@ -211,7 +211,7 @@ class MeleeUploader(BaseWidget):
                 print("Killing this thread now\n\n")
                 return False
         print(f"Uploading {title}")
-        credit = "Uploaded with Melee-Youtube-Uploader (https://github.com/NikhilNarayana/Melee-YouTube-Uploader) by Nikhil Narayana"
+        credit = "Uploaded with Melee-YouTube-Uploader (https://github.com/NikhilNarayana/Melee-YouTube-Uploader) by Nikhil Narayana"
         descrip = (f"Bracket: {opts.bracket}\n\n{credit}") if opts.bracket else credit
         tags = ["Melee", "Super Smash Brothers Melee", "Smash Brothers", "Super Smash Bros. Melee", "meleeuploader", "SSBM", "ssbm"]
         tags.extend((opts.p1char, opts.p2char, opts.ename, opts.p1, opts.p2))
