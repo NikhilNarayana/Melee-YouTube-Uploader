@@ -51,7 +51,7 @@ If you want to launch the application easily, you can find the exe by hitting th
 ### History - Fixing an upload that didn't work
 History was built so I could fix uploads that exceeded the title limit on YouTube (100 characters). 
 
-By loading the history window from the menubar, you can double click any row in the list to reload the form with the values you inputted for that submission. Every submission will create a new entry, but the GUI is only updated on load, you will need to close and reopen it to see new entries.
+By loading the history window from the menubar, you can double click any row in the list to reload the form with the values you inputted for that submission. Every submission will create a new entry, but the history window is only updated on load, you will need to close and reopen it to see new entries.
 
 ### Queue - Saving uploads for later
 Queue was built so I could upload VODs after an event because the venue didn't have the bandwidth to support streaming and uploading simultaneously. 
