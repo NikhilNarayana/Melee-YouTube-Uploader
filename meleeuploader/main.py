@@ -187,9 +187,7 @@ class MeleeUploader(BaseWidget):
             opts.mtype = " ".join((opts.mextraleft, opts.mtype))
         elif opts.mextraright:
             opts.mtype = " ".join((opts.mtype, opts.mextraright))
-        title = f"{opts.ename} - {opts.mtype} - ({'/'.join(opts.p1char)}) {opts.p1} vs {opts.p2} ({'/'.join(opts.p2char)})"
-        if not opts.p1char or not opts.p2char:
-            title = f"{opts.ename} - {opts.mtype} - {opts.p1} vs {opts.p2}"
+        title = f"{opts.ename} - {opts.mtype} - ({'/'.join(opts.p1char)}) {opts.p1} vs {opts.p2} ({'/'.join(opts.p2char)})" if any(x for x in [opts.p1char, opts.p2char]) else f"{opts.ename} - {opts.mtype} - {opts.p1} vs {opts.p2}"
         if len(title) > 100:
             for i in range(len(opts.p1char)):
                 if opts.p1char[i] in self.minchars:
@@ -205,17 +203,17 @@ class MeleeUploader(BaseWidget):
                 opts.p2char.remove("Fox")
                 opts.p2char.remove("Falco")
                 opts.p2char.insert(0, "Spacies")
-        title = f"{opts.ename} - {opts.mtype} - ({'/'.join(opts.p1char)}) {opts.p1} vs {opts.p2} ({'/'.join(opts.p2char)})"
-        if len(title) > 100:
-            print("Title is greater than 100 characters after minifying character names")
-            print(title)
-            print(len(title))
-            print("Killing this thread now\n\n")
-            return False
+            title = f"{opts.ename} - {opts.mtype} - ({'/'.join(opts.p1char)}) {opts.p1} vs {opts.p2} ({'/'.join(opts.p2char)})" if any(x for x in [opts.p1char, opts.p2char]) else f"{opts.ename} - {opts.mtype} - {opts.p1} vs {opts.p2}"
+            if len(title) > 100:
+                print("Title is greater than 100 characters after minifying character names")
+                print(title)
+                print(len(title))
+                print("Killing this thread now\n\n")
+                return False
         print(f"Uploading {title}")
         credit = "Uploaded with Melee-Youtube-Uploader (https://github.com/NikhilNarayana/Melee-YouTube-Uploader) by Nikhil Narayana"
         descrip = (f"Bracket: {opts.bracket}\n\n{credit}") if opts.bracket else credit
-        tags = ["Melee", "Super Smash Brothers Melee", "Smash Brothers", "Super Smash Bros. Melee", "meleeuploader"]
+        tags = ["Melee", "Super Smash Brothers Melee", "Smash Brothers", "Super Smash Bros. Melee", "meleeuploader", "SSBM", "ssbm"]
         tags.extend((opts.p1char, opts.p2char, opts.ename, opts.p1, opts.p2))
         if opts.tags:
             tags.extend([x.strip() for x in opts.tags.split(",")])
@@ -300,7 +298,6 @@ class MeleeUploader(BaseWidget):
 
     def __reset_match(self, menu=True):
         self._file.value = ""
-        self._mtype.value = "Pools"
         self._p1char.load_form(dict(selected=[]))
         self._p2char.load_form(dict(selected=[]))
         self._p1.value = ""
@@ -310,6 +307,7 @@ class MeleeUploader(BaseWidget):
         self._file.value = ""
         self._mextraright.value = ""
         if menu:
+            self._mtype.value = "Pools"
             self._mextraleft.value = ""
 
     def __reset_event(self):
