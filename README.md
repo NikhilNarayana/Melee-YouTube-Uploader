@@ -38,6 +38,7 @@ In the future I will not be including YouTube API credentials with this project.
 5. Once the API is enabled it will tell you to create credentials and there will be a button to press.
 6. Follow the steps laid out in the credential creation wizard and make sure to select `Other UI` for `Where will you be calling the API from?` and `User Data` for `What data will you be accessing?`.
 7. Once you have downloaded your credentails remember to rename them `client_secrets.json` (if you don't see the `.json` when renaming the file just use `client_secrets`) and put the file in `C:\Users\[Your Username]\` or, if you are on macOS or Unix, whatever `echo ~` returns in terminal. macOS users can also just do `open ~` to open a Finder window at that directory.
+8. If you already created YouTube Account credentials for the program, open the program and select `Settings -> Remove YouTube Credentials`
 
 ### Additional Setup Options
 #### Windows
@@ -56,4 +57,4 @@ By loading the history window from the menubar, you can double click any row in 
 ### Queue - Saving uploads for later
 Queue was built so I could upload VODs after an event because the venue didn't have the bandwidth to support streaming and uploading simultaneously. 
 
-Queue refers to the list of upcoming uploads in the status tab. By selecting `Toggle Queue` you can toggle the queue from uploading videos, but continue to allow the queue to receive entries. Once you have finished adding all the VODs you want to upload, selecting `Save Queue` will write the entire queue to your disk to be loaded later on. Finally, using `Load Queue` will load the entire queue file and start uploading immediately.
+Queue refers to the list of upcoming uploads in the status tab. By selecting `Toggle Uploads` you can toggle the uploading function, but continue to add entries to the queue. Once you have finished adding all the VODs you want to upload, selecting `Save Queue` will write the entire queue to your disk to be loaded later on. Finally, using `Load Queue` will load the entire queue file and start uploading immediately.
