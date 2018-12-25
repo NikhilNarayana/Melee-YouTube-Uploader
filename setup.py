@@ -4,7 +4,7 @@ from codecs import open
 from os import path
 
 here = path.abspath(path.dirname(__file__))
-version = '1.4.12'
+version = '1.5.1'
 
 long_des = ""
 with open(path.join(here, 'README.md')) as f:
@@ -12,7 +12,7 @@ with open(path.join(here, 'README.md')) as f:
 
 setup(
     name='MeleeUploader',
-    description="A YouTube Uploader with Super Smash Bros. Melee in mind",
+    description="A YouTube Uploader with Super Smash Bros. in mind",
     long_description=long_des,
     long_description_content_type="text/markdown",
     url="https://github.com/NikhilNarayana/Melee-YouTube-Uploader",
@@ -22,12 +22,12 @@ setup(
     keywords='smash melee youtube uploader',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
-        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Operating System :: OS Independent',
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Natural Language :: English",
     ],
-    entry_points=dict(console_scripts=['meleeuploader = meleeuploader.main:main']),
+    entry_points=dict(console_scripts=['meleeuploader = meleeuploader.main:main', 'smashuploader = meleeuploader.main:main']),
     python_requires='~=3.5',
     version=version,
     packages=["meleeuploader"],

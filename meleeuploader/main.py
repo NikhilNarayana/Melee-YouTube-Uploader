@@ -68,6 +68,7 @@ class MeleeUploader(BaseWidget):
         self._pID = ControlText("Playlist ID")
         self._bracket = ControlText("Bracket Link")
         self._tags = ControlText("Tags")
+        self._description = ControlTextArea("Description")
         # Match Values
         self._file = ControlFile("File")
         self._p1 = ControlText()
@@ -94,7 +95,7 @@ class MeleeUploader(BaseWidget):
         # Form Layout
         self.formset = [{"-Match": ["_file", (' ', "_mextraleft", "_mtype", "_mextraright", ' '), (' ', "_p1sponsor", "_p1", ' '), (' ', "_p1char", ' '), (' ', "_p2sponsor", "_p2", ' '), (' ', "_p2char", ' ')],
                          "-Status-": ["_output", "=", "_qview"],
-                         "Event-": ["_privacy", "_ename", "_pID", "_bracket", "_tags"]},
+                         "Event-": ["_privacy", "_ename", "_pID", "_bracket", "_tags", "_description"]},
                         (' ', '_button', ' ')]
 
         # Main Menu Layout
@@ -102,7 +103,8 @@ class MeleeUploader(BaseWidget):
             {'Settings': [{'Save Form': self.__save_form}, {'Remove YouTube Credentials': self.__reset_cred_event}],
                 'Clear': [{'Clear Match Values': self.__reset_match}, {'Clear Event Values': self.__reset_event}, {'Clear All': self.__reset_forms}],
                 'Queue': [{'Toggle Uploads': self.__toggle_worker}, {'Save Queue': self.__save_queue}, {'Load Queue': self.__load_queue}],
-                'History': [{'Show History': self.__show_h_view}]}]
+                'History': [{'Show History': self.__show_h_view}],
+                'Characters': [{'Melee': self.__melee_chars}, {'Ultimate/Smash4': self.__ultimate_chars}]}]
 
         # Add ControlCombo values
         self._mtype += "Pools"
@@ -119,11 +121,53 @@ class MeleeUploader(BaseWidget):
         self._privacy += "public"
         self._privacy += "unlisted"
         self._privacy += "private"
-        chars = ['Fox', 'Falco', 'Marth', 'Sheik', 'Jigglypuff', 'Peach', 'Captain Falcon', 'Ice Climbers', 'Pikachu', 'Samus', 'Dr. Mario', 'Yoshi', 'Luigi', 'Ganondorf', 'Mario', 'Young Link', 'Donkey Kong', 'Link', 'Mr. Game & Watch', 'Mewtwo', 'Roy', 'Zelda', 'Ness', 'Pichu', 'Bowser', 'Kirby']
-        self.minchars = {'Jigglypuff': "Puff", 'Captain Falcon': "Falcon", 'Ice Climbers': "Icies", 'Pikachu': "Pika", 'Dr. Mario': "Doc", 'Ganondorf': "Ganon", 'Young Link': "YLink", 'Donkey Kong': "DK", 'Mr. Game & Watch': "G&W", 'Mewtwo': "Mew2"}
-        for char in chars:
-            self._p1char += (char, False)
-            self._p2char += (char, False)
+        self.minchars = {
+            'Jigglypuff': "Puff",
+            'Captain Falcon': "Falcon",
+            'Ice Climbers': "Icies",
+            'Pikachu': "Pika",
+            'Dr. Mario': "Doc",
+            'Ganondorf': "Ganon",
+            'Young Link': "YLink",
+            'Donkey Kong': "DK",
+            'Mr. Game & Watch': "G&W",
+            'Mewtwo': "Mew2",
+            'Dark Samus': "D. Samus",
+            'Meta Knight': "MK",
+            'Dark Pit': "D. Pit",
+            'Zero Suit Samus': "ZSS",
+            'Pokemon Trainer': "PK Trainer",
+            'Diddy Kong': "Diddy",
+            'King Dedede': "DDD",
+            'Toon Link': "TLink",
+            'Wii Fit Trainer': "Wii Fit",
+            'Rosalina & Luma': "Rosa",
+            'Mii Fighter': "Mii",
+            'Bayonetta': "Bayo",
+            'King K. Rool': "K. Rool",
+            'Piranha Plant': "Plant"
+        }
+        self._melee_chars = [
+            'Fox', 'Falco', 'Marth', 'Sheik', 'Jigglypuff', 'Peach', 'Captain Falcon',
+            'Ice Climbers', 'Pikachu', 'Samus', 'Dr. Mario', 'Yoshi', 'Luigi',
+            'Ganondorf', 'Mario', 'Young Link', 'Donkey Kong', 'Link',
+            'Mr. Game & Watch', 'Mewtwo', 'Roy', 'Zelda', 'Ness', 'Pichu', 'Bowser',
+            'Kirby'
+        ]
+        self._ult_chars = [
+            'Mario', 'Donkey Kong', 'Link', 'Samus', 'Dark Samus', 'Yoshi', 'Fox',
+            'Pikachu', 'Luigi', 'Ness', 'Captain Falcon', 'Jigglypuff', 'Peach',
+            'Daisy', 'Bowser', 'Ice Climbers', 'Sheik', 'Zelda', 'Dr. Mario', 'Pichu',
+            'Falco', 'Marth', 'Lucina', 'Young Link', 'Ganondorf', 'Mewtwo', 'Roy',
+            'Chrom', 'Mr. Game & Watch', 'Meta Knight', 'Pit', 'Dark Pit',
+            'Zero Suit Samus', 'Wario', 'Snake', 'Ike', 'Pokemon Trainer',
+            'Diddy Kong', 'Lucas', 'Sonic', 'King Dedede', 'Olimar', 'Lucario',
+            'R.O.B', 'Toon Link', 'Wolf', 'Villager', 'Mega Man', 'Wii Fit Trainer',
+            'Rosalina & Luma', 'Little Mac', 'Greninja', 'Mii Fighter', 'Palutena',
+            'Pac-Man', 'Robin', 'Shulk', 'Bowser Jr.', 'Duck Hunt', 'Ryu', 'Ken',
+            'Cloud', 'Corrin', 'Bayonetta', 'Inkling', 'Ridley', 'Simon', 'Richter',
+            'King K. Rool', 'Isabelle', 'Incineroar', 'Piranha Plant', 'Joker'
+        ]
 
         # Set placeholder text
         self._p1sponsor.form.lineEdit.setPlaceholderText("Sponsor Tag")
@@ -138,6 +182,14 @@ class MeleeUploader(BaseWidget):
 
         # Define the button action
         self._button.value = self.__buttonAction
+
+        # Define the existing form fields
+        self._form_fields = [
+            self._ename, self._pID, self._mtype, self._p1, self._p2, self._p1char,
+            self._p2char, self._bracket, self._file, self._tags, self._mextraright,
+            self._mextraleft, self._p1sponsor, self._p2sponsor, self._privacy,
+            self._description
+        ]
 
         # Get latest values from form_values.txt
         self.__load_form()
@@ -164,6 +216,7 @@ class MeleeUploader(BaseWidget):
         options.mextraright = self._mextraright.value
         options.mextraleft = self._mextraleft.value
         options.privacy = self._privacy.value
+        options.descrip = self._description.value
         if self._p1sponsor.value:
             options.p1 = " | ".join((self._p1sponsor.value, options.p1))
         if self._p2sponsor.value:
@@ -212,7 +265,10 @@ class MeleeUploader(BaseWidget):
                 return False
         print(f"Uploading {title}")
         credit = "Uploaded with Melee-YouTube-Uploader (https://github.com/NikhilNarayana/Melee-YouTube-Uploader) by Nikhil Narayana"
-        descrip = (f"Bracket: {opts.bracket}\n\n{credit}") if opts.bracket else credit
+        if opts.descrip:
+            descrip = (f"Bracket: {opts.bracket}\n\n{opts.descrip}\n\n{credit}") if opts.bracket else credit
+        else:
+            descrip = (f"Bracket: {opts.bracket}\n\n{credit}") if opts.bracket else credit
         tags = ["Melee", "Super Smash Brothers Melee", "Smash Brothers", "Super Smash Bros. Melee", "meleeuploader", "SSBM", "ssbm"]
         tags.extend((opts.p1char, opts.p2char, opts.ename, opts.p1, opts.p2))
         if opts.tags:
@@ -316,6 +372,7 @@ class MeleeUploader(BaseWidget):
         self._pID.value = ""
         self._bracket.value = ""
         self._tags.value = ""
+        self._description.value = ""
 
     def __reset_forms(self):
         self.__reset_match()
@@ -402,33 +459,28 @@ class MeleeUploader(BaseWidget):
             row[11] = deepcopy(options.mextraleft)
             row[12] = ""
             row[13] = ""
-            row[14] = deepcopy(self._privacy.value)
+            row[14] = deepcopy(options.privacy)
+            row[15] = deepcopy(options.descrip)
         else:
             f = self._pID.value.find("PL")
             self._pID.value = self._pID.value[f:f + 34]
-            row[0] = deepcopy(self._ename.value)
-            row[1] = deepcopy(self._pID.value)
-            row[2] = deepcopy(self._mtype.value)
-            row[3] = deepcopy(self._p1.value)
-            row[4] = deepcopy(self._p2.value)
-            row[5] = deepcopy(self._p1char.value)
-            row[6] = deepcopy(self._p2char.value)
-            row[7] = deepcopy(self._bracket.value)
-            row[8] = deepcopy(self._file.value)
-            row[9] = deepcopy(self._tags.value)
-            row[10] = deepcopy(self._mextraright.value)
-            row[11] = deepcopy(self._mextraleft.value)
-            row[12] = deepcopy(self._p1sponsor.value)
-            row[13] = deepcopy(self._p2sponsor.value)
-            row[14] = deepcopy(self._privacy.value)
+            for i, var in zip(range(20), self._form_fields):
+                row[i] = deepcopy(var.value)
         with open(self.__form_values, 'w') as f:
                 f.write(json.dumps(row))
         return row
 
     def __load_form(self, history=[]):
+        updateChars = True
         if history:
-            for val, var in zip(history, [self._ename, self._pID, self._mtype, self._p1, self._p2, self._p1char, self._p2char, self._bracket, self._file, self._tags, self._mextraright, self._mextraleft, self._p1sponsor, self._p2sponsor, self._privacy]):
+            for val, var in zip(history, self._form_fields):
                 if isinstance(val, (list, dict)):
+                    if updateChars and any(char not in self._melee_chars for char in val):
+                        self.__ultimate_chars()
+                        updateChars = False
+                    elif updateChars:
+                        self.__melee_chars()
+                        updateChars = False
                     var.load_form(dict(selected=val))
                 elif val:
                     var.value = val
@@ -436,13 +488,36 @@ class MeleeUploader(BaseWidget):
             try:
                 with open(self.__form_values) as f:
                     values = json.loads(f.read())
-                    for val, var in zip(values, [self._ename, self._pID, self._mtype, self._p1, self._p2, self._p1char, self._p2char, self._bracket, self._file, self._tags, self._mextraright, self._mextraleft, self._p1sponsor, self._p2sponsor, self._privacy]):
+                    for val, var in zip(values, self._form_fields):
                         if isinstance(val, (list, dict)):
+                            if updateChars and any(char not in self._melee_chars for char in val):
+                                self.__ultimate_chars()
+                                updateChars = False
+                            elif updateChars:
+                                self.__melee_chars()
+                                updateChars = False
                             var.load_form(dict(selected=val))
                         elif val:
                             var.value = val
             except (IOError, OSError, StopIteration, json.decoder.JSONDecodeError) as e:
                 print("No melee_form_values.json to read from, continuing with default values")
+
+    def __melee_chars(self):
+        self.__update_chars(self._melee_chars)
+
+    def __ultimate_chars(self):
+        self.__update_chars(self._ult_chars)
+
+    def __update_chars(self, chars):
+        p1 = self._p1char.value
+        p2 = self._p2char.value
+        self._p1char.clear()
+        self._p2char.clear()
+        for char in chars:
+            self._p1char += (char, False)
+            self._p2char += (char, False)
+        self._p1char.load_form(dict(selected=p1))
+        self._p2char.load_form(dict(selected=p2))
 
 
 def internet(host="www.google.com", port=80, timeout=4):

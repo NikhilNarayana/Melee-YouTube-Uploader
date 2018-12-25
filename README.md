@@ -64,7 +64,8 @@ This field will be added to the player tag like so `{sponsor} | {player}` result
 
 #### Characters
 If you ignore this field on either player than both player will not have characters.  
-Characters that are selected will be in the order they are shown in the list, not the selected order (unfortunate issue with the GUI framework).
+Characters that are selected will be in the order they are shown in the list, not the selected order (unfortunate issue with the GUI framework).  
+You can swap the character list using the menu bar option. Currently the Ultimate character list will only load if the last saved form used a character that was not in Melee, however switching between the two sets will keep your selection, assuming the selection exists in the other set (Melee -> Ult is guaranteed, but the inverse isn't).
 
 #### YouTube PlaylistID
 The URL of the playlist after creation can be put here, the program will trim it to just the part it needs. The URL should look like `https://www.youtube.com/playlist?list=PLSCJwgNAP2cXdlHlwbZr38JDHuuc8vx_s`, if the address has a string with `PL` at the start, it should work.
@@ -75,6 +76,9 @@ Any URL will work here, just make sure to include `https://` so YouTube users ca
 #### Tags
 If you want to add additional tags, for a specific event or your channel, add them here. Separate the tags with commas and don't worry about leading or trailing spaces.  
 Also multiple tags about Melee and the players are added by the program so don't add any related to those in this field.
+
+#### Description
+Additional text can be added to the description here, it will go between the bracket link and the credit text.
 
 #### Submit
 The submit button does a lot, it adds submission to queue, clears fields in match values that aren't generally needed for consecutive matches, and prevents you from adding submissions that don't meet the minimum criteria.
