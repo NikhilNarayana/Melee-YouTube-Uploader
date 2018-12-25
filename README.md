@@ -3,6 +3,10 @@ A YouTube Uploader for my Melee recordings
 
 A modified version of FRC-YouTube-Uploader for Super Smash Bros. Melee.
 
+**IMPORTANT NOTE**
+
+This application **DOES NOT** support enabling monetization at the moment. I highly suggest you upload videos as unlisted and set monetization settings before making them public or monitor your uploads and update monetization settings as they are uploaded (you can adjust the settings while the files are being uploaded without breaking anything). If you see the YouTube ContentID API in your Google Developer Console and are willing to help me test updates to fix the issue DM me on twitter at @xMetonym.
+
 ## To Do
 * Automate creation of thumbnails
 * Automate file picking
@@ -46,6 +50,34 @@ If you want to launch the application easily, you can find the exe by hitting th
 
 #### Mac and Unix
 `meleeuploader &` if you want to hide the terminal window. There are probably ways to launch the program quicker, but I don't use macOS/Unix for uploading usually.
+
+## How to use fields
+### Required
+`Event Name`, `File`, `Video Privacy`, `Match Type`, and `Player Tags` are the only required fields for uploading any file.
+
+### Optional
+#### Match Type Prefix and Suffix
+These are fairly self explanatory, you can add a bit of text before and after the `Match Type`. When submitting the video the `Prefix` is kept while the `Suffix` is cleared.
+
+#### Sponsor Tag
+This field will be added to the player tag like so `{sponsor} | {player}` resulting in names like `TSM | Leffen`.
+
+#### Characters
+If you ignore this field on either player than both player will not have characters.  
+Characters that are selected will be in the order they are shown in the list, not the selected order (unfortunate issue with the GUI framework).
+
+#### YouTube PlaylistID
+The URL of the playlist after creation can be put here, the program will trim it to just the part it needs. The URL should look like `https://www.youtube.com/playlist?list=PLSCJwgNAP2cXdlHlwbZr38JDHuuc8vx_s`, if the address has a string with `PL` at the start, it should work.
+
+#### Bracket Link
+Any URL will work here, just make sure to include `https://` so YouTube users can click on the link in the description.
+
+#### Tags
+If you want to add additional tags, for a specific event or your channel, add them here. Separate the tags with commas and don't worry about leading or trailing spaces.  
+Also multiple tags about Melee and the players are added by the program so don't add any related to those in this field.
+
+#### Submit
+The submit button does a lot, it adds submission to queue, clears fields in match values that aren't generally needed for consecutive matches, and prevents you from adding submissions that don't meet the minimum criteria.
 
 ## How to use advanced features
 
