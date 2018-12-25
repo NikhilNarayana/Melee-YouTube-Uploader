@@ -10,6 +10,7 @@ This application **DOES NOT** support enabling monetization at the moment. I hig
 ## To Do
 * Automate creation of thumbnails
 * Automate file picking
+* Update Ultimate character list settings
 * Update this README even more
 
 ## Contributing
@@ -63,8 +64,10 @@ These are fairly self explanatory, you can add a bit of text before and after th
 This field will be added to the player tag like so `{sponsor} | {player}` resulting in names like `TSM | Leffen`.
 
 #### Characters
+Characters are currently ordered by tier list placing, according to the 2015 official NTSC tier list.  
 If you ignore this field on either player than both player will not have characters.  
 Characters that are selected will be in the order they are shown in the list, not the selected order (unfortunate issue with the GUI framework).  
+**Ultimate character list is currently in Beta, things will change as I figure out the best way to mix the two sets**  
 You can swap the character list using the menu bar option. Currently the Ultimate character list will only load if the last saved form used a character that was not in Melee, however switching between the two sets will keep your selection, assuming the selection exists in the other set (Melee -> Ult is guaranteed, but the inverse isn't).
 
 #### YouTube PlaylistID
