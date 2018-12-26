@@ -1,7 +1,7 @@
 # Melee-YouTube-Uploader
 A YouTube Uploader for my Melee recordings
 
-A modified version of FRC-YouTube-Uploader for Super Smash Bros. Melee.
+A modified version of FRC-YouTube-Uploader for Super Smash Bros. Melee and Super Smash Bros. Ultimate.
 
 **IMPORTANT NOTE**
 
@@ -10,11 +10,13 @@ This application **DOES NOT** support enabling monetization at the moment. I hig
 ## To Do
 * Automate creation of thumbnails
 * Automate file picking
-* Update Ultimate character list settings
 * Update this README even more
 
 ## Contributing
 PRs are appreciated and will be reviewed quickly, the only code quality standard I have is to follow PEP8 standard except for the line length. If you have trouble understanding my code just ask me.
+
+## Questions and Support
+I am always open to help setup the program or fix any techincal issues you may have. Please send me a DM on twitter with your issue and I'll get you sorted out.
 
 ## Current Feature Set:
 * Upload videos
@@ -23,15 +25,16 @@ PRs are appreciated and will be reviewed quickly, the only code quality standard
 * Adds to a YouTube playlist
 * Saves and loads form values
 * Loading values from history
+* Melee and Ultimate Character List
 
 ## How to Setup
 1. Install [Python 3.7.1](https://www.python.org/downloads/release/python-371/) for your OS with the PATH added and make sure there are no other versions of Python 3.
 2. Install the program with `pip3 install -U meleeuploader`. If you want untested features you can download the repo and install with `pip3 install -U /path/to/repo`
-3. Start the program by running `meleeuploader` in terminal.
+3. Start the program by running `meleeuploader` for the Melee character list or `smashuploader` for the Ultimate character list in terminal.
 4. Add in the necessary info in the Event Values and Match Values tabs
-5. Hit submit every time a match finishes.
+5. Hit submit when the match finishes.
 6. Update forms with the next match's info.
-7. Enjoy not having to deal with YouTube's front end 🎉.
+7. Repeat steps 4-6 and enjoy not having to deal with YouTube's front end 🎉.
 
 ### Create Your Own Credentials
 In the future I will not be including YouTube API credentials with this project. So here is a guide to create your own credentials.
@@ -64,11 +67,11 @@ These are fairly self explanatory, you can add a bit of text before and after th
 This field will be added to the player tag like so `{sponsor} | {player}` resulting in names like `TSM | Leffen`.
 
 #### Characters
-Characters are currently ordered by tier list placing, according to the 2015 official NTSC tier list.  
-If you ignore this field on either player than both player will not have characters.  
+Melee characters are currently ordered by tier list placing, according to the 2015 official NTSC tier list.  
+Ultimate characters are currently ordered by the default character select screen without echo stacking.  
+If you don't add any characters for either player, both players will not have characters in the title.  
 Characters that are selected will be in the order they are shown in the list, not the selected order (unfortunate issue with the GUI framework).  
-**Ultimate character list is currently in Beta, things will change as I figure out the best way to mix the two sets**  
-You can swap the character list using the menu bar option. Currently the Ultimate character list will only load if the last saved form used a character that was not in Melee, however switching between the two sets will keep your selection, assuming the selection exists in the other set (Melee -> Ult is guaranteed, but the inverse isn't).
+You can swap the character list using the menu bar or load the preferred character list by using `meleeuploader` for Melee and `smashuploader` for Ultimate.
 
 #### YouTube PlaylistID
 The URL of the playlist after creation can be put here, the program will trim it to just the part it needs. The URL should look like `https://www.youtube.com/playlist?list=PLSCJwgNAP2cXdlHlwbZr38JDHuuc8vx_s`, if the address has a string with `PL` at the start, it should work.
