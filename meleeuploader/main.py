@@ -26,6 +26,8 @@ from pyforms_lite.controls import ControlTextArea, ControlList
 from pyforms_lite.controls import ControlCombo, ControlProgress
 from pyforms_lite.controls import ControlButton, ControlCheckBox, ControlCheckBoxList
 
+melee = True
+
 
 class EmittingStream(QtCore.QObject):
 
@@ -41,7 +43,11 @@ class EmittingStream(QtCore.QObject):
 class MeleeUploader(BaseWidget):
 
     def __init__(self):
-        super(MeleeUploader, self).__init__("Melee YouTube Uploader")
+        global melee
+        if melee:
+            super(MeleeUploader, self).__init__("Melee YouTube Uploader")
+        else:
+            super(MeleeUploader, self).__init__("Smash YouTube Uploader")
         # Redirct print output
         sys.stdout = EmittingStream(textWritten=self.writePrint)
 
@@ -104,7 +110,7 @@ class MeleeUploader(BaseWidget):
                 'Clear': [{'Clear Match Values': self.__reset_match}, {'Clear Event Values': self.__reset_event}, {'Clear All': self.__reset_forms}],
                 'Queue': [{'Toggle Uploads': self.__toggle_worker}, {'Save Queue': self.__save_queue}, {'Load Queue': self.__load_queue}],
                 'History': [{'Show History': self.__show_h_view}],
-                'Characters': [{'Melee': self.__melee_chars}, {'Ultimate/Smash4': self.__ultimate_chars}]}]
+                'Characters': [{'Melee': self.__melee_chars}, {'Ultimate': self.__ultimate_chars}]}]
 
         # Add ControlCombo values
         self._mtype += "Pools"
@@ -190,6 +196,12 @@ class MeleeUploader(BaseWidget):
             self._mextraleft, self._p1sponsor, self._p2sponsor, self._privacy,
             self._description
         ]
+
+        # Set character list
+        if melee:
+            self.__melee_chars()
+        else:
+            self.__ultimate_chars()
 
         # Get latest values from form_values.txt
         self.__load_form()
@@ -475,12 +487,6 @@ class MeleeUploader(BaseWidget):
         if history:
             for val, var in zip(history, self._form_fields):
                 if isinstance(val, (list, dict)):
-                    if updateChars and any(char not in self._melee_chars for char in val):
-                        self.__ultimate_chars()
-                        updateChars = False
-                    elif updateChars:
-                        self.__melee_chars()
-                        updateChars = False
                     var.load_form(dict(selected=val))
                 elif val:
                     var.value = val
@@ -490,12 +496,6 @@ class MeleeUploader(BaseWidget):
                     values = json.loads(f.read())
                     for val, var in zip(values, self._form_fields):
                         if isinstance(val, (list, dict)):
-                            if updateChars and any(char not in self._melee_chars for char in val):
-                                self.__ultimate_chars()
-                                updateChars = False
-                            elif updateChars:
-                                self.__melee_chars()
-                                updateChars = False
                             var.load_form(dict(selected=val))
                         elif val:
                             var.value = val
@@ -545,6 +545,12 @@ def main():
         sys.exit(0)
     else:
         sys.exit(1)
+
+
+def ult():
+    global melee
+    melee = False
+    main()
 
 
 if __name__ == "__main__":
