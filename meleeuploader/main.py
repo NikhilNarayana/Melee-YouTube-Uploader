@@ -6,7 +6,9 @@ import json
 import errno
 import pickle
 import socket
+import asyncio
 import threading
+import websockets
 from time import sleep
 from queue import Queue
 from copy import deepcopy
@@ -205,6 +207,8 @@ class MeleeUploader(BaseWidget):
 
         # Get latest values from form_values.txt
         self.__load_form()
+
+        asyncio.get_event_loop().run_until_complete(self.__get_data_sock())
 
     def __buttonAction(self):
         """Button action event"""
@@ -518,6 +522,14 @@ class MeleeUploader(BaseWidget):
             self._p2char += (char, False)
         self._p1char.load_form(dict(selected=p1))
         self._p2char.load_form(dict(selected=p2))
+
+    async def __update_form(self):
+        print(message)
+
+    async def __get_data_sock(self):
+        async with websockets.connect("ws://localhost:58341") as websocket:
+            async for message in websocket:
+                await self.__update_form(message)
 
 
 def internet(host="www.google.com", port=80, timeout=4):
