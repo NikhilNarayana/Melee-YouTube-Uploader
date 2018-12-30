@@ -4,7 +4,7 @@ from codecs import open
 from os import path
 
 here = path.abspath(path.dirname(__file__))
-version = '1.6.0'
+version = '1.6.1'
 
 long_des = ""
 with open(path.join(here, 'README.md')) as f:
@@ -28,7 +28,7 @@ setup(
         "Natural Language :: English",
     ],
     entry_points=dict(console_scripts=['meleeuploader = meleeuploader.main:main', 'smashuploader = meleeuploader.main:ult']),
-    python_requires='~=3.5',
+    python_requires='~=3.6',
     version=version,
     packages=["meleeuploader"],
     install_requires=[
@@ -36,6 +36,7 @@ setup(
         'google-api-python-client',
         'oauth2client',
         'Pyforms-Lite',
+        'websockets',
     ],
     data_files=[("share/meleeuploader", ['meleeuploader/client_secrets.json'])],
     package_data={'meleeuploader': ['meleeuploader/client_secrets.json']},
