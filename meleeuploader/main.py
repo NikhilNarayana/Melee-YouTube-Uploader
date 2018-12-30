@@ -108,7 +108,7 @@ class MeleeUploader(BaseWidget):
 
         # Main Menu Layout
         self.mainmenu = [
-            {'Settings': [{'Save Form': self.__save_form}, {'Remove YouTube Credentials': self.__reset_cred_event}],
+            {'Settings': [{'Save Form': self.__save_form}, {'Remove YouTube Credentials': self.__reset_cred_event}, {'Enable Websocket for SA': self.__start_websocket}],
                 'Clear': [{'Clear Match Values': self.__reset_match}, {'Clear Event Values': self.__reset_event}, {'Clear All': self.__reset_forms}],
                 'Queue': [{'Toggle Uploads': self.__toggle_worker}, {'Save Queue': self.__save_queue}, {'Load Queue': self.__load_queue}],
                 'History': [{'Show History': self.__show_h_view}],
@@ -208,7 +208,6 @@ class MeleeUploader(BaseWidget):
         # Get latest values from form_values.txt
         self.__load_form()
 
-        asyncio.get_event_loop().run_until_complete(self.__get_data_sock())
 
     def __buttonAction(self):
         """Button action event"""
@@ -523,13 +522,30 @@ class MeleeUploader(BaseWidget):
         self._p1char.load_form(dict(selected=p1))
         self._p2char.load_form(dict(selected=p2))
 
-    async def __update_form(self):
-        print(message)
+    async def __update_form(self, message):
+        data = json.loads(message)
+        try:
+            self._p1.value = data['player1']
+            self._p2.value = data['player2']
+        except Exception as e:
+            pass
 
     async def __get_data_sock(self):
         async with websockets.connect("ws://localhost:58341") as websocket:
             async for message in websocket:
                 await self.__update_form(message)
+
+    def __runner(self):
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(self.__get_data_sock())
+
+    def __start_websocket(self):
+        print("Starting Websocket, please make sure Scoreboard Assistant is open")
+        sleep(3)
+        thr = threading.Thread(target=self.__runner)
+        thr.daemon = True
+        thr.start()
 
 
 def internet(host="www.google.com", port=80, timeout=4):
