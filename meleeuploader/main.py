@@ -110,7 +110,7 @@ class MeleeUploader(BaseWidget):
 
         # Main Menu Layout
         self.mainmenu = [
-            {'Settings': [{'Save Form': self.__save_form}, {'Remove YouTube Credentials': self.__reset_cred_event}, {'Toggle Websocket for SA': self.__toggle_websocket}],
+            {'Settings': [{'Save Form': self.__save_form}, {'Remove YouTube Credentials': self.__reset_cred_event}, {'Toggle Websocket for SA': self.__toggle_websocket}, {'Hook into OBS': self.__hook_obs}],
                 'Clear': [{'Clear Match Values': self.__reset_match}, {'Clear Event Values': self.__reset_event}, {'Clear All': self.__reset_forms}],
                 'Queue': [{'Toggle Uploads': self.__toggle_worker}, {'Save Queue': self.__save_queue}, {'Load Queue': self.__load_queue}],
                 'History': [{'Show History': self.__show_h_view}],
@@ -204,7 +204,7 @@ class MeleeUploader(BaseWidget):
         # Get latest values from form_values.txt
         self.__load_form()
 
-    def __buttonAction(self):
+    def __buttonAction(self, data=None):
         """Button action event"""
         if any(not x for x in (self._ename.value, self._p1.value, self._p2.value, self._file.value)):
             print("Missing one of the required fields (event name, player names, file name)")
@@ -535,11 +535,21 @@ class MeleeUploader(BaseWidget):
         if self._ws is None:
             print("Starting Websocket, please make sure Scoreboard Assistant is open")
             self._ws = websocket.WebSocketApp("ws://localhost:58341", on_message=self.__update_form)
-            self._ws.run_forever()
+            self._wst = threading.Thread(target=self._ws.run_forever)
+            self._wst.daemon = True
+            self._wst.start()
         else:
             print("Closing the Websocket")
             self._ws.close()
             self._ws = None
+            self._wst.join()
+
+    def __hook_obs(self):
+        from obswebsocket import obsws, events
+        self._obs = obsws("localhost", "4444")
+        self._obs.register(self.__buttonAction, events.RecordingStopped)
+        self._obs.connect()
+        print("Hooked into OBS")
 
 
 def internet(host="www.google.com", port=80, timeout=4):
