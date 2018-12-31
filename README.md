@@ -60,6 +60,9 @@ If you want to launch the application easily, you can find the exe by hitting th
 ### Required
 `Event Name`, `File`, `Video Privacy`, `Match Type`, and `Player Tags` are the only required fields for uploading any file.
 
+#### File
+File is able to be used as either a file or directory input. Because of how the input selector is setup you will need to select a file within the directory you wish to use and then you can delete the filename from the field. If you select a directory it will not be deleted after submission.
+
 ### Optional
 #### Match Type Prefix and Suffix
 These are fairly self explanatory, you can add a bit of text before and after the `Match Type`. When submitting the video the `Prefix` is kept while the `Suffix` is cleared.
@@ -103,8 +106,13 @@ Queue was built so I could upload VODs after an event because the venue didn't h
 Queue refers to the list of upcoming uploads in the status tab. By selecting `Toggle Uploads` you can toggle the uploading function, but continue to add entries to the queue. Once you have finished adding all the VODs you want to upload, selecting `Save Queue` will write the entire queue to your disk to be loaded later on. Finally, using `Load Queue` will load the entire queue file and start uploading immediately.
 
 ### Scoreboard Assistant Websocket
-Websocket was built so I could avoid retyping information that I put into Scoreboard Assistant.
+SA Websocket was built so I could avoid retyping information that I put into Scoreboard Assistant.
 
 To enable the websocket open the `Settings` menu tab and select the `Enable Websocket` option. Just make sure that SA is open before you start the websocket.
 
 The websocket will pull from the `Player 1`, `Player 2`, and `Match` fields. The match type will be parsed to find a similar option in the ones given, but will otherwise leave it as is.
+
+### OBS Websocket
+This is a peculiar feature that I built with only myself in mind. There are no plans to expand what I've set it up to do.
+
+I've set it up so once recording has been stopped, the application will submit the information that is currently inputted. This combined with `SA Websocket` is a powerful feature set to quickly queue sets. The only info the user will have to 
