@@ -115,17 +115,9 @@ class MeleeUploader(BaseWidget):
                 'Characters': [{'Melee': self.__melee_chars}, {'Ultimate': self.__ultimate_chars}]}]
 
         # Add ControlCombo values
-        self._mtype += "Pools"
-        self._mtype += "Round Robin"
-        self._mtype += "Winners"
-        self._mtype += "Losers"
-        self._mtype += "Winners Finals"
-        self._mtype += "Losers Finals"
-        self._mtype += "Grand Finals"
-        self._mtype += "Money Match"
-        self._mtype += "Crew Battle"
-        self._mtype += "Ladder"
-        self._mtype += "Friendlies"
+        self.__match_types = ["Pools", "Round Robin", "Winners", "Losers", "Winners Finals", "Losers Finals", "Grand Finals", "Money Match", "Crew Battle", "Ladder", "Friendlies"]
+        for t in self.__match_types:
+            self._mtype += t
         self._privacy += "public"
         self._privacy += "unlisted"
         self._privacy += "private"
@@ -207,7 +199,6 @@ class MeleeUploader(BaseWidget):
 
         # Get latest values from form_values.txt
         self.__load_form()
-
 
     def __buttonAction(self):
         """Button action event"""
@@ -527,6 +518,12 @@ class MeleeUploader(BaseWidget):
         try:
             self._p1.value = data['player1']
             self._p2.value = data['player2']
+            if data['match'] == "Winners Finals" or data['match'] == "Losers Finals":
+                self._mtype.value = data['match']
+            else:
+                for t in self.__match_types:
+                    if t.lower() in data['match'].lower():
+                        self._mtype.value = t
         except Exception as e:
             pass
 
