@@ -6,9 +6,8 @@ import json
 import errno
 import pickle
 import socket
-import asyncio
 import threading
-import websockets
+import websocket
 from time import sleep
 from queue import Queue
 from copy import deepcopy
@@ -52,6 +51,9 @@ class MeleeUploader(BaseWidget):
             super(MeleeUploader, self).__init__("Smash YouTube Uploader")
         # Redirct print output
         sys.stdout = EmittingStream(textWritten=self.writePrint)
+
+        # Websocket
+        self._ws = None
 
         # History
         self.__history = []
@@ -108,7 +110,7 @@ class MeleeUploader(BaseWidget):
 
         # Main Menu Layout
         self.mainmenu = [
-            {'Settings': [{'Save Form': self.__save_form}, {'Remove YouTube Credentials': self.__reset_cred_event}, {'Enable Websocket for SA': self.__start_websocket}],
+            {'Settings': [{'Save Form': self.__save_form}, {'Remove YouTube Credentials': self.__reset_cred_event}, {'Toggle Websocket for SA': self.__toggle_websocket}],
                 'Clear': [{'Clear Match Values': self.__reset_match}, {'Clear Event Values': self.__reset_event}, {'Clear All': self.__reset_forms}],
                 'Queue': [{'Toggle Uploads': self.__toggle_worker}, {'Save Queue': self.__save_queue}, {'Load Queue': self.__load_queue}],
                 'History': [{'Show History': self.__show_h_view}],
@@ -121,6 +123,8 @@ class MeleeUploader(BaseWidget):
         self._privacy += "public"
         self._privacy += "unlisted"
         self._privacy += "private"
+
+        # Character Names and Minification
         self.minchars = {
             'Jigglypuff': "Puff",
             'Captain Falcon': "Falcon",
@@ -513,7 +517,7 @@ class MeleeUploader(BaseWidget):
         self._p1char.load_form(dict(selected=p1))
         self._p2char.load_form(dict(selected=p2))
 
-    async def __update_form(self, message):
+    def __update_form(self, message):
         data = json.loads(message)
         try:
             self._p1.value = data['player1']
@@ -527,22 +531,15 @@ class MeleeUploader(BaseWidget):
         except Exception as e:
             pass
 
-    async def __get_data_sock(self):
-        async with websockets.connect("ws://localhost:58341") as websocket:
-            async for message in websocket:
-                await self.__update_form(message)
-
-    def __runner(self):
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        loop.run_until_complete(self.__get_data_sock())
-
-    def __start_websocket(self):
-        print("Starting Websocket, please make sure Scoreboard Assistant is open")
-        sleep(3)
-        thr = threading.Thread(target=self.__runner)
-        thr.daemon = True
-        thr.start()
+    def __toggle_websocket(self):
+        if self._ws is None:
+            print("Starting Websocket, please make sure Scoreboard Assistant is open")
+            self._ws = websocket.WebSocketApp("ws://localhost:58341", on_message=self.__update_form)
+            self._ws.run_forever()
+        else:
+            print("Closing the Websocket")
+            self._ws.close()
+            self._ws = None
 
 
 def internet(host="www.google.com", port=80, timeout=4):
