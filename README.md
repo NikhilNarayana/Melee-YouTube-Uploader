@@ -103,6 +103,8 @@ Queue was built so I could upload VODs after an event because the venue didn't h
 Queue refers to the list of upcoming uploads in the status tab. By selecting `Toggle Uploads` you can toggle the uploading function, but continue to add entries to the queue. Once you have finished adding all the VODs you want to upload, selecting `Save Queue` will write the entire queue to your disk to be loaded later on. Finally, using `Load Queue` will load the entire queue file and start uploading immediately.
 
 ### Scoreboard Assistant Websocket
-Websocket was built so I could avoid retyping player names.
+Websocket was built so I could avoid retyping information that I put into Scoreboard Assistant.
 
-To enable the websocket open the `Settings` menu tab and select the `Enable Websocket` option. Just make sure that SA is open before you select that option.
+To enable the websocket open the `Settings` menu tab and select the `Enable Websocket` option. Just make sure that SA is open before you start the websocket.
+
+The websocket will pull from the `Player 1`, `Player 2`, and `Match` fields. The match type will be parsed to find a similar option in the ones given, but will otherwise leave it as is.
