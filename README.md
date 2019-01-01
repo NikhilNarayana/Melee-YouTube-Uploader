@@ -63,6 +63,8 @@ If you want to launch the application easily, you can find the exe by hitting th
 #### File
 File is able to be used as either a file or directory input. Because of how the input selector is setup you will need to select a file within the directory you wish to use and then you can delete the filename from the field. If you select a directory it will not be deleted after submission.
 
+When using this quirk of the field, it will find the newest file in the directory you give it, so make sure no other files are written to this folder other than the OBS recordings. This is best used for uploading or queueing videos during an event.
+
 ### Optional
 #### Match Type Prefix and Suffix
 These are fairly self explanatory, you can add a bit of text before and after the `Match Type`. When submitting the video the `Prefix` is kept while the `Suffix` is cleared.
@@ -115,4 +117,6 @@ The websocket will pull from the `Player 1`, `Player 2`, and `Match` fields. The
 ### OBS Websocket
 This is a peculiar feature that I built with only myself in mind. There are no plans to expand what I've set it up to do.
 
-I've set it up so once recording has been stopped, the application will submit the information that is currently inputted. This combined with `SA Websocket` is a powerful feature set to quickly queue sets. The only info the user will have to 
+I've set it up so once recording has been stopped, the application will submit the information that is currently inputted. This combined with `SA Websocket` is a powerful feature set to quickly queue sets. The only info that will have to set if using that combo is the `Match Suffix` and the `Characters` for both players.
+
+In addition to enabling the settings you will need to update OBS with the websocket plugin found here: https://github.com/Palakis/obs-websocket
