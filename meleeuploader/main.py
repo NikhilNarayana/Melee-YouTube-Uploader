@@ -223,7 +223,7 @@ class MeleeUploader(BaseWidget):
         options.bracket = self._bracket.value
         isdir = os.path.isdir(self._file.value)
         if isdir:
-            options.file = max([f for f in os.listdir(self._file.value) if os.path.isfile(os.path.join(self._file.value, f))], key=os.path.getctime)
+            options.file = max([os.path.join(self._file.value,f) for f in os.listdir(self._file.value) if os.path.isfile(os.path.join(self._file.value, f))], key=os.path.getctime)
         else:
             options.file = self._file.value
         options.tags = self._tags.value
@@ -256,20 +256,8 @@ class MeleeUploader(BaseWidget):
             opts.mtype = " ".join((opts.mtype, opts.mextraright))
         title = f"{opts.ename} - {opts.mtype} - ({'/'.join(opts.p1char)}) {opts.p1} vs {opts.p2} ({'/'.join(opts.p2char)})" if any(x for x in [opts.p1char, opts.p2char]) else f"{opts.ename} - {opts.mtype} - {opts.p1} vs {opts.p2}"
         if len(title) > 100:
-            for i in range(len(opts.p1char)):
-                if opts.p1char[i] in self.minchars:
-                    opts.p1char[i] = self.minchars[opts.p1char[i]]
-            if all(x in opts.p1char for x in ("Fox", "Falco")):
-                opts.p1char.remove("Fox")
-                opts.p1char.remove("Falco")
-                opts.p1char.insert(0, "Spacies")
-            for i in range(len(opts.p2char)):
-                if opts.p2char[i] in self.minchars:
-                    opts.p2char[i] = self.minchars[opts.p2char[i]]
-            if all(x in opts.p2char for x in ("Fox", "Falco")):
-                opts.p2char.remove("Fox")
-                opts.p2char.remove("Falco")
-                opts.p2char.insert(0, "Spacies")
+            opts.p1char = self._minify_chars(opts.p1char)
+            opts.p2char = self._minify_chars(opts.p2char)
             title = f"{opts.ename} - {opts.mtype} - ({'/'.join(opts.p1char)}) {opts.p1} vs {opts.p2} ({'/'.join(opts.p2char)})" if any(x for x in [opts.p1char, opts.p2char]) else f"{opts.ename} - {opts.mtype} - {opts.p1} vs {opts.p2}"
             if len(title) > 100:
                 print("Title is greater than 100 characters after minifying character names")
@@ -280,9 +268,9 @@ class MeleeUploader(BaseWidget):
         print(f"Uploading {title}")
         credit = "Uploaded with Melee-YouTube-Uploader (https://github.com/NikhilNarayana/Melee-YouTube-Uploader) by Nikhil Narayana"
         if opts.descrip:
-            descrip = (f"Bracket: {opts.bracket}\n\n{opts.descrip}\n\n{credit}") if opts.bracket else credit
+            descrip = f"Bracket: {opts.bracket}\n\n{opts.descrip}\n\n{credit}" if opts.bracket else f"{opts.descrip}\n\n{credit}"
         else:
-            descrip = (f"Bracket: {opts.bracket}\n\n{credit}") if opts.bracket else credit
+            descrip = f"Bracket: {opts.bracket}\n\n{credit}" if opts.bracket else credit
         tags = ["Melee", "Super Smash Brothers Melee", "Smash Brothers", "Super Smash Bros. Melee", "meleeuploader", "SSBM", "ssbm"]
         tags.extend((opts.p1char, opts.p2char, opts.ename, opts.p1, opts.p2))
         if opts.tags:
@@ -555,6 +543,16 @@ class MeleeUploader(BaseWidget):
         self._obs.register(self.__buttonAction, events.RecordingStopped)
         self._obs.connect()
         print("Hooked into OBS")
+
+    def _minify_chars(self, pchars):
+        for i in range(len(pchars)):
+            if pchars[i] in self.minchars:
+                pchars[i] = self.minchars[pchars[i]]
+        if all(x in pchars for x in ("Fox", "Falco")):
+            pchars.remove("Fox")
+            pchars.remove("Falco")
+            pchars.insert(0, "Spacies")
+        return pchars
 
 
 def internet(host="www.google.com", port=80, timeout=4):
