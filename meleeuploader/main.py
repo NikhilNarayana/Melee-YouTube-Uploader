@@ -347,7 +347,8 @@ class MeleeUploader(BaseWidget):
     def writePrint(self, text):
         self._output.value += text
         self._output._form.plainTextEdit.moveCursor(QtGui.QTextCursor.End)
-        print(text, file=sys.__stdout__, end='')
+        if sys.__stdout__:
+            print(text, file=sys.__stdout__, end='')
 
     def __reset_cred_event(self):
         os.remove(os.path.join(os.path.expanduser("~"), ".melee-oauth2-youtube.json"))
