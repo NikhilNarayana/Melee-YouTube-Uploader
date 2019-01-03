@@ -20,6 +20,7 @@ import pyforms_lite
 from argparse import Namespace
 from PyQt5 import QtCore, QtGui
 from pyforms_lite import BaseWidget
+from obswebsocket import obsws, events
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload
 from pyforms_lite.controls import ControlText, ControlFile
@@ -61,6 +62,10 @@ class MeleeUploader(BaseWidget):
         # Filenames
         self.__form_values = os.path.join(os.path.expanduser("~"), '.melee_form_values.json')
         self.__queue_values = os.path.join(os.path.expanduser("~"), ".melee_queue_values.txt")
+        self.__log_file = os.path.join(os.path.expanduser("~"), ".melee_log.txt")
+
+        # Redirect error output to a file
+        sys.stderr = open(self.__log_file, "a")
 
         # Queue
         self._queue = Queue()
@@ -75,6 +80,7 @@ class MeleeUploader(BaseWidget):
         # Event Values
         self._privacy = ControlCombo("Video Privacy")
         self._ename = ControlText("Event Name")
+        self._ename_min = ControlText()
         self._pID = ControlText("Playlist ID")
         self._bracket = ControlText("Bracket Link")
         self._tags = ControlText("Tags")
@@ -88,8 +94,8 @@ class MeleeUploader(BaseWidget):
         self._p1char = ControlCheckBoxList("P1 Characters")
         self._p2char = ControlCheckBoxList("P2 Characters")
         self._mtype = ControlCombo()
-        self._mextraleft = ControlText()
-        self._mextraright = ControlText()
+        self._mprefix = ControlText()
+        self._msuffix = ControlText()
 
         # Output Box
         self._output = ControlTextArea()
@@ -103,9 +109,9 @@ class MeleeUploader(BaseWidget):
         self._button = ControlButton('Submit')
 
         # Form Layout
-        self.formset = [{"-Match": ["_file", (' ', "_mextraleft", "_mtype", "_mextraright", ' '), (' ', "_p1sponsor", "_p1", ' '), (' ', "_p1char", ' '), (' ', "_p2sponsor", "_p2", ' '), (' ', "_p2char", ' ')],
+        self.formset = [{"-Match": ["_file", (' ', "_mprefix", "_mtype", "_msuffix", ' '), (' ', "_p1sponsor", "_p1", ' '), (' ', "_p1char", ' '), (' ', "_p2sponsor", "_p2", ' '), (' ', "_p2char", ' ')],
                          "-Status-": ["_output", "=", "_qview"],
-                         "Event-": ["_privacy", "_ename", "_pID", "_bracket", "_tags", "_description"]},
+                         "Event-": ["_privacy", ("_ename","_ename_min"), "_pID", "_bracket", "_tags", "_description"]},
                         (' ', '_button', ' ')]
 
         # Main Menu Layout
@@ -120,11 +126,12 @@ class MeleeUploader(BaseWidget):
         self.__match_types = ["Pools", "Round Robin", "Winners", "Losers", "Winners Finals", "Losers Finals", "Grand Finals", "Money Match", "Crew Battle", "Ladder", "Friendlies"]
         for t in self.__match_types:
             self._mtype += t
+        self.__min_match_types = {"Round ": "R", "Round Robin": "RR", "Winners Finals": "WF", "Losers Finals": "LF", "Grand Finals": "GF", "Money Match": "MM", "Crew Battle": "Crews", "Semifinals": "SF", "Quarterfinals": "QF"}
         self._privacy += "public"
         self._privacy += "unlisted"
         self._privacy += "private"
 
-        # Character Names and Minification
+        # Character Names and Minifications
         self.minchars = {
             'Jigglypuff': "Puff",
             'Captain Falcon': "Falcon",
@@ -174,12 +181,13 @@ class MeleeUploader(BaseWidget):
         ]
 
         # Set placeholder text
+        self._ename_min.form.lineEdit.setPlaceholderText("Shortened Event Name")
         self._p1sponsor.form.lineEdit.setPlaceholderText("Sponsor Tag")
         self._p2sponsor.form.lineEdit.setPlaceholderText("Sponsor Tag")
         self._p1.form.lineEdit.setPlaceholderText("P1 Tag")
         self._p2.form.lineEdit.setPlaceholderText("P2 Tag")
-        self._mextraleft.form.lineEdit.setPlaceholderText("Match Type Prefix")
-        self._mextraright.form.lineEdit.setPlaceholderText("Match Type Suffix")
+        self._mprefix.form.lineEdit.setPlaceholderText("Match Type Prefix")
+        self._msuffix.form.lineEdit.setPlaceholderText("Match Type Suffix")
         self._bracket.form.lineEdit.setPlaceholderText("Include https://")
         self._tags.form.lineEdit.setPlaceholderText("Separate with commas")
         self._pID.form.lineEdit.setPlaceholderText("Accepts full YT link")
@@ -190,9 +198,9 @@ class MeleeUploader(BaseWidget):
         # Define the existing form fields
         self._form_fields = [
             self._ename, self._pID, self._mtype, self._p1, self._p2, self._p1char,
-            self._p2char, self._bracket, self._file, self._tags, self._mextraright,
-            self._mextraleft, self._p1sponsor, self._p2sponsor, self._privacy,
-            self._description
+            self._p2char, self._bracket, self._file, self._tags, self._msuffix,
+            self._mprefix, self._p1sponsor, self._p2sponsor, self._privacy,
+            self._description, self._ename_min
         ]
 
         # Set character list
@@ -212,6 +220,7 @@ class MeleeUploader(BaseWidget):
         options = Namespace()
         self.__history.append(self.__save_form())
         options.ename = self._ename.value
+        options.ename_min = self._ename_min.value
         f = self._pID.value.find("PL")
         self._pID.value = self._pID.value[f:f + 34]
         options.pID = self._pID.value
@@ -227,8 +236,8 @@ class MeleeUploader(BaseWidget):
         else:
             options.file = self._file.value
         options.tags = self._tags.value
-        options.mextraright = self._mextraright.value
-        options.mextraleft = self._mextraleft.value
+        options.msuffix = self._msuffix.value
+        options.mprefix = self._mprefix.value
         options.privacy = self._privacy.value
         options.descrip = self._description.value
         if self._p1sponsor.value:
@@ -237,7 +246,7 @@ class MeleeUploader(BaseWidget):
             options.p2 = " | ".join((self._p2sponsor.value, options.p2))
         options.ignore = False
         self.__reset_match(False, isdir)
-        self._qview += (options.p1, options.p2, " ".join((options.mextraleft, options.mtype, options.mextraright)))
+        self._qview += (options.p1, options.p2, " ".join((options.mprefix, options.mtype, options.msuffix)))
         self._queue.put(options)
         self._queueref.append(options)
         self._qview.resize_rows_contents()
@@ -248,23 +257,33 @@ class MeleeUploader(BaseWidget):
             self._firstrun = False
 
     def _init(self, opts):
-        if opts.mextraleft and opts.mextraright:
-            opts.mtype = " ".join((opts.mextraleft, opts.mtype, opts.mextraright))
-        elif opts.mextraleft:
-            opts.mtype = " ".join((opts.mextraleft, opts.mtype))
-        elif opts.mextraright:
-            opts.mtype = " ".join((opts.mtype, opts.mextraright))
-        title = f"{opts.ename} - {opts.mtype} - ({'/'.join(opts.p1char)}) {opts.p1} vs {opts.p2} ({'/'.join(opts.p2char)})" if any(x for x in [opts.p1char, opts.p2char]) else f"{opts.ename} - {opts.mtype} - {opts.p1} vs {opts.p2}"
+        if opts.mprefix and opts.msuffix:
+            opts.mtype = " ".join((opts.mprefix, opts.mtype, opts.msuffix))
+        elif opts.mprefix:
+            opts.mtype = " ".join((opts.mprefix, opts.mtype))
+        elif opts.msuffix:
+            opts.mtype = " ".join((opts.mtype, opts.msuffix))
+        chars_exist = all(x for x in [opts.p1char, opts.p2char])
+        title = f"{opts.ename} - {opts.mtype} - ({'/'.join(opts.p1char)}) {opts.p1} vs {opts.p2} ({'/'.join(opts.p2char)})" if chars_exist else f"{opts.ename} - {opts.mtype} - {opts.p1} vs {opts.p2}"
         if len(title) > 100:
             opts.p1char = self._minify_chars(opts.p1char)
             opts.p2char = self._minify_chars(opts.p2char)
-            title = f"{opts.ename} - {opts.mtype} - ({'/'.join(opts.p1char)}) {opts.p1} vs {opts.p2} ({'/'.join(opts.p2char)})" if any(x for x in [opts.p1char, opts.p2char]) else f"{opts.ename} - {opts.mtype} - {opts.p1} vs {opts.p2}"
+            title = f"{opts.ename} - {opts.mtype} - ({'/'.join(opts.p1char)}) {opts.p1} vs {opts.p2} ({'/'.join(opts.p2char)})" if chars_exist else f"{opts.ename} - {opts.mtype} - {opts.p1} vs {opts.p2}"
             if len(title) > 100:
-                print("Title is greater than 100 characters after minifying character names")
-                print(title)
-                print(len(title))
-                print("Killing this thread now\n\n")
-                return False
+                opts.mtype = self._minify_mtype(opts)
+                title = f"{opts.ename} - {opts.mtype} - ({'/'.join(opts.p1char)}) {opts.p1} vs {opts.p2} ({'/'.join(opts.p2char)})" if chars_exist else f"{opts.ename} - {opts.mtype} - {opts.p1} vs {opts.p2}"
+                if len(title) > 100:
+                    opts.mtype = self._minify_mtype(opts, True)
+                    title = f"{opts.ename} - {opts.mtype} - ({'/'.join(opts.p1char)}) {opts.p1} vs {opts.p2} ({'/'.join(opts.p2char)})" if chars_exist else f"{opts.ename} - {opts.mtype} - {opts.p1} vs {opts.p2}"
+                    if len(title) > 100:
+                        title = f"{opts.ename_min} - {opts.mtype} - ({'/'.join(opts.p1char)}) {opts.p1} vs {opts.p2} ({'/'.join(opts.p2char)})" if chars_exist else f"{opts.ename_min} - {opts.mtype} - {opts.p1} vs {opts.p2}"
+                        if len(title) > 100:
+                            # I can only hope no one ever goes this far
+                            print("Title is greater than 100 characters after minifying character names")
+                            print(title)
+                            print(len(title))
+                            print("Killing this thread now\n\n")
+                            return False
         print(f"Uploading {title}")
         credit = "Uploaded with Melee-YouTube-Uploader (https://github.com/NikhilNarayana/Melee-YouTube-Uploader) by Nikhil Narayana"
         if opts.descrip:
@@ -365,14 +384,15 @@ class MeleeUploader(BaseWidget):
         self._p1sponsor.value = ""
         self._p2sponsor.value = ""
         self._file.value = ""
-        self._mextraright.value = ""
+        self._msuffix.value = ""
         if menu:
             self._mtype.value = "Pools"
-            self._mextraleft.value = ""
+            self._mprefix.value = ""
 
     def __reset_event(self):
         self._privacy.value = "public"
         self._ename.value = ""
+        self._ename_min.value = ""
         self._pID.value = ""
         self._bracket.value = ""
         self._tags.value = ""
@@ -398,8 +418,9 @@ class MeleeUploader(BaseWidget):
                     row[1] = deepcopy(options.pID)
                     row[7] = deepcopy(options.bracket)
                     row[9] = deepcopy(options.tags)
-                    row[11] = deepcopy(options.mextraleft)
+                    row[11] = deepcopy(options.mprefix)
                     row[14] = deepcopy(options.privacy)
+                    row[16] = deepcopy(options.ename_min)
                     with open(self.__form_values, 'w') as f:
                         f.write(json.dumps(row))
                 self._qview -= 0
@@ -459,12 +480,13 @@ class MeleeUploader(BaseWidget):
             row[7] = deepcopy(options.bracket)
             row[8] = deepcopy(options.file)
             row[9] = deepcopy(options.tags)
-            row[10] = deepcopy(options.mextraright)
-            row[11] = deepcopy(options.mextraleft)
+            row[10] = deepcopy(options.msuffix)
+            row[11] = deepcopy(options.mprefix)
             row[12] = ""
             row[13] = ""
             row[14] = deepcopy(options.privacy)
             row[15] = deepcopy(options.descrip)
+            row[16] = deepcopy(options.ename_min)
         else:
             f = self._pID.value.find("PL")
             self._pID.value = self._pID.value[f:f + 34]
@@ -521,6 +543,25 @@ class MeleeUploader(BaseWidget):
             else:
                 for t in self.__match_types:
                     if t.lower() in data['match'].lower():
+                        data['match'] = data['match'].strip()
+                        loc = data['match'].find(t)
+                        if loc > 0:
+                            match_vals = data['match'].split(" ")
+                            type_split = t.split(" ")
+                            for i, val in enumerate(match_vals):
+                                if val == type_split[0]:
+                                    self._mprefix.value = " ".join(match_vals[:i])
+                                if len(type_split) == 2 and val == type_split[1]:
+                                    self.msuffix.value = " ".join(match_vals[i+1:])
+                        else:
+                            self._mprefix.value = ""
+                            match_vals = data['match'].split(" ")
+                            type_split = t.split(" ")
+                            for i, val in enumerate(match_vals):
+                                if len(type_split) == 1 and val == type_split[0]:
+                                    self.msuffix.value = " ".join(match_vals[i:])
+                                elif len(type_split) == 2 and val == type_split[1]:
+                                    self.msuffix.value = " ".join(match_vals[i:])
                         self._mtype.value = t
         except Exception as e:
             pass
@@ -539,7 +580,6 @@ class MeleeUploader(BaseWidget):
             self._wst.join()
 
     def __hook_obs(self):
-        from obswebsocket import obsws, events
         self._obs = obsws("localhost", "4444")
         self._obs.register(self.__buttonAction, events.RecordingStopped)
         self._obs.connect()
@@ -554,6 +594,24 @@ class MeleeUploader(BaseWidget):
             pchars.remove("Falco")
             pchars.insert(0, "Spacies")
         return pchars
+
+    def _minify_mtype(self, opts, middle=False):
+        for k, v in self.__min_match_types.items():
+            opts.mprefix = opts.mprefix.replace(k, v)
+            opts.mprefix = opts.mprefix.replace(k.lower(), v)
+            opts.msuffix = opts.msuffix.replace(k, v)
+            opts.msuffix = opts.msuffix.replace(k.lower(), v)
+            if middle:
+                opts.mtype = opts.mtype.replace(k, v)
+                opts.mtype = opts.mtype.replace(k.lower(), v)
+        if opts.mprefix and opts.msuffix:
+            opts.mtype = " ".join((opts.mprefix, opts.mtype, opts.msuffix))
+        elif opts.mprefix:
+            opts.mtype = " ".join((opts.mprefix, opts.mtype))
+        elif opts.msuffix:
+            opts.mtype = " ".join((opts.mtype, opts.msuffix))
+        return opts.mtype
+
 
 
 def internet(host="www.google.com", port=80, timeout=4):
@@ -577,7 +635,7 @@ def main():
             subprocess.call(['sudo', 'python3', sys.argv[0]])
     get_youtube_service()
     if internet():
-        pyforms_lite.start_app(MeleeUploader, geometry=(100, 100, 1, 1))
+        pyforms_lite.start_app(MeleeUploader, geometry=(200, 200, 1, 1))
         sys.exit(0)
     else:
         sys.exit(1)
