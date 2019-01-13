@@ -53,6 +53,8 @@ In the future I will not be including YouTube API credentials with this project.
 #### Windows
 If you want to launch the application easily, you can find the exe by hitting the Windows key and typing `meleeuploader`, if that doesn't show the option to run the command then you can probably find the exe at `C:\Users\[Your Username]\AppData\Local\Programs\Python\Python37\Scripts\`. Pinning the exe to the taskbar allows quick access to the program.
 
+If you would like to have no console window on your screen, you will need to find out where your pythonw.exe file is (it should be in the same place your python.exe) and create a shortcut to it. Then open the shortcut properties window and edit the target to include `-m meleeuploader` for melee or `-m meleeuploader ult` for ultimate at the end. This can then be pinned to your taskbar for easy access.
+
 #### Mac and Unix
 `meleeuploader &` if you want to hide the terminal window. There are probably ways to launch the program quicker, but I don't use macOS/Unix for uploading usually.
 
@@ -112,11 +114,11 @@ SA Websocket was built so I could avoid retyping information that I put into Sco
 
 To enable the websocket open the `Settings` menu tab and select the `Enable Websocket` option. Just make sure that SA is open before you start the websocket.
 
-The websocket will pull from the `Player 1`, `Player 2`, and `Match` fields. The match type will be parsed to find a similar option in the ones given, but will otherwise leave it as is.
+The program will pull from the `Player 1`, `Player 2`, and `Match` fields. The `Match` field will be parsed to find which of the match types defined in the program are a substring, then it will split the input at the substring and update `Match Prefix` and `Match Suffix` with whatever is left over. For example, `Doubles - Winners R1` as the input would result in `Doubles -` and `R1` being the prefix and suffix respectively.
 
 ### OBS Websocket
 This is a peculiar feature that I built with only myself in mind. There are no plans to expand what I've set it up to do.
 
-I've set it up so once recording has been stopped, the application will submit the information that is currently inputted. This combined with `SA Websocket` is a powerful feature set to quickly queue sets. The only info that will have to set if using that combo is the `Match Suffix` and the `Characters` for both players.
+I've set it up so once recording has been stopped, the application will submit the information that is currently inputted. This combined with `SA Websocket` is a powerful feature set to quickly queue sets. The only info that will have to be set if using that combo is the `Characters` for both players or you could just ignore those and automate the whole uploading procedure from start to finish.
 
 In addition to enabling the settings you will need to update OBS with the websocket plugin found here: https://github.com/Palakis/obs-websocket
