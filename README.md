@@ -26,7 +26,7 @@ I am always open to help setup the program or fix any techincal issues you may h
 * Saves and loads form values
 * Loading values from history
 * Melee and Ultimate Character List
-* Websocket hook into Scoreboard Assistant to update player names
+* Hooks into Scoreboard Assistant and OBS
 
 ## How to Setup
 1. Install [Python 3.7.1](https://www.python.org/downloads/release/python-371/) for your OS with the PATH added and make sure there are no other versions of Python 3.
