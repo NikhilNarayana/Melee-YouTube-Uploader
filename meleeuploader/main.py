@@ -46,7 +46,8 @@ class MeleeUploader(BaseWidget):
 
     def __init__(self):
         global melee
-        if melee:
+        self._melee = melee
+        if self._melee:
             super(MeleeUploader, self).__init__("Melee YouTube Uploader")
         else:
             super(MeleeUploader, self).__init__("Smash YouTube Uploader")
@@ -204,7 +205,7 @@ class MeleeUploader(BaseWidget):
         ]
 
         # Set character list
-        if melee:
+        if self._melee:
             self.__melee_chars()
         else:
             self.__ultimate_chars()
@@ -220,11 +221,15 @@ class MeleeUploader(BaseWidget):
         options = Namespace()
         self.__history.append(self.__save_form())
         options.ename = self._ename.value
-        options.ename_min = self._ename_min.value
+        if self._ename_min.value:
+            options.ename_min = self._ename_min.value
+        else:
+            options.ename_min = options.ename
         f = self._pID.value.find("PL")
         self._pID.value = self._pID.value[f:f + 34]
         options.pID = self._pID.value
         options.mtype = self._mtype.value
+        options.mmid = options.mtype
         options.p1 = self._p1.value
         options.p2 = self._p2.value
         options.p1char = self._p1char.value
@@ -279,19 +284,19 @@ class MeleeUploader(BaseWidget):
                         title = f"{opts.ename_min} - {opts.mtype} - ({'/'.join(opts.p1char)}) {opts.p1} vs {opts.p2} ({'/'.join(opts.p2char)})" if chars_exist else f"{opts.ename_min} - {opts.mtype} - {opts.p1} vs {opts.p2}"
                         if len(title) > 100:
                             # I can only hope no one ever goes this far
-                            print("Title is greater than 100 characters after minifying character names")
+                            print("Title is greater than 100 characters after minifying all options")
                             print(title)
-                            print(len(title))
-                            print("Killing this thread now\n\n")
+                            print("Title Length: " + len(title))
+                            print("Killing this upload now\n\n")
                             return False
         print(f"Uploading {title}")
         credit = "Uploaded with Melee-YouTube-Uploader (https://github.com/NikhilNarayana/Melee-YouTube-Uploader) by Nikhil Narayana"
         if opts.descrip:
-            descrip = f"Bracket: {opts.bracket}\n\n{opts.descrip}\n\n{credit}" if opts.bracket else f"{opts.descrip}\n\n{credit}"
+            descrip = f"Bracket: {opts.bracket}\n{opts.descrip}\n\n{credit}" if opts.bracket else f"{opts.descrip}\n\n{credit}"
         else:
             descrip = f"Bracket: {opts.bracket}\n\n{credit}" if opts.bracket else credit
-        tags = ["Melee", "Super Smash Brothers Melee", "Smash Brothers", "Super Smash Bros. Melee", "meleeuploader", "SSBM", "ssbm"]
-        tags.extend((opts.p1char, opts.p2char, opts.ename, opts.p1, opts.p2))
+        tags = ["Melee", "Super Smash Brothers Melee", "Smash Brothers", "Super Smash Bros. Melee", "meleeuploader", "SSBM", "ssbm"] if self._melee else ["Ultimate", "Super Smash Brothers Ultimate", "Smash Brothers", "Super Smash Bros. Ultimate", "smashuploader", "SSBU", "ssbu"]
+        tags.extend((opts.p1char, opts.p2char, opts.ename, opts.ename_min, opts.p1, opts.p2))
         if opts.tags:
             tags.extend([x.strip() for x in opts.tags.split(",")])
         body = dict(
@@ -405,9 +410,8 @@ class MeleeUploader(BaseWidget):
     def __worker(self):
         while True:
             if self._stop_thread:
-                print("Stopping Worker")
-                while self._stop_thread:
-                    sleep(1)
+                print("Stopping Upload Service")
+                break
             options = self._queue.get()
             if not options.ignore:
                 if self._init(options):
@@ -443,7 +447,7 @@ class MeleeUploader(BaseWidget):
             self._stop_thread = True
             self._firstrun = False
         else:
-            print("Starting Uploads")
+            print("Ready to Upload")
             self._stop_thread = False
             self._firstrun = True
 
@@ -520,6 +524,7 @@ class MeleeUploader(BaseWidget):
         self.__update_chars(self._melee_chars)
 
     def __ultimate_chars(self):
+        self._melee = False
         self.__update_chars(self._ult_chars)
 
     def __update_chars(self, chars):
@@ -538,31 +543,18 @@ class MeleeUploader(BaseWidget):
         try:
             self._p1.value = data['player1']
             self._p2.value = data['player2']
-            if data['match'] == "Winners Finals" or data['match'] == "Losers Finals":
-                self._mtype.value = data['match']
-            else:
-                for t in self.__match_types:
-                    if t.lower() in data['match'].lower():
-                        data['match'] = data['match'].strip()
-                        loc = data['match'].find(t)
-                        if loc > 0:
-                            match_vals = data['match'].split(" ")
-                            type_split = t.split(" ")
-                            for i, val in enumerate(match_vals):
-                                if val == type_split[0]:
-                                    self._mprefix.value = " ".join(match_vals[:i])
-                                if len(type_split) == 2 and val == type_split[1]:
-                                    self.msuffix.value = " ".join(match_vals[i+1:])
-                        else:
-                            self._mprefix.value = ""
-                            match_vals = data['match'].split(" ")
-                            type_split = t.split(" ")
-                            for i, val in enumerate(match_vals):
-                                if len(type_split) == 1 and val == type_split[0]:
-                                    self.msuffix.value = " ".join(match_vals[i:])
-                                elif len(type_split) == 2 and val == type_split[1]:
-                                    self.msuffix.value = " ".join(match_vals[i:])
-                        self._mtype.value = t
+            print(data['match'])
+            for t in self.__match_types:
+                if t.lower() in data['match'].lower():
+                    self._mtype.value = t
+                    if not data['match'].find(t):
+                        sections = data['match'].split(t)
+                        self._msuffix.value = sections[1].strip()
+                    else:
+                        sections = data['match'].split(t)
+                        print(sections)
+                        self._mprefix.value = sections[0].strip()
+                        self._msuffix.value = sections[1].strip()
         except Exception as e:
             pass
 
@@ -602,14 +594,16 @@ class MeleeUploader(BaseWidget):
             opts.msuffix = opts.msuffix.replace(k, v)
             opts.msuffix = opts.msuffix.replace(k.lower(), v)
             if middle:
-                opts.mtype = opts.mtype.replace(k, v)
-                opts.mtype = opts.mtype.replace(k.lower(), v)
+                opts.mmid = opts.mmid.replace(k, v)
+                opts.mmid = opts.mmid.replace(k.lower(), v)
         if opts.mprefix and opts.msuffix:
-            opts.mtype = " ".join((opts.mprefix, opts.mtype, opts.msuffix))
+            opts.mtype = " ".join((opts.mprefix, opts.mmid, opts.msuffix))
         elif opts.mprefix:
-            opts.mtype = " ".join((opts.mprefix, opts.mtype))
+            opts.mtype = " ".join((opts.mprefix, opts.mmid))
         elif opts.msuffix:
-            opts.mtype = " ".join((opts.mtype, opts.msuffix))
+            opts.mtype = " ".join((opts.mmid, opts.msuffix))
+        else:
+            opts.mtype = opts.mmid
         return opts.mtype
 
 
