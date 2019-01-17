@@ -540,21 +540,25 @@ class MeleeUploader(BaseWidget):
 
     def __update_form(self, message):
         data = json.loads(message)
+        prefix = ""
+        mtype = ""
+        suffix = ""
         try:
             self._p1.value = data['player1']
             self._p2.value = data['player2']
-            print(data['match'])
             for t in self.__match_types:
                 if t.lower() in data['match'].lower():
-                    self._mtype.value = t
+                    mtype = t
                     if not data['match'].find(t):
                         sections = data['match'].split(t)
-                        self._msuffix.value = sections[1].strip()
+                        suffix = sections[1].strip()
                     else:
                         sections = data['match'].split(t)
-                        print(sections)
-                        self._mprefix.value = sections[0].strip()
-                        self._msuffix.value = sections[1].strip()
+                        prefix = sections[0].strip()
+                        suffix = sections[1].strip()
+            self._mtype.value = mtype
+            self._mprefix.value = prefix
+            self._msuffix.value = suffix
         except Exception as e:
             pass
 
@@ -572,10 +576,13 @@ class MeleeUploader(BaseWidget):
             self._wst.join()
 
     def __hook_obs(self):
-        self._obs = obsws("localhost", "4444")
-        self._obs.register(self.__buttonAction, events.RecordingStopped)
-        self._obs.connect()
-        print("Hooked into OBS")
+        try:
+            self._obs = obsws("localhost", "4444")
+            self._obs.register(self.__buttonAction, events.RecordingStopped)
+            self._obs.connect()
+            print("Hooked into OBS")
+        except Exception as e:
+            print("OBS Websocket server might not be enabled")
 
     def _minify_chars(self, pchars):
         for i in range(len(pchars)):
@@ -605,7 +612,6 @@ class MeleeUploader(BaseWidget):
         else:
             opts.mtype = opts.mmid
         return opts.mtype
-
 
 
 def internet(host="www.google.com", port=80, timeout=4):
