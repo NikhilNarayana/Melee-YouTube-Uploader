@@ -66,7 +66,8 @@ class MeleeUploader(BaseWidget):
         self.__log_file = os.path.join(os.path.expanduser("~"), ".melee_log.txt")
 
         # Redirect error output to a file
-        sys.stderr = open(self.__log_file, "a")
+        if not sys.stderr:
+            sys.stderr = open(self.__log_file, "a")
 
         # Queue
         self._queue = Queue()

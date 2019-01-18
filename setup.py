@@ -4,7 +4,7 @@ from codecs import open
 from os import path
 
 here = path.abspath(path.dirname(__file__))
-version = '1.7.1'
+version = '1.7.2'
 
 long_des = ""
 with open(path.join(here, 'README.md')) as f:
