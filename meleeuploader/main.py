@@ -236,8 +236,8 @@ class MeleeUploader(BaseWidget):
         options.p1char = self._p1char.value
         options.p2char = self._p2char.value
         options.bracket = self._bracket.value
-        isdir = os.path.isdir(self._file.value)
-        if isdir:
+        isadir = os.path.isdir(self._file.value)
+        if isadir:
             options.file = max([os.path.join(self._file.value,f) for f in os.listdir(self._file.value) if os.path.isfile(os.path.join(self._file.value, f))], key=os.path.getctime)
         else:
             options.file = self._file.value
@@ -251,7 +251,7 @@ class MeleeUploader(BaseWidget):
         if self._p2sponsor.value:
             options.p2 = " | ".join((self._p2sponsor.value, options.p2))
         options.ignore = False
-        self.__reset_match(False, isdir)
+        self.__reset_match(False, isadir)
         self._qview += (options.p1, options.p2, " ".join((options.mprefix, options.mtype, options.msuffix)))
         self._queue.put(options)
         self._queueref.append(options)
@@ -380,8 +380,8 @@ class MeleeUploader(BaseWidget):
         # os.remove(os.path.join(os.path.expanduser("~"), ".melee-oauth2-spreadsheet.json"))
         sys.exit(0)
 
-    def __reset_match(self, menu=True, isdir=False):
-        if not isdir:
+    def __reset_match(self, menu=True, isadir=False):
+        if not isadir:
             self._file.value = ""
         self._p1char.load_form(dict(selected=[]))
         self._p2char.load_form(dict(selected=[]))
@@ -389,7 +389,6 @@ class MeleeUploader(BaseWidget):
         self._p2.value = ""
         self._p1sponsor.value = ""
         self._p2sponsor.value = ""
-        self._file.value = ""
         self._msuffix.value = ""
         if menu:
             self._mtype.value = "Pools"
