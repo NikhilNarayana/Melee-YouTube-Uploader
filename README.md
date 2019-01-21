@@ -60,12 +60,15 @@ If you would like to have no console window on your screen, you will need to fin
 
 ## How to use fields
 ### Required
-`Event Name`, `File`, `Video Privacy`, `Match Type`, and `Player Tags` are the only required fields for uploading any file.
+`Event Name`, `Title Format`, `Video Privacy`, `File`, `Match Type`, and `Player Tags` are the only required fields for uploading any file.
 
 #### File
 File is able to be used as either a file or directory input. Because of how the input selector is setup you will need to select a file within the directory you wish to use and then you can delete the filename from the field. If you select a directory it will not be deleted after submission.
 
 When using this quirk of the field, it will find the newest file in the directory you give it, so make sure no other files are written to this folder other than the OBS recordings. This is best used for uploading or queueing videos during an event.
+
+#### Title Format 
+Options can be expanded upon on request.
 
 ### Optional
 #### Match Type Prefix and Suffix
@@ -92,7 +95,7 @@ If you want to add additional tags, for a specific event or your channel, add th
 Also multiple tags about Melee and the players are added by the program so don't add any related to those in this field.
 
 #### Description
-Additional text can be added to the description here, it will go between the bracket link and the credit text.
+Additional text can be added to the description here, it will go between the bracket link and the credit text. If you would like to put the bracket link in a different spot, don't input anything in `Bracket Link` and instead insert your format in `Description`.
 
 #### Submit
 The submit button does a lot, it adds submission to queue, clears fields in match values that aren't generally needed for consecutive matches, and prevents you from adding submissions that don't meet the minimum criteria.
