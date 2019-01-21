@@ -81,6 +81,7 @@ class MeleeUploader(BaseWidget):
         # Create form fields
         # Event Values
         self._privacy = ControlCombo("Video Privacy")
+        self._titleformat = ControlCombo("Title Format")
         self._ename = ControlText("Event Name")
         self._ename_min = ControlText()
         self._pID = ControlText("Playlist ID")
@@ -110,10 +111,20 @@ class MeleeUploader(BaseWidget):
         # Button
         self._button = ControlButton('Submit')
 
+        # Title Formats
+        self._titleformat += ("Event - Round - P1 (Fox) vs P2 (Fox)", "{ename} - {round} - {p1} ({p1char}) vs {p2} ({p2char})")
+        self._titleformat += ("Event - P1 (Fox) vs P2 (Fox) - Round", "{ename} - {p1} ({p1char}) vs {p2} ({p2char}) - {round}")
+        self._titleformat += ("Event - Round - (Fox) P1 vs P2 (Fox)", "{ename} - {round} - ({p1char}) {p1} vs {p2} ({p2char})")
+        self._titleformat_min = {
+            "{ename} - {round} - {p1} ({p1char}) vs {p2} ({p2char})": "{ename} - {round} - {p1} vs {p2}",
+            "{ename} - {p1} ({p1char}) vs {p2} ({p2char}) - {round}": "{ename} - {p1} vs {p2} - {round}",
+            "{ename} - {round} - ({p1char}) {p1} vs {p2} ({p2char})": "{ename} - {round} - {p1} vs {p2}"
+        }
+
         # Form Layout
         self.formset = [{"-Match": ["_file", (' ', "_mprefix", "_mtype", "_msuffix", ' '), (' ', "_p1sponsor", "_p1", ' '), (' ', "_p1char", ' '), (' ', "_p2sponsor", "_p2", ' '), (' ', "_p2char", ' ')],
                          "-Status-": ["_output", "=", "_qview"],
-                         "Event-": ["_privacy", ("_ename", "_ename_min"), "_pID", "_bracket", "_tags", "_description"]},
+                         "Event-": ["_privacy", "_titleformat", ("_ename", "_ename_min"), "_pID", "_bracket", "_tags", "_description"]},
                         (' ', '_button', ' ')]
 
         # Main Menu Layout
@@ -128,7 +139,7 @@ class MeleeUploader(BaseWidget):
         self.__match_types = ["Pools", "Round Robin", "Winners", "Losers", "Winners Finals", "Losers Finals", "Grand Finals", "Money Match", "Crew Battle", "Ladder", "Friendlies"]
         for t in self.__match_types:
             self._mtype += t
-        self.__min_match_types = {"Round ": "R", "Round Robin": "RR", "Winners Finals": "WF", "Losers Finals": "LF", "Grand Finals": "GF", "Money Match": "MM", "Crew Battle": "Crews", "Semifinals": "SF", "Quarterfinals": "QF"}
+        self.__min_match_types = {"Round ": "R", "Round Robin": "RR", "Winners Finals": "WF", "Losers Finals": "LF", "Grand Finals": "GF", "Money Match": "MM", "Crew Battle": "Crews", "Semifinals": "Semis", "Quarterfinals": "Quarters", "Semis": "SF", "Quarters": "QF"}
         self._privacy += "public"
         self._privacy += "unlisted"
         self._privacy += "private"
@@ -183,13 +194,14 @@ class MeleeUploader(BaseWidget):
         ]
 
         # Set placeholder text
+        # self._titleformat.form.lineEdit.setPlaceholderText("Default format is 'Event Name - Round - (P1 Character) P1 Tag vs P2 Tag (P2 Character)'")
         self._ename_min.form.lineEdit.setPlaceholderText("Shortened Event Name")
         self._p1sponsor.form.lineEdit.setPlaceholderText("Sponsor Tag")
         self._p2sponsor.form.lineEdit.setPlaceholderText("Sponsor Tag")
         self._p1.form.lineEdit.setPlaceholderText("P1 Tag")
         self._p2.form.lineEdit.setPlaceholderText("P2 Tag")
-        self._mprefix.form.lineEdit.setPlaceholderText("Match Type Prefix")
-        self._msuffix.form.lineEdit.setPlaceholderText("Match Type Suffix")
+        self._mprefix.form.lineEdit.setPlaceholderText("Round Prefix")
+        self._msuffix.form.lineEdit.setPlaceholderText("Round Suffix")
         self._bracket.form.lineEdit.setPlaceholderText("Include https://")
         self._tags.form.lineEdit.setPlaceholderText("Separate with commas")
         self._pID.form.lineEdit.setPlaceholderText("Accepts full YT link")
@@ -202,7 +214,7 @@ class MeleeUploader(BaseWidget):
             self._ename, self._pID, self._mtype, self._p1, self._p2, self._p1char,
             self._p2char, self._bracket, self._file, self._tags, self._msuffix,
             self._mprefix, self._p1sponsor, self._p2sponsor, self._privacy,
-            self._description, self._ename_min
+            self._description, self._ename_min, self._titleformat
         ]
 
         # Set character list
@@ -246,6 +258,7 @@ class MeleeUploader(BaseWidget):
         options.mprefix = self._mprefix.value
         options.privacy = self._privacy.value
         options.descrip = self._description.value
+        options.titleformat = self._titleformat.value
         if self._p1sponsor.value:
             options.p1 = " | ".join((self._p1sponsor.value, options.p1))
         if self._p2sponsor.value:
@@ -270,19 +283,19 @@ class MeleeUploader(BaseWidget):
         elif opts.msuffix:
             opts.mtype = " ".join((opts.mtype, opts.msuffix))
         chars_exist = all(x for x in [opts.p1char, opts.p2char])
-        title = f"{opts.ename} - {opts.mtype} - ({'/'.join(opts.p1char)}) {opts.p1} vs {opts.p2} ({'/'.join(opts.p2char)})" if chars_exist else f"{opts.ename} - {opts.mtype} - {opts.p1} vs {opts.p2}"
+        title = opts.titleformat.format(ename=opts.ename, round=opts.mtype, p1=opts.p1, p2=opts.p2, p1char='/'.join(opts.p1char), p2char='/'.join(opts.p2char)) if chars_exist else self._titleformat_min[opts.titleformat].format(ename=opts.ename, round=opts.mtype, p1=opts.p1, p2=opts.p2)
         if len(title) > 100:
             opts.p1char = self._minify_chars(opts.p1char)
             opts.p2char = self._minify_chars(opts.p2char)
-            title = f"{opts.ename} - {opts.mtype} - ({'/'.join(opts.p1char)}) {opts.p1} vs {opts.p2} ({'/'.join(opts.p2char)})" if chars_exist else f"{opts.ename} - {opts.mtype} - {opts.p1} vs {opts.p2}"
+            title = opts.titleformat.format(ename=opts.ename, round=opts.mtype, p1=opts.p1, p2=opts.p2, p1char='/'.join(opts.p1char), p2char='/'.join(opts.p2char)) if chars_exist else self._titleformat_min[opts.titleformat].format(ename=opts.ename, round=opts.mtype, p1=opts.p1, p2=opts.p2)
             if len(title) > 100:
                 opts.mtype = self._minify_mtype(opts)
-                title = f"{opts.ename} - {opts.mtype} - ({'/'.join(opts.p1char)}) {opts.p1} vs {opts.p2} ({'/'.join(opts.p2char)})" if chars_exist else f"{opts.ename} - {opts.mtype} - {opts.p1} vs {opts.p2}"
+                title = opts.titleformat.format(ename=opts.ename, round=opts.mtype, p1=opts.p1, p2=opts.p2, p1char='/'.join(opts.p1char), p2char='/'.join(opts.p2char)) if chars_exist else self._titleformat_min[opts.titleformat].format(ename=opts.ename, round=opts.mtype, p1=opts.p1, p2=opts.p2)
                 if len(title) > 100:
                     opts.mtype = self._minify_mtype(opts, True)
-                    title = f"{opts.ename} - {opts.mtype} - ({'/'.join(opts.p1char)}) {opts.p1} vs {opts.p2} ({'/'.join(opts.p2char)})" if chars_exist else f"{opts.ename} - {opts.mtype} - {opts.p1} vs {opts.p2}"
+                    title = opts.titleformat.format(ename=opts.ename, round=opts.mtype, p1=opts.p1, p2=opts.p2, p1char='/'.join(opts.p1char), p2char='/'.join(opts.p2char)) if chars_exist else self._titleformat_min[opts.titleformat].format(ename=opts.ename, round=opts.mtype, p1=opts.p1, p2=opts.p2)
                     if len(title) > 100:
-                        title = f"{opts.ename_min} - {opts.mtype} - ({'/'.join(opts.p1char)}) {opts.p1} vs {opts.p2} ({'/'.join(opts.p2char)})" if chars_exist else f"{opts.ename_min} - {opts.mtype} - {opts.p1} vs {opts.p2}"
+                        title = opts.titleformat.format(ename=opts.ename, round=opts.mtype, p1=opts.p1, p2=opts.p2, p1char='/'.join(opts.p1char), p2char='/'.join(opts.p2char)) if chars_exist else self._titleformat_min[opts.titleformat].format(ename=opts.ename, round=opts.mtype, p1=opts.p1, p2=opts.p2)
                         if len(title) > 100:
                             # I can only hope no one ever goes this far
                             print("Title is greater than 100 characters after minifying all options")
@@ -402,6 +415,7 @@ class MeleeUploader(BaseWidget):
         self._bracket.value = ""
         self._tags.value = ""
         self._description.value = ""
+        self._titleformat.value = ""
 
     def __reset_forms(self):
         self.__reset_match()
@@ -426,6 +440,7 @@ class MeleeUploader(BaseWidget):
                     row[14] = deepcopy(options.privacy)
                     row[15] = deepcopy(options.descrip)
                     row[16] = deepcopy(options.ename_min)
+                    row[17] = deepcopy(options.titleformat)
                     with open(self.__form_values, 'w') as f:
                         f.write(json.dumps(row))
                 self._qview -= 0
@@ -492,6 +507,7 @@ class MeleeUploader(BaseWidget):
             row[14] = deepcopy(options.privacy)
             row[15] = deepcopy(options.descrip)
             row[16] = deepcopy(options.ename_min)
+            row[17] = deepcopy(options.titleformat)
         else:
             f = self._pID.value.find("PL")
             self._pID.value = self._pID.value[f:f + 34]
@@ -522,6 +538,7 @@ class MeleeUploader(BaseWidget):
                 print("No melee_form_values.json to read from, continuing with default values")
 
     def __melee_chars(self):
+        self._melee = True
         self.__update_chars(self._melee_chars)
 
     def __ultimate_chars(self):
@@ -625,7 +642,7 @@ def internet(host="www.google.com", port=80, timeout=4):
         return True
     except Exception as e:
         print(e)
-        print("No internet!")
+        print("This program will not function without the internet!")
         return False
 
 
@@ -634,8 +651,9 @@ def main():
         if os.geteuid() != 0:
             print("Need sudo for writing files")
             subprocess.call(['sudo', 'python3', sys.argv[0]])
-    get_youtube_service()
     if internet():
+        # Always get the initial YT credentials outside of a thread. Threads break the setup process.
+        get_youtube_service()
         pyforms_lite.start_app(MeleeUploader, geometry=(200, 200, 1, 1))
         sys.exit(0)
     else:
