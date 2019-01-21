@@ -283,19 +283,19 @@ class MeleeUploader(BaseWidget):
         elif opts.msuffix:
             opts.mtype = " ".join((opts.mtype, opts.msuffix))
         chars_exist = all(x for x in [opts.p1char, opts.p2char])
-        title = opts.titleformat.format(ename=opts.ename, round=opts.mtype, p1=opts.p1, p2=opts.p2, p1char='/'.join(opts.p1char), p2char='/'.join(opts.p2char)) if chars_exist else self._titleformat_min[opts.titleformat].format(ename=opts.ename, round=opts.mtype, p1=opts.p1, p2=opts.p2)
+        title = self.__make_title(opts, chars_exist)
         if len(title) > 100:
             opts.p1char = self._minify_chars(opts.p1char)
             opts.p2char = self._minify_chars(opts.p2char)
-            title = opts.titleformat.format(ename=opts.ename, round=opts.mtype, p1=opts.p1, p2=opts.p2, p1char='/'.join(opts.p1char), p2char='/'.join(opts.p2char)) if chars_exist else self._titleformat_min[opts.titleformat].format(ename=opts.ename, round=opts.mtype, p1=opts.p1, p2=opts.p2)
+            title = self.__make_title(opts, chars_exist)
             if len(title) > 100:
                 opts.mtype = self._minify_mtype(opts)
-                title = opts.titleformat.format(ename=opts.ename, round=opts.mtype, p1=opts.p1, p2=opts.p2, p1char='/'.join(opts.p1char), p2char='/'.join(opts.p2char)) if chars_exist else self._titleformat_min[opts.titleformat].format(ename=opts.ename, round=opts.mtype, p1=opts.p1, p2=opts.p2)
+                title = self.__make_title(opts, chars_exist)
                 if len(title) > 100:
                     opts.mtype = self._minify_mtype(opts, True)
-                    title = opts.titleformat.format(ename=opts.ename, round=opts.mtype, p1=opts.p1, p2=opts.p2, p1char='/'.join(opts.p1char), p2char='/'.join(opts.p2char)) if chars_exist else self._titleformat_min[opts.titleformat].format(ename=opts.ename, round=opts.mtype, p1=opts.p1, p2=opts.p2)
+                    title = self.__make_title(opts, chars_exist)
                     if len(title) > 100:
-                        title = opts.titleformat.format(ename=opts.ename, round=opts.mtype, p1=opts.p1, p2=opts.p2, p1char='/'.join(opts.p1char), p2char='/'.join(opts.p2char)) if chars_exist else self._titleformat_min[opts.titleformat].format(ename=opts.ename, round=opts.mtype, p1=opts.p1, p2=opts.p2)
+                        title = self.__make_title(opts, chars_exist, True)
                         if len(title) > 100:
                             # I can only hope no one ever goes this far
                             print("Title is greater than 100 characters after minifying all options")
@@ -630,6 +630,12 @@ class MeleeUploader(BaseWidget):
         else:
             opts.mtype = opts.mmid
         return opts.mtype
+
+    def __make_title(self, opts, chars_exist, min_ename=False):
+        if min_ename:
+            return opts.titleformat.format(ename=opts.ename_min, round=opts.mtype, p1=opts.p1, p2=opts.p2, p1char='/'.join(opts.p1char), p2char='/'.join(opts.p2char)) if chars_exist else self._titleformat_min[opts.titleformat].format(ename=opts.ename_min, round=opts.mtype, p1=opts.p1, p2=opts.p2)
+        else:
+            return opts.titleformat.format(ename=opts.ename, round=opts.mtype, p1=opts.p1, p2=opts.p2, p1char='/'.join(opts.p1char), p2char='/'.join(opts.p2char)) if chars_exist else self._titleformat_min[opts.titleformat].format(ename=opts.ename, round=opts.mtype, p1=opts.p1, p2=opts.p2)
 
 
 def internet(host="www.google.com", port=80, timeout=4):
