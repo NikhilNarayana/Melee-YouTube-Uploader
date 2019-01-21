@@ -113,7 +113,7 @@ class MeleeUploader(BaseWidget):
         # Form Layout
         self.formset = [{"-Match": ["_file", (' ', "_mprefix", "_mtype", "_msuffix", ' '), (' ', "_p1sponsor", "_p1", ' '), (' ', "_p1char", ' '), (' ', "_p2sponsor", "_p2", ' '), (' ', "_p2char", ' ')],
                          "-Status-": ["_output", "=", "_qview"],
-                         "Event-": ["_privacy", ("_ename","_ename_min"), "_pID", "_bracket", "_tags", "_description"]},
+                         "Event-": ["_privacy", ("_ename", "_ename_min"), "_pID", "_bracket", "_tags", "_description"]},
                         (' ', '_button', ' ')]
 
         # Main Menu Layout
@@ -238,7 +238,7 @@ class MeleeUploader(BaseWidget):
         options.bracket = self._bracket.value
         isadir = os.path.isdir(self._file.value)
         if isadir:
-            options.file = max([os.path.join(self._file.value,f) for f in os.listdir(self._file.value) if os.path.isfile(os.path.join(self._file.value, f))], key=os.path.getctime)
+            options.file = max([os.path.join(self._file.value, f) for f in os.listdir(self._file.value) if os.path.isfile(os.path.join(self._file.value, f))], key=os.path.getctime)
         else:
             options.file = self._file.value
         options.tags = self._tags.value
@@ -287,7 +287,7 @@ class MeleeUploader(BaseWidget):
                             # I can only hope no one ever goes this far
                             print("Title is greater than 100 characters after minifying all options")
                             print(title)
-                            print("Title Length: " + len(title))
+                            print(f"Title Length: {len(title)}")
                             print("Killing this upload now\n\n")
                             return False
         print(f"Uploading {title}")
@@ -424,6 +424,7 @@ class MeleeUploader(BaseWidget):
                     row[9] = deepcopy(options.tags)
                     row[11] = deepcopy(options.mprefix)
                     row[14] = deepcopy(options.privacy)
+                    row[15] = deepcopy(options.descrip)
                     row[16] = deepcopy(options.ename_min)
                     with open(self.__form_values, 'w') as f:
                         f.write(json.dumps(row))
