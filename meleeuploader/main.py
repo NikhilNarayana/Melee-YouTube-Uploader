@@ -653,32 +653,14 @@ class MeleeUploader(BaseWidget):
             return opts.titleformat.format(ename=opts.ename, round=opts.mtype, p1=opts.p1, p2=opts.p2, p1char='/'.join(opts.p1char), p2char='/'.join(opts.p2char)) if chars_exist else self._titleformat_min[opts.titleformat].format(ename=opts.ename, round=opts.mtype, p1=opts.p1, p2=opts.p2)
 
 
-def internet(host="www.google.com", port=80, timeout=4):
-    try:
-        host = socket.gethostbyname(host)
-        socket.setdefaulttimeout(timeout)
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect((host, port))
-        s.close()
-        return True
-    except Exception as e:
-        print(e)
-        print("This program will not function without the internet!")
-        return False
-
-
 def main():
     if "linux" in sys.platform:  # root needed for writing files
         if os.geteuid() != 0:
             print("Need sudo for writing files")
             subprocess.call(['sudo', 'python3', sys.argv[0]])
-    if internet():
-        # Always get the initial YT credentials outside of a thread. Threads break the setup process.
-        get_youtube_service()
-        pyforms_lite.start_app(MeleeUploader, geometry=(200, 200, 1, 1))
-        sys.exit(0)
-    else:
-        sys.exit(1)
+    # Always get the initial YT credentials outside of a thread. Threads break the setup process.
+    get_youtube_service()
+    sys.exit(pyforms_lite.start_app(MeleeUploader, geometry=(200, 200, 1, 1)))
 
 
 def ult():
