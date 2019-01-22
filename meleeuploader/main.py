@@ -394,8 +394,8 @@ class MeleeUploader(BaseWidget):
             print(text, file=sys.__stdout__, end='')
 
     def __reset_cred_event(self):
-        os.remove(os.path.join(os.path.expanduser("~"), ".melee-oauth2-youtube.json"))
-        # os.remove(os.path.join(os.path.expanduser("~"), ".melee-oauth2-spreadsheet.json"))
+        os.remove(os.path.join(os.path.expanduser("~"), ".smash-oauth2-youtube.json"))
+        # os.remove(os.path.join(os.path.expanduser("~"), ".smash-oauth2-spreadsheet.json"))
         sys.exit(0)
 
     def __reset_match(self, menu=True, isadir=False):
