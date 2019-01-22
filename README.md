@@ -82,7 +82,8 @@ Melee characters are currently ordered by tier list placing, according to the 20
 Ultimate characters are currently ordered by the default character select screen without echo stacking.  
 If you don't add any characters for either player, both players will not have characters in the title.  
 Characters that are selected will be in the order they are shown in the list, not the selected order (unfortunate issue with the GUI framework).  
-You can swap the character list using the menu bar or load the preferred character list by using `meleeuploader` for Melee and `smashuploader` for Ultimate.
+You can swap the character list using the menu bar or load the preferred character list by using `meleeuploader` for Melee and `smashuploader` for Ultimate.  
+There is also the option to load your own character list, instructions can be found at the bottom.
 
 #### YouTube PlaylistID
 The URL of the playlist after creation can be put here, the program will trim it to just the part it needs. The URL should look like `https://www.youtube.com/playlist?list=PLSCJwgNAP2cXdlHlwbZr38JDHuuc8vx_s`, if the address has a string with `PL` at the start, it should work.
@@ -125,3 +126,7 @@ This is a peculiar feature that I built with only myself in mind. There are no p
 I've set it up so once recording has been stopped, the application will submit the information that is currently inputted. This combined with `SA Websocket` is a powerful feature set to quickly queue sets. The only info that will have to be set if using that combo is the `Characters` for both players or you could just ignore those and automate the whole uploading procedure from start to finish.
 
 In addition to enabling the settings you will need to update OBS with the websocket plugin found here: https://github.com/Palakis/obs-websocket
+
+### Custom Character List
+You can add your own custom character lists by putting a file with comma separated names in a file called `.smash_custom_list.txt` in your root directory.  
+Your root directory is probably `C:\Users\[Your Username]\` if you use Windows. If you are on macOS or Unix, use whatever `echo ~` returns in terminal. macOS users can also just do `open ~` to open a Finder window at that directory.
