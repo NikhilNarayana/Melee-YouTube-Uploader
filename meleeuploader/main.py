@@ -47,6 +47,7 @@ class MeleeUploader(BaseWidget):
     def __init__(self):
         global melee
         self._melee = melee
+        self._custom = False
         if self._melee:
             super(MeleeUploader, self).__init__("Melee YouTube Uploader")
         else:
@@ -61,9 +62,10 @@ class MeleeUploader(BaseWidget):
         self.__history = []
 
         # Filenames
-        self.__form_values = os.path.join(os.path.expanduser("~"), '.melee_form_values.json')
-        self.__queue_values = os.path.join(os.path.expanduser("~"), ".melee_queue_values.txt")
-        self.__log_file = os.path.join(os.path.expanduser("~"), ".melee_log.txt")
+        self.__form_values = os.path.join(os.path.expanduser("~"), '.smash_form_values.json')
+        self.__queue_values = os.path.join(os.path.expanduser("~"), ".smash_queue_values.txt")
+        self.__log_file = os.path.join(os.path.expanduser("~"), ".smash_log.txt")
+        self.__custom_list_file = os.path.join(os.path.expanduser("~"), ".smash_custom_list.txt")
 
         # Redirect error output to a file
         if not sys.stderr:
@@ -133,7 +135,7 @@ class MeleeUploader(BaseWidget):
                 'Clear': [{'Clear Match Values': self.__reset_match}, {'Clear Event Values': self.__reset_event}, {'Clear All': self.__reset_forms}],
                 'Queue': [{'Toggle Uploads': self.__toggle_worker}, {'Save Queue': self.__save_queue}, {'Load Queue': self.__load_queue}],
                 'History': [{'Show History': self.__show_h_view}],
-                'Characters': [{'Melee': self.__melee_chars}, {'Ultimate': self.__ultimate_chars}]}]
+                'Characters': [{'Melee': self.__melee_chars}, {'Ultimate': self.__ultimate_chars}, {'Custom': self.__custom_chars}]}]
 
         # Add ControlCombo values
         self.__match_types = ("Pools", "Round Robin", "Winners", "Losers", "Winners Finals", "Losers Finals", "Grand Finals", "Money Match", "Crew Battle", "Ladder", "Friendlies")
@@ -311,6 +313,8 @@ class MeleeUploader(BaseWidget):
         else:
             descrip = f"Bracket: {opts.bracket}\n\n{credit}" if opts.bracket else credit
         tags = ["Melee", "Super Smash Brothers Melee", "Smash Brothers", "Super Smash Bros. Melee", "meleeuploader", "SSBM", "ssbm"] if self._melee else ["Ultimate", "Super Smash Brothers Ultimate", "Smash Brothers", "Super Smash Bros. Ultimate", "smashuploader", "SSBU", "ssbu"]
+        if self._custom:
+            tags = []
         tags.extend((opts.p1char, opts.p2char, opts.ename, opts.ename_min, opts.p1, opts.p2))
         if opts.tags:
             tags.extend([x.strip() for x in opts.tags.split(",")])
@@ -539,12 +543,22 @@ class MeleeUploader(BaseWidget):
                 print("No melee_form_values.json to read from, continuing with default values")
 
     def __melee_chars(self):
+        self._custom = False
         self._melee = True
         self.__update_chars(self._melee_chars)
 
     def __ultimate_chars(self):
+        self._custom = False
         self._melee = False
         self.__update_chars(self._ult_chars)
+
+    def __custom_chars(self):
+        self._custom = True
+        self._melee = False
+        chars = None
+        with open(self.__custom_list_file, "r") as f:
+            chars = [x.strip() for x in f.read().split(",")]
+        self.__update_chars(chars)
 
     def __update_chars(self, chars):
         p1 = self._p1char.value
