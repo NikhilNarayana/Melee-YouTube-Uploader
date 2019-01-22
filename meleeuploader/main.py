@@ -136,7 +136,7 @@ class MeleeUploader(BaseWidget):
                 'Characters': [{'Melee': self.__melee_chars}, {'Ultimate': self.__ultimate_chars}]}]
 
         # Add ControlCombo values
-        self.__match_types = ["Pools", "Round Robin", "Winners", "Losers", "Winners Finals", "Losers Finals", "Grand Finals", "Money Match", "Crew Battle", "Ladder", "Friendlies"]
+        self.__match_types = ("Pools", "Round Robin", "Winners", "Losers", "Winners Finals", "Losers Finals", "Grand Finals", "Money Match", "Crew Battle", "Ladder", "Friendlies")
         for t in self.__match_types:
             self._mtype += t
         self.__min_match_types = {"Round ": "R", "Round Robin": "RR", "Winners Finals": "WF", "Losers Finals": "LF", "Grand Finals": "GF", "Money Match": "MM", "Crew Battle": "Crews", "Semifinals": "Semis", "Quarterfinals": "Quarters", "Semis": "SF", "Quarters": "QF"}
@@ -171,27 +171,28 @@ class MeleeUploader(BaseWidget):
             'King K. Rool': "K. Rool",
             'Piranha Plant': "Plant"
         }
-        self._melee_chars = [
-            'Fox', 'Falco', 'Marth', 'Sheik', 'Jigglypuff', 'Peach', 'Captain Falcon',
-            'Ice Climbers', 'Pikachu', 'Samus', 'Dr. Mario', 'Yoshi', 'Luigi',
-            'Ganondorf', 'Mario', 'Young Link', 'Donkey Kong', 'Link',
-            'Mr. Game & Watch', 'Mewtwo', 'Roy', 'Zelda', 'Ness', 'Pichu', 'Bowser',
-            'Kirby'
-        ]
-        self._ult_chars = [
-            'Mario', 'Donkey Kong', 'Link', 'Samus', 'Dark Samus', 'Yoshi', 'Fox',
-            'Pikachu', 'Luigi', 'Ness', 'Captain Falcon', 'Jigglypuff', 'Peach',
-            'Daisy', 'Bowser', 'Ice Climbers', 'Sheik', 'Zelda', 'Dr. Mario', 'Pichu',
-            'Falco', 'Marth', 'Lucina', 'Young Link', 'Ganondorf', 'Mewtwo', 'Roy',
-            'Chrom', 'Mr. Game & Watch', 'Meta Knight', 'Pit', 'Dark Pit',
-            'Zero Suit Samus', 'Wario', 'Snake', 'Ike', 'Pokemon Trainer',
-            'Diddy Kong', 'Lucas', 'Sonic', 'King Dedede', 'Olimar', 'Lucario',
-            'R.O.B', 'Toon Link', 'Wolf', 'Villager', 'Mega Man', 'Wii Fit Trainer',
-            'Rosalina & Luma', 'Little Mac', 'Greninja', 'Mii Fighter', 'Palutena',
-            'Pac-Man', 'Robin', 'Shulk', 'Bowser Jr.', 'Duck Hunt', 'Ryu', 'Ken',
-            'Cloud', 'Corrin', 'Bayonetta', 'Inkling', 'Ridley', 'Simon', 'Richter',
-            'King K. Rool', 'Isabelle', 'Incineroar', 'Piranha Plant', 'Joker'
-        ]
+        self._melee_chars = ('Fox', 'Falco', 'Marth', 'Sheik', 'Jigglypuff', 'Peach',
+                             'Captain Falcon', 'Ice Climbers', 'Pikachu', 'Samus',
+                             'Dr. Mario', 'Yoshi', 'Luigi', 'Ganondorf', 'Mario',
+                             'Young Link', 'Donkey Kong', 'Link', 'Mr. Game & Watch',
+                             'Mewtwo', 'Roy', 'Zelda', 'Ness', 'Pichu', 'Bowser',
+                             'Kirby')
+        self._ult_chars = ('Mario', 'Donkey Kong', 'Link', 'Samus', 'Dark Samus',
+                           'Yoshi', 'Fox', 'Pikachu', 'Luigi', 'Ness',
+                           'Captain Falcon', 'Jigglypuff', 'Peach', 'Daisy', 'Bowser',
+                           'Ice Climbers', 'Sheik', 'Zelda', 'Dr. Mario', 'Pichu',
+                           'Falco', 'Marth', 'Lucina', 'Young Link', 'Ganondorf',
+                           'Mewtwo', 'Roy', 'Chrom', 'Mr. Game & Watch', 'Meta Knight',
+                           'Pit', 'Dark Pit', 'Zero Suit Samus', 'Wario', 'Snake',
+                           'Ike', 'Pokemon Trainer', 'Squirtle', 'Ivysaur', 'Charizard'
+                           'Diddy Kong', 'Lucas', 'Sonic', 'King Dedede', 'Olimar',
+                           'Lucario', 'R.O.B', 'Toon Link', 'Wolf', 'Villager',
+                           'Mega Man', 'Wii Fit Trainer', 'Rosalina & Luma',
+                           'Little Mac', 'Greninja', 'Mii Fighter', 'Palutena',
+                           'Pac-Man', 'Robin', 'Shulk', 'Bowser Jr.', 'Duck Hunt',
+                           'Ryu', 'Ken', 'Cloud', 'Corrin', 'Bayonetta', 'Inkling',
+                           'Ridley', 'Simon', 'Richter', 'King K. Rool', 'Isabelle',
+                           'Incineroar', 'Piranha Plant', 'Joker')
 
         # Set placeholder text
         # self._titleformat.form.lineEdit.setPlaceholderText("Default format is 'Event Name - Round - (P1 Character) P1 Tag vs P2 Tag (P2 Character)'")
