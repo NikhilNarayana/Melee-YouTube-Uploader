@@ -540,7 +540,7 @@ class MeleeUploader(BaseWidget):
                         elif val:
                             var.value = val
             except (IOError, OSError, StopIteration, json.decoder.JSONDecodeError) as e:
-                print("No melee_form_values.json to read from, continuing with default values")
+                print("No smash_form_values.json to read from, continuing with default values")
 
     def __melee_chars(self):
         self._custom = False

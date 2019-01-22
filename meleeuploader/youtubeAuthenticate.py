@@ -40,7 +40,7 @@ def get_youtube_service():
     flow = flow_from_clientsecrets(CLIENT_SECRETS_FILE, scope=YOUTUBE_UPLOAD_SCOPE)
 
     flow.user_agent = "Melee YouTube Uploader"
-    storage = Storage(os.path.join(os.path.expanduser("~"), ".melee-oauth2-youtube.json"))
+    storage = Storage(os.path.join(os.path.expanduser("~"), ".smash-oauth2-youtube.json"))
     credentials = storage.get()
 
     flags = argparser.parse_args(args=[])
@@ -66,7 +66,7 @@ def get_spreadsheet_service():
 
     flow.user_agent = "Melee YouTube Uploader"
 
-    storage = Storage(os.path.join(os.path.expanduser("~"), ".melee-oauth2-spreadsheet.json"))
+    storage = Storage(os.path.join(os.path.expanduser("~"), ".smash-oauth2-spreadsheet.json"))
     credentials = storage.get()
 
     flags = argparser.parse_args(args=[])
