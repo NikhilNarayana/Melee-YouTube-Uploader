@@ -477,8 +477,11 @@ class MeleeUploader(BaseWidget):
             f.write(pickle.dumps(self._queueref))
 
     def __load_queue(self):
-        with open(self.__queue_values, "rb") as f:
-            self._queueref = pickle.load(f)
+        try:
+            with open(self.__queue_values, "rb") as f:
+                self._queueref = pickle.load(f)
+        except Exception as e:
+            print("You need to save a queue before loading a queue")
         for options in self._queueref:
             self._qview += (options.p1, options.p2, options.mtype)
             self._queue.put(options)
@@ -523,7 +526,6 @@ class MeleeUploader(BaseWidget):
         return row
 
     def __load_form(self, history=[]):
-        updateChars = True
         if history:
             for val, var in zip(history, self._form_fields):
                 if isinstance(val, (list, dict)):
@@ -532,7 +534,7 @@ class MeleeUploader(BaseWidget):
                     var.value = val
         else:
             try:
-                with open(self.__form_values) as f:
+                with open(self.__form_values, "r") as f:
                     values = json.loads(f.read())
                     for val, var in zip(values, self._form_fields):
                         if isinstance(val, (list, dict)):
@@ -556,9 +558,14 @@ class MeleeUploader(BaseWidget):
         self._custom = True
         self._melee = False
         chars = None
-        with open(self.__custom_list_file, "r") as f:
-            chars = [x.strip() for x in f.read().split(",")]
-        self.__update_chars(chars)
+        try:
+            with open(self.__custom_list_file, "r") as f:
+                chars = [x.strip() for x in f.read().split(",")]
+            self.__update_chars(chars)
+        except Exception as e:
+            with open(self.__custom_list_file, "a") as f:
+                pass
+            print("A custom list file as been created for you to modify, it can be found at " + self.__custom_list_file)
 
     def __update_chars(self, chars):
         p1 = self._p1char.value
@@ -660,7 +667,7 @@ def main():
             subprocess.call(['sudo', 'python3', sys.argv[0]])
     # Always get the initial YT credentials outside of a thread. Threads break the setup process.
     get_youtube_service()
-    sys.exit(pyforms_lite.start_app(MeleeUploader, geometry=(200, 200, 1, 1)))
+    pyforms_lite.start_app(MeleeUploader, geometry=(200, 200, 1, 1))
 
 
 def ult():
