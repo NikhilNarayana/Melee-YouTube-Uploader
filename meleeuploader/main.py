@@ -3,7 +3,6 @@
 import os
 import sys
 import json
-import errno
 import pickle
 import socket
 import threading
@@ -11,24 +10,22 @@ import websocket
 from time import sleep
 from queue import Queue
 from copy import deepcopy
-from decimal import Decimal
 
 from .viewer import *
-from .youtubeAuthenticate import *
+from . import utils
+from . import consts
+from . import youtube as yt
 
 import pyforms_lite
 from argparse import Namespace
 from PyQt5 import QtCore, QtGui
 from pyforms_lite import BaseWidget
 from obswebsocket import obsws, events
-from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload
 from pyforms_lite.controls import ControlText, ControlFile
 from pyforms_lite.controls import ControlTextArea, ControlList
 from pyforms_lite.controls import ControlCombo, ControlProgress
 from pyforms_lite.controls import ControlButton, ControlCheckBox, ControlCheckBoxList
-
-melee = True
 
 
 class EmittingStream(QtCore.QObject):
@@ -43,12 +40,9 @@ class EmittingStream(QtCore.QObject):
 
 
 class MeleeUploader(BaseWidget):
-
     def __init__(self):
-        global melee
-        self._melee = melee
         self._custom = False
-        if self._melee:
+        if consts.melee:
             super(MeleeUploader, self).__init__("Melee YouTube Uploader")
         else:
             super(MeleeUploader, self).__init__("Smash YouTube Uploader")
@@ -78,7 +72,7 @@ class MeleeUploader(BaseWidget):
         self._stop_thread = False
 
         # Get YouTube
-        self._youtube = get_youtube_service()
+        self._youtube = yt.get_youtube_service()
 
         # Create form fields
         # Event Values
@@ -114,14 +108,8 @@ class MeleeUploader(BaseWidget):
         self._button = ControlButton('Submit')
 
         # Title Formats
-        self._titleformat += ("Event - Round - P1 (Fox) vs P2 (Fox)", "{ename} - {round} - {p1} ({p1char}) vs {p2} ({p2char})")
-        self._titleformat += ("Event - P1 (Fox) vs P2 (Fox) - Round", "{ename} - {p1} ({p1char}) vs {p2} ({p2char}) - {round}")
-        self._titleformat += ("Event - Round - (Fox) P1 vs P2 (Fox)", "{ename} - {round} - ({p1char}) {p1} vs {p2} ({p2char})")
-        self._titleformat_min = {
-            "{ename} - {round} - {p1} ({p1char}) vs {p2} ({p2char})": "{ename} - {round} - {p1} vs {p2}",
-            "{ename} - {p1} ({p1char}) vs {p2} ({p2char}) - {round}": "{ename} - {p1} vs {p2} - {round}",
-            "{ename} - {round} - ({p1char}) {p1} vs {p2} ({p2char})": "{ename} - {round} - {p1} vs {p2}"
-        }
+        for f in consts.titleformat:
+            self._titleformat += f
 
         # Form Layout
         self.formset = [{"-Match": ["_file", (' ', "_mprefix", "_mtype", "_msuffix", ' '), (' ', "_p1sponsor", "_p1", ' '), (' ', "_p1char", ' '), (' ', "_p2sponsor", "_p2", ' '), (' ', "_p2char", ' ')],
@@ -138,66 +126,13 @@ class MeleeUploader(BaseWidget):
                 'Characters': [{'Melee': self.__melee_chars}, {'Ultimate': self.__ultimate_chars}, {'Custom': self.__custom_chars}]}]
 
         # Add ControlCombo values
-        self.__match_types = ("Pools", "Round Robin", "Winners", "Losers", "Winners Finals", "Losers Finals", "Grand Finals", "Money Match", "Crew Battle", "Ladder", "Friendlies")
-        for t in self.__match_types:
+        for t in consts.match_types:
             self._mtype += t
-        self.__min_match_types = {"Round ": "R", "Round Robin": "RR", "Winners Finals": "WF", "Losers Finals": "LF", "Grand Finals": "GF", "Money Match": "MM", "Crew Battle": "Crews", "Semifinals": "Semis", "Quarterfinals": "Quarters", "Semis": "SF", "Quarters": "QF"}
         self._privacy += "public"
         self._privacy += "unlisted"
         self._privacy += "private"
 
-        # Character Names and Minifications
-        self.minchars = {
-            'Jigglypuff': "Puff",
-            'Captain Falcon': "Falcon",
-            'Ice Climbers': "Icies",
-            'Pikachu': "Pika",
-            'Dr. Mario': "Doc",
-            'Ganondorf': "Ganon",
-            'Young Link': "YLink",
-            'Donkey Kong': "DK",
-            'Mr. Game & Watch': "G&W",
-            'Mewtwo': "Mew2",
-            'Dark Samus': "D. Samus",
-            'Meta Knight': "MK",
-            'Dark Pit': "D. Pit",
-            'Zero Suit Samus': "ZSS",
-            'Pokemon Trainer': "PK Trainer",
-            'Diddy Kong': "Diddy",
-            'King Dedede': "DDD",
-            'Toon Link': "TLink",
-            'Wii Fit Trainer': "Wii Fit",
-            'Rosalina & Luma': "Rosa",
-            'Mii Fighter': "Mii",
-            'Bayonetta': "Bayo",
-            'King K. Rool': "K. Rool",
-            'Piranha Plant': "Plant"
-        }
-        self._melee_chars = ('Fox', 'Falco', 'Marth', 'Sheik', 'Jigglypuff', 'Peach',
-                             'Captain Falcon', 'Ice Climbers', 'Pikachu', 'Samus',
-                             'Dr. Mario', 'Yoshi', 'Luigi', 'Ganondorf', 'Mario',
-                             'Young Link', 'Donkey Kong', 'Link', 'Mr. Game & Watch',
-                             'Mewtwo', 'Roy', 'Zelda', 'Ness', 'Pichu', 'Bowser',
-                             'Kirby')
-        self._ult_chars = ('Mario', 'Donkey Kong', 'Link', 'Samus', 'Dark Samus',
-                           'Yoshi', 'Fox', 'Pikachu', 'Luigi', 'Ness',
-                           'Captain Falcon', 'Jigglypuff', 'Peach', 'Daisy', 'Bowser',
-                           'Ice Climbers', 'Sheik', 'Zelda', 'Dr. Mario', 'Pichu',
-                           'Falco', 'Marth', 'Lucina', 'Young Link', 'Ganondorf',
-                           'Mewtwo', 'Roy', 'Chrom', 'Mr. Game & Watch', 'Meta Knight',
-                           'Pit', 'Dark Pit', 'Zero Suit Samus', 'Wario', 'Snake',
-                           'Ike', 'Pokemon Trainer', 'Squirtle', 'Ivysaur', 'Charizard',
-                           'Diddy Kong', 'Lucas', 'Sonic', 'King Dedede', 'Olimar',
-                           'Lucario', 'R.O.B', 'Toon Link', 'Wolf', 'Villager',
-                           'Mega Man', 'Wii Fit Trainer', 'Rosalina & Luma',
-                           'Little Mac', 'Greninja', 'Mii Fighter', 'Palutena',
-                           'Pac-Man', 'Robin', 'Shulk', 'Bowser Jr.', 'Duck Hunt',
-                           'Ryu', 'Ken', 'Cloud', 'Corrin', 'Bayonetta', 'Inkling',
-                           'Ridley', 'Simon', 'Richter', 'King K. Rool', 'Isabelle',
-                           'Incineroar', 'Piranha Plant', 'Joker')
-
         # Set placeholder text
-        # self._titleformat.form.lineEdit.setPlaceholderText("Default format is 'Event Name - Round - (P1 Character) P1 Tag vs P2 Tag (P2 Character)'")
         self._ename_min.form.lineEdit.setPlaceholderText("Shortened Event Name")
         self._p1sponsor.form.lineEdit.setPlaceholderText("Sponsor Tag")
         self._p2sponsor.form.lineEdit.setPlaceholderText("Sponsor Tag")
@@ -221,7 +156,7 @@ class MeleeUploader(BaseWidget):
         ]
 
         # Set character list
-        if self._melee:
+        if consts.melee:
             self.__melee_chars()
         else:
             self.__ultimate_chars()
@@ -286,19 +221,19 @@ class MeleeUploader(BaseWidget):
         elif opts.msuffix:
             opts.mtype = " ".join((opts.mtype, opts.msuffix))
         chars_exist = all(x for x in [opts.p1char, opts.p2char])
-        title = self.__make_title(opts, chars_exist)
+        title = utils.make_title(opts, chars_exist)
         if len(title) > 100:
-            opts.p1char = self._minify_chars(opts.p1char)
-            opts.p2char = self._minify_chars(opts.p2char)
-            title = self.__make_title(opts, chars_exist)
+            opts.p1char = utils.minify_chars(opts.p1char)
+            opts.p2char = utils.minify_chars(opts.p2char)
+            title = utils.make_title(opts, chars_exist)
             if len(title) > 100:
-                opts.mtype = self._minify_mtype(opts)
-                title = self.__make_title(opts, chars_exist)
+                opts.mtype = utils.minify_mtype(opts)
+                title = utils.make_title(opts, chars_exist)
                 if len(title) > 100:
-                    opts.mtype = self._minify_mtype(opts, True)
-                    title = self.__make_title(opts, chars_exist)
+                    opts.mtype = utils.minify_mtype(opts, True)
+                    title = utils.make_title(opts, chars_exist)
                     if len(title) > 100:
-                        title = self.__make_title(opts, chars_exist, True)
+                        title = utils.make_title(opts, chars_exist, True)
                         if len(title) > 100:
                             # I can only hope no one ever goes this far
                             print("Title is greater than 100 characters after minifying all options")
@@ -312,7 +247,7 @@ class MeleeUploader(BaseWidget):
             descrip = f"Bracket: {opts.bracket}\n{opts.descrip}\n\n{credit}" if opts.bracket else f"{opts.descrip}\n\n{credit}"
         else:
             descrip = f"Bracket: {opts.bracket}\n\n{credit}" if opts.bracket else credit
-        tags = ["Melee", "Super Smash Brothers Melee", "Smash Brothers", "Super Smash Bros. Melee", "meleeuploader", "SSBM", "ssbm"] if self._melee else ["Ultimate", "Super Smash Brothers Ultimate", "Smash Brothers", "Super Smash Bros. Ultimate", "smashuploader", "SSBU", "ssbu"]
+        tags = ["Melee", "Super Smash Brothers Melee", "Smash Brothers", "Super Smash Bros. Melee", "meleeuploader", "SSBM", "ssbm"] if consts.melee else ["Ultimate", "Super Smash Brothers Ultimate", "Smash Brothers", "Super Smash Bros. Ultimate", "smashuploader", "SSBU", "ssbu"]
         if self._custom:
             tags = []
         tags.extend((opts.p1char, opts.p2char, opts.ename, opts.ename_min, opts.p1, opts.p2))
@@ -334,7 +269,7 @@ class MeleeUploader(BaseWidget):
             media_body=MediaFileUpload(opts.file,
                                        chunksize=104857600,
                                        resumable=True),)
-        ret, vid = self._upload(insert_request)
+        ret, vid = yt.upload(insert_request)
         if ret and opts.pID[:2] == "PL":
             self._youtube.playlistItems().insert(
                 part="snippet",
@@ -350,42 +285,6 @@ class MeleeUploader(BaseWidget):
         else:
             print(vid)
         return ret
-
-    def _upload(self, insert_request):
-        response = None
-        retry_exceptions = get_retry_exceptions()
-        retry_status_codes = get_retry_status_codes()
-        ACCEPTABLE_ERRNO = (errno.EPIPE, errno.EINVAL, errno.ECONNRESET)
-        try:
-            ACCEPTABLE_ERRNO += (errno.WSAECONNABORTED,)
-        except AttributeError:
-            pass  # Not windows
-        while True:
-            try:
-                status, response = insert_request.next_chunk()
-                if status is not None:
-                    percent = Decimal(int(status.resumable_progress) / int(status.total_size))
-                    print(f"{round(100 * percent, 2)}% uploaded")
-            except HttpError as e:
-                if e.resp.status in retry_status_codes:
-                    print(f"A retriable HTTP error {e.resp.status} occurred:\n{e.content}")
-            except retry_exceptions as e:
-                print(f"A retriable error occurred: {e}")
-
-            except Exception as e:
-                if e in ACCEPTABLE_ERRNO:
-                    print("Retriable Error occured, retrying now")
-                else:
-                    print(e)
-                pass
-            if response:
-                if "id" in response:
-                    print(f"Video link is https://www.youtube.com/watch?v={response['id']}")
-                    return True, response['id']
-                else:
-                    print(response)
-                    print(status)
-                    return False, "Upload failed, no id in response"
 
     def writePrint(self, text):
         self._output.value += text
@@ -414,13 +313,13 @@ class MeleeUploader(BaseWidget):
 
     def __reset_event(self):
         self._privacy.value = "public"
+        self._titleformat.value = "{ename} - {round} - {p1} ({p1char}) vs {p2} ({p2char})"
         self._ename.value = ""
         self._ename_min.value = ""
         self._pID.value = ""
         self._bracket.value = ""
         self._tags.value = ""
         self._description.value = ""
-        self._titleformat.value = ""
 
     def __reset_forms(self):
         self.__reset_match()
@@ -546,17 +445,17 @@ class MeleeUploader(BaseWidget):
 
     def __melee_chars(self):
         self._custom = False
-        self._melee = True
-        self.__update_chars(self._melee_chars)
+        consts.melee = True
+        self.__update_chars(consts.melee_chars)
 
     def __ultimate_chars(self):
         self._custom = False
-        self._melee = False
-        self.__update_chars(self._ult_chars)
+        consts.melee = False
+        self.__update_chars(consts.ult_chars)
 
     def __custom_chars(self):
         self._custom = True
-        self._melee = False
+        consts.melee = False
         chars = None
         try:
             with open(self.__custom_list_file, "r") as f:
@@ -586,7 +485,7 @@ class MeleeUploader(BaseWidget):
         try:
             self._p1.value = data['player1']
             self._p2.value = data['player2']
-            for t in self.__match_types:
+            for t in consts.match_types:
                 if t.lower() in data['match'].lower():
                     mtype = t
                     if not data['match'].find(t):
@@ -624,41 +523,6 @@ class MeleeUploader(BaseWidget):
         except Exception as e:
             print("OBS Websocket server might not be enabled")
 
-    def _minify_chars(self, pchars):
-        for i in range(len(pchars)):
-            if pchars[i] in self.minchars:
-                pchars[i] = self.minchars[pchars[i]]
-        if all(x in pchars for x in ("Fox", "Falco")):
-            pchars.remove("Fox")
-            pchars.remove("Falco")
-            pchars.insert(0, "Spacies")
-        return pchars
-
-    def _minify_mtype(self, opts, middle=False):
-        for k, v in self.__min_match_types.items():
-            opts.mprefix = opts.mprefix.replace(k, v)
-            opts.mprefix = opts.mprefix.replace(k.lower(), v)
-            opts.msuffix = opts.msuffix.replace(k, v)
-            opts.msuffix = opts.msuffix.replace(k.lower(), v)
-            if middle:
-                opts.mmid = opts.mmid.replace(k, v)
-                opts.mmid = opts.mmid.replace(k.lower(), v)
-        if opts.mprefix and opts.msuffix:
-            opts.mtype = " ".join((opts.mprefix, opts.mmid, opts.msuffix))
-        elif opts.mprefix:
-            opts.mtype = " ".join((opts.mprefix, opts.mmid))
-        elif opts.msuffix:
-            opts.mtype = " ".join((opts.mmid, opts.msuffix))
-        else:
-            opts.mtype = opts.mmid
-        return opts.mtype
-
-    def __make_title(self, opts, chars_exist, min_ename=False):
-        if min_ename:
-            return opts.titleformat.format(ename=opts.ename_min, round=opts.mtype, p1=opts.p1, p2=opts.p2, p1char='/'.join(opts.p1char), p2char='/'.join(opts.p2char)) if chars_exist else self._titleformat_min[opts.titleformat].format(ename=opts.ename_min, round=opts.mtype, p1=opts.p1, p2=opts.p2)
-        else:
-            return opts.titleformat.format(ename=opts.ename, round=opts.mtype, p1=opts.p1, p2=opts.p2, p1char='/'.join(opts.p1char), p2char='/'.join(opts.p2char)) if chars_exist else self._titleformat_min[opts.titleformat].format(ename=opts.ename, round=opts.mtype, p1=opts.p1, p2=opts.p2)
-
 
 def main():
     if "linux" in sys.platform:  # root needed for writing files
@@ -666,13 +530,12 @@ def main():
             print("Need sudo for writing files")
             subprocess.call(['sudo', 'python3', sys.argv[0]])
     # Always get the initial YT credentials outside of a thread. Threads break the setup process.
-    get_youtube_service()
+    yt.get_youtube_service()
     pyforms_lite.start_app(MeleeUploader, geometry=(200, 200, 1, 1))
 
 
 def ult():
-    global melee
-    melee = False
+    consts.melee = False
     main()
 
 
