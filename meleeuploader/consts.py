@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
 
+import os
+
 melee = True
+
+form_values = os.path.join(os.path.expanduser("~"), '.smash_form_values.json')
+queue_values = os.path.join(os.path.expanduser("~"), ".smash_queue_values.txt")
+log_file = os.path.join(os.path.expanduser("~"), ".smash_log.txt")
+custom_list_file = os.path.join(os.path.expanduser("~"), ".smash_custom_list.txt")
 
 minchars = {
     'Jigglypuff': "Puff",

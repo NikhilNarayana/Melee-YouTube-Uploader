@@ -29,7 +29,6 @@ def minify_mtype(self, opts, middle=False):
         opts.msuffix = opts.msuffix.replace(k.lower(), v)
         if middle:
             opts.mmid = opts.mmid.replace(k, v)
-            opts.mmid = opts.mmid.replace(k.lower(), v)
     if opts.mprefix and opts.msuffix:
         opts.mtype = " ".join((opts.mprefix, opts.mmid, opts.msuffix))
     elif opts.mprefix:
