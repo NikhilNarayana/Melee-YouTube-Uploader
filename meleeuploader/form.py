@@ -40,7 +40,6 @@ class EmittingStream(QtCore.QObject):
 
 class MeleeUploader(BaseWidget):
     def __init__(self):
-        self._custom = False
         if consts.melee:
             super(MeleeUploader, self).__init__("Melee YouTube Uploader")
         else:
@@ -61,11 +60,9 @@ class MeleeUploader(BaseWidget):
         # Queue
         self._queue = Queue()
         self._queueref = []
-        self._firstrun = True
-        self._stop_thread = False
 
         # Get YouTube
-        self._youtube = yt.get_youtube_service()
+        self._youtube = consts.yt
 
         # Create form fields
         # Event Values
@@ -200,11 +197,11 @@ class MeleeUploader(BaseWidget):
         self._queue.put(options)
         self._queueref.append(options)
         self._qview.resize_rows_contents()
-        if self._firstrun:
+        if consts.firstrun:
             thr = threading.Thread(target=self.__worker)
             thr.daemon = True
             thr.start()
-            self._firstrun = False
+            consts.firstrun = False
 
     def _init(self, opts):
         if opts.mprefix and opts.msuffix:
@@ -241,7 +238,7 @@ class MeleeUploader(BaseWidget):
         else:
             descrip = f"Bracket: {opts.bracket}\n\n{credit}" if opts.bracket else credit
         tags = ["Melee", "Super Smash Brothers Melee", "Smash Brothers", "Super Smash Bros. Melee", "meleeuploader", "SSBM", "ssbm"] if consts.melee else ["Ultimate", "Super Smash Brothers Ultimate", "Smash Brothers", "Super Smash Bros. Ultimate", "smashuploader", "SSBU", "ssbu"]
-        if self._custom:
+        if consts.custom:
             tags = []
         tags.extend((opts.p1char, opts.p2char, opts.ename, opts.ename_min, opts.p1, opts.p2))
         if opts.tags:
@@ -320,7 +317,7 @@ class MeleeUploader(BaseWidget):
 
     def __worker(self):
         while True:
-            if self._stop_thread:
+            if consts.stop_thread:
                 print("Stopping Upload Service")
                 break
             options = self._queue.get()
@@ -345,24 +342,24 @@ class MeleeUploader(BaseWidget):
             self._queue.task_done()
 
     def __show_o_view(self, row, column):
-        win = OptionsViewer(row, self._queueref[row], self._stop_thread)
+        win = OptionsViewer(row, self._queueref[row], consts.stop_thread)
         win.parent = self
         win.show()
 
     def __show_h_view(self):
-        win = HistoryViewer(self.__history, self._stop_thread, self)
+        win = HistoryViewer(self.__history, consts.stop_thread, self)
         win.parent = self
         win.show()
 
     def __toggle_worker(self):
-        if not self._stop_thread:
+        if not consts.stop_thread:
             print("Stopping Uploads")
-            self._stop_thread = True
-            self._firstrun = False
+            consts.stop_thread = True
+            consts.firstrun = False
         else:
             print("Ready to Upload")
-            self._stop_thread = False
-            self._firstrun = True
+            consts.stop_thread = False
+            consts.firstrun = True
 
     def __save_queue(self):
         with open(consts.queue_values, "wb") as f:
@@ -381,8 +378,8 @@ class MeleeUploader(BaseWidget):
             self.__history.append(self.__save_form(options))
         thr = threading.Thread(target=self.__worker)
         thr.daemon = True
-        self._firstrun = False
-        self._stop_thread = False
+        consts.firstrun = False
+        consts.stop_thread = False
         thr.start()
 
     def __save_form(self, options=[]):
@@ -437,17 +434,17 @@ class MeleeUploader(BaseWidget):
                 print("No smash_form_values.json to read from, continuing with default values")
 
     def __melee_chars(self):
-        self._custom = False
+        consts.custom = False
         consts.melee = True
         self.__update_chars(consts.melee_chars)
 
     def __ultimate_chars(self):
-        self._custom = False
+        consts.custom = False
         consts.melee = False
         self.__update_chars(consts.ult_chars)
 
     def __custom_chars(self):
-        self._custom = True
+        consts.custom = True
         consts.melee = False
         chars = None
         try:

@@ -2,7 +2,11 @@
 
 import os
 
+firstrun = True
+stop_thread = False
 melee = True
+custom = False
+yt = None
 
 form_values = os.path.join(os.path.expanduser("~"), '.smash_form_values.json')
 queue_values = os.path.join(os.path.expanduser("~"), ".smash_queue_values.txt")

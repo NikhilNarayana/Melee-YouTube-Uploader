@@ -17,8 +17,12 @@ def main():
             print("Need sudo for writing files")
             subprocess.call(['sudo', 'python3', sys.argv[0]])
     # Always get the initial YT credentials outside of a thread. Threads break the setup process.
-    yt.get_youtube_service()
-    pyforms_lite.start_app(form.MeleeUploader, geometry=(200, 200, 1, 1))
+    try:
+        consts.yt = yt.get_youtube_service()
+        pyforms_lite.start_app(form.MeleeUploader, geometry=(200, 200, 1, 1))
+    except Exception as e:
+        print("This program needs internet access to work")
+        sys.exit(1)
 
 
 def ult():
