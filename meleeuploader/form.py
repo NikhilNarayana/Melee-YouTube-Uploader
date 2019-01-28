@@ -342,12 +342,12 @@ class MeleeUploader(BaseWidget):
             self._queue.task_done()
 
     def __show_o_view(self, row, column):
-        win = OptionsViewer(row, self._queueref[row], consts.stop_thread)
+        win = OptionsViewer(row, self._queueref[row])
         win.parent = self
         win.show()
 
     def __show_h_view(self):
-        win = HistoryViewer(self.__history, consts.stop_thread, self)
+        win = HistoryViewer(self.__history, self)
         win.parent = self
         win.show()
 

@@ -1,21 +1,23 @@
 #!/usr/bin/env python3
 
+from . import consts
+
 from pyforms_lite import BaseWidget
 from pyforms_lite.controls import ControlButton, ControlList
 
 
 class OptionsViewer(BaseWidget):
-    def __init__(self, pos, options, running):
+    def __init__(self, pos, options):
         super(OptionsViewer, self).__init__(f"Options #{pos}")
         self.options = options
         self._oview = ControlList()
         self._oview.readonly = True
-        if pos or not running:
-            self._oview.horizontal_headers = ["Key", "Value"]
+        self._oview.horizontal_headers = ["Key", "Value"]
+        self.formset = ["_oview"]
+        if pos or consts.stop_thread:
             self._ignorebutton = ControlButton("Toggle Ignore")
             self._ignorebutton.value = self.__ignore_job
             self.formset = ["_oview", "=", "_ignorebutton"]
-        self.formset = ["_oview"]
         self.__update_o_view()
 
     def __ignore_job(self):
@@ -34,11 +36,10 @@ class OptionsViewer(BaseWidget):
 
 
 class HistoryViewer(BaseWidget):
-    def __init__(self, history, running, mainprog):
+    def __init__(self, history, mainprog):
         super(HistoryViewer, self).__init__("History")
         self._mainprog = mainprog
         self._history = history
-        self._running = running
         self._qview = ControlList(select_entire_row=True)
         self._qview.cell_double_clicked_event = self.__load_row
         self._qview.readonly = True
