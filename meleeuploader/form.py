@@ -92,7 +92,7 @@ class MeleeUploader(BaseWidget):
         self._qview = ControlList("Queue", select_entire_row=True)
         self._qview.cell_double_clicked_event = self.__show_o_view
         self._qview.readonly = True
-        self._qview.horizontal_headers = ["Player 1", "Player 2", "Match Type"]
+        self._qview.horizontal_headers = ["Player 1", "Player 2", "Round"]
 
         # Button
         self._button = ControlButton('Submit')
@@ -316,10 +316,7 @@ class MeleeUploader(BaseWidget):
         self.__reset_event()
 
     def __worker(self):
-        while True:
-            if consts.stop_thread:
-                print("Stopping Upload Service")
-                break
+        while not consts.stop_thread:
             options = self._queue.get()
             if not options.ignore:
                 if self._init(options):
@@ -340,6 +337,7 @@ class MeleeUploader(BaseWidget):
                 self._qview -= 0
                 self._queueref.pop(0)
             self._queue.task_done()
+        print("Stopping Upload Service")
 
     def __show_o_view(self, row, column):
         win = OptionsViewer(row, self._queueref[row])
@@ -372,7 +370,7 @@ class MeleeUploader(BaseWidget):
         except Exception as e:
             print("You need to save a queue before loading a queue")
         for options in self._queueref:
-            self._qview += (options.p1, options.p2, options.mtype)
+            self._qview += (options.p1, options.p2, " ".join((options.mprefix, options.mtype, options.msuffix)))
             self._queue.put(options)
             self._qview.resize_rows_contents()
             self.__history.append(self.__save_form(options))

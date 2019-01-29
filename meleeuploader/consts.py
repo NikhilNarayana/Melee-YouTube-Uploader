@@ -78,12 +78,14 @@ min_match_types = {
 
 titleformat = (("Event - Round - P1 (Fox) vs P2 (Fox)", "{ename} - {round} - {p1} ({p1char}) vs {p2} ({p2char})"),
                ("Event - P1 (Fox) vs P2 (Fox) - Round", "{ename} - {p1} ({p1char}) vs {p2} ({p2char}) - {round}"),
-               ("Event - Round - (Fox) P1 vs P2 (Fox)", "{ename} - {round} - ({p1char}) {p1} vs {p2} ({p2char})"),)
+               ("Event - Round - (Fox) P1 vs P2 (Fox)", "{ename} - {round} - ({p1char}) {p1} vs {p2} ({p2char})"),
+               ("Round - P1 (Fox) vs P2 (Fox) - Event", "{round} - {p1} ({p1char}) vs {p2} ({p2char}) - {ename}"),)
 
 titleformat_min = {
     "{ename} - {round} - {p1} ({p1char}) vs {p2} ({p2char})": "{ename} - {round} - {p1} vs {p2}",
     "{ename} - {p1} ({p1char}) vs {p2} ({p2char}) - {round}": "{ename} - {p1} vs {p2} - {round}",
-    "{ename} - {round} - ({p1char}) {p1} vs {p2} ({p2char})": "{ename} - {round} - {p1} vs {p2}"
+    "{ename} - {round} - ({p1char}) {p1} vs {p2} ({p2char})": "{ename} - {round} - {p1} vs {p2}",
+    "{round} - {p1} ({p1char}) vs {p2} ({p2char}) - {ename}": "{round} - {p1} vs {p2} - {ename}"
 }
 
 match_types = ("Pools", "Round Robin", "Winners", "Losers", "Winners Finals",
