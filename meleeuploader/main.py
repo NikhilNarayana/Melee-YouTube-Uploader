@@ -19,6 +19,7 @@ def main():
     # Always get the initial YT credentials outside of a thread. Threads break the setup process.
     try:
         consts.yt = yt.get_youtube_service()
+        consts.sheets = yt.get_spreadsheet_service()
         pyforms_lite.start_app(form.MeleeUploader, geometry=(200, 200, 1, 1))
     except Exception as e:
         print("This program needs internet access to work")

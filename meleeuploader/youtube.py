@@ -70,12 +70,12 @@ def upload(insert_request):
 
 
 def get_youtube_service():
-    CLIENT_SECRETS_FILE = get_secrets([
+    CLIENT_SECRETS_FILE = get_secrets((
         os.path.expanduser("~"),
         sys.prefix,
         os.path.join(sys.prefix, "local"), "/usr",
         os.path.join("/usr", "local")
-    ], ["client_secrets.json", ".client_secrets.json", "share/meleeuploader/client_secrets.json"])
+    ), ("client_secrets.json", ".client_secrets.json", "share/meleeuploader/client_secrets.json"))
 
     flow = flow_from_clientsecrets(CLIENT_SECRETS_FILE, scope=YOUTUBE_UPLOAD_SCOPE)
 
@@ -93,12 +93,12 @@ def get_youtube_service():
 
 
 def get_spreadsheet_service():
-    CLIENT_SECRETS_FILE = get_secrets([
+    CLIENT_SECRETS_FILE = get_secrets((
         os.path.expanduser("~"),
         sys.prefix,
         os.path.join(sys.prefix, "local"), "/usr",
         os.path.join("/usr", "local")
-    ], ["client_secrets.json", ".client_secrets.json", "share/meleeuploader/client_secrets.json"])
+    ), ("client_secrets.json", ".client_secrets.json", "share/meleeuploader/client_secrets.json"))
 
     flow = flow_from_clientsecrets(CLIENT_SECRETS_FILE, scope=SPREADSHEETS_SCOPE)
 

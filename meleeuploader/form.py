@@ -8,6 +8,7 @@ import threading
 from time import sleep
 from queue import Queue
 from copy import deepcopy
+from datetime import datetime
 
 from .viewer import *
 from . import utils
@@ -60,9 +61,6 @@ class MeleeUploader(BaseWidget):
         # Queue
         self._queue = Queue()
         self._queueref = []
-
-        # Get YouTube
-        self._youtube = consts.yt
 
         # Create form fields
         # Event Values
@@ -138,12 +136,12 @@ class MeleeUploader(BaseWidget):
         self._button.value = self.__buttonAction
 
         # Define the existing form fields
-        self._form_fields = [
+        self._form_fields = (
             self._ename, self._pID, self._mtype, self._p1, self._p2, self._p1char,
             self._p2char, self._bracket, self._file, self._tags, self._msuffix,
             self._mprefix, self._p1sponsor, self._p2sponsor, self._privacy,
             self._description, self._ename_min, self._titleformat
-        ]
+        )
 
         # Set character list
         if consts.melee:
@@ -232,15 +230,14 @@ class MeleeUploader(BaseWidget):
                             print("Killing this upload now\n\n")
                             return False
         print(f"Uploading {title}")
-        credit = "Uploaded with Melee-YouTube-Uploader (https://github.com/NikhilNarayana/Melee-YouTube-Uploader) by Nikhil Narayana"
         if opts.descrip:
-            descrip = f"Bracket: {opts.bracket}\n{opts.descrip}\n\n{credit}" if opts.bracket else f"{opts.descrip}\n\n{credit}"
+            descrip = f"Bracket: {opts.bracket}\n{opts.descrip}\n\n{consts.credit}" if opts.bracket else f"{opts.descrip}\n\n{consts.credit}"
         else:
-            descrip = f"Bracket: {opts.bracket}\n\n{credit}" if opts.bracket else credit
-        tags = ["Melee", "Super Smash Brothers Melee", "Smash Brothers", "Super Smash Bros. Melee", "meleeuploader", "SSBM", "ssbm"] if consts.melee else ["Ultimate", "Super Smash Brothers Ultimate", "Smash Brothers", "Super Smash Bros. Ultimate", "smashuploader", "SSBU", "ssbu"]
+            descrip = f"Bracket: {opts.bracket}\n\n{consts.credit}" if opts.bracket else consts.credit
+        tags = consts.melee_tags if consts.melee else consts.ult_tags
         if consts.custom:
             tags = []
-        tags.extend((opts.p1char, opts.p2char, opts.ename, opts.ename_min, opts.p1, opts.p2))
+        tags.extend((*opts.p1char, *opts.p2char, opts.ename, opts.ename_min, opts.p1, opts.p2))
         if opts.tags:
             tags.extend([x.strip() for x in opts.tags.split(",")])
         body = dict(
@@ -253,7 +250,7 @@ class MeleeUploader(BaseWidget):
             status=dict(
                 privacyStatus=opts.privacy)
         )
-        insert_request = self._youtube.videos().insert(
+        insert_request = consts.yt.videos().insert(
             part=",".join(body.keys()),
             body=body,
             media_body=MediaFileUpload(opts.file,
@@ -261,7 +258,7 @@ class MeleeUploader(BaseWidget):
                                        resumable=True),)
         ret, vid = yt.upload(insert_request)
         if ret and opts.pID[:2] == "PL":
-            self._youtube.playlistItems().insert(
+            consts.yt.playlistItems().insert(
                 part="snippet",
                 body=dict(
                     snippet=dict(
@@ -271,6 +268,26 @@ class MeleeUploader(BaseWidget):
                             videoId=vid)))).execute()
             print("Added to playlist")
         if ret:
+            if consts.sheets:
+                totalTime = datetime.now() - options.then
+                values = [[
+                    str(datetime.now()),
+                    str(totalTime), f"https://www.youtube.com/watch?v={vid}",
+                    options.ename,
+                    options.titleformat,
+                    title,
+                    str(options.loadedQueue)
+                ]]
+                sheetbody = {"values": values}
+                try:
+                    consts.sheets.spreadsheets().values().append(
+                        spreadsheetId=spreadsheetID,
+                        range=rowRange,
+                        valueInputOption="USER_ENTERED",
+                        body=sheetbody).execute()
+                    print("Added data to spreadsheet")
+                except Exception as e:
+                    print("Failed to write to spreadsheet")
             print("DONE\n")
         else:
             print(vid)
@@ -283,8 +300,10 @@ class MeleeUploader(BaseWidget):
             print(text, file=sys.__stdout__, end='')
 
     def __reset_cred_event(self):
-        os.remove(os.path.join(os.path.expanduser("~"), ".smash-oauth2-youtube.json"))
-        # os.remove(os.path.join(os.path.expanduser("~"), ".smash-oauth2-spreadsheet.json"))
+        if consts.yt:
+            os.remove(os.path.join(os.path.expanduser("~"), ".smash-oauth2-youtube.json"))
+        if consts.sheets:
+            os.remove(os.path.join(os.path.expanduser("~"), ".smash-oauth2-spreadsheet.json"))
         sys.exit(0)
 
     def __reset_match(self, menu=True, isadir=False):
@@ -319,6 +338,7 @@ class MeleeUploader(BaseWidget):
         while not consts.stop_thread:
             options = self._queue.get()
             if not options.ignore:
+                options.then = datetime.now()
                 if self._init(options):
                     row = [None] * 20
                     f = self._pID.value.find("PL")
@@ -378,6 +398,7 @@ class MeleeUploader(BaseWidget):
         thr.daemon = True
         consts.firstrun = False
         consts.stop_thread = False
+        consts.loadedQueue = True
         thr.start()
 
     def __save_form(self, options=[]):
