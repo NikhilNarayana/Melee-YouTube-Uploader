@@ -3,14 +3,16 @@ A YouTube Uploader for my Melee recordings
 
 A modified version of FRC-YouTube-Uploader for Super Smash Bros. Melee and Super Smash Bros. Ultimate.
 
+Minimal, anonymous or already public data is collected on Google Sheets [here](https://docs.google.com/spreadsheets/d/1TavrlG3uiLLJUwrx6UB0CCyjbiWElYE8sCev6fWclaw/edit#gid=0), this is to help figure out if certain highly specific features are being used.
+
+
 **IMPORTANT NOTE**
 
 This application **DOES NOT** support enabling monetization at the moment. I highly suggest you upload videos as unlisted and set monetization settings before making them public or monitor your uploads and update monetization settings as they are uploaded (you can adjust the settings while the files are being uploaded without breaking anything). If you see the YouTube ContentID API in your Google Developer Console and are willing to help me test updates to fix the issue DM me on twitter at @xMetonym.
 
 ## To Do
 * Automate creation of thumbnails
-* Automate file picking
-* Update this README even more
+* Maybe other stuff
 
 ## Contributing
 PRs are appreciated and will be reviewed quickly, the only code quality standard I have is to follow PEP8 standard except for the line length. If you have trouble understanding my code just ask me.
@@ -20,13 +22,15 @@ I am always open to help setup the program or fix any techincal issues you may h
 
 ## Current Feature Set:
 * Upload videos
+* Manual or automatic file selection
 * Queue and dequeue Videos to upload
-* Adds a lot of relevant tags
-* Adds to a YouTube playlist
-* Saves and loads form values
-* Loading values from history
-* Melee and Ultimate Character List
-* Hooks into Scoreboard Assistant and OBS
+* Add many relevant YouTube tags
+* Add to a YouTube playlist
+* Save and load form values
+* Load old submissions from history
+* Save a queue to be uploaded later
+* Melee and Ultimate Character Lists
+* Hook into Scoreboard Assistant and OBS
 
 ## How to Setup
 1. Install [Python 3.7.1](https://www.python.org/downloads/release/python-371/) for your OS with the PATH added and make sure there are no other versions of Python 3.
@@ -43,8 +47,8 @@ In the future I will not be including YouTube API credentials with this project.
 1. Open the [Google Developer Console](https://console.developers.google.com/)
 2. Hit the `Select Project` button near the top and create a new project.
 3. Once the project is created, select the project.
-4. Hit the `Enable APIs and Services` button and enable the YouTube Data API V3.
-5. Once the API is enabled it will tell you to create credentials and there will be a button to press.
+4. Hit the `Enable APIs and Services` button and enable the YouTube Data API V3 and the Google Sheets API.
+5. Once the APIs are enabled it will tell you to create credentials and there will be a button to press.
 6. Follow the steps laid out in the credential creation wizard and make sure to select `Other UI` for `Where will you be calling the API from?` and `User Data` for `What data will you be accessing?`.
 7. Once you have downloaded your credentails remember to rename them `client_secrets.json` (if you don't see the `.json` when renaming the file just use `client_secrets`) and put the file in `C:\Users\[Your Username]\` or, if you are on macOS or Unix, whatever `echo ~` returns in terminal. macOS users can also just do `open ~` to open a Finder window at that directory.
 8. If you already created YouTube Account credentials for the program, open the program and select `Settings -> Remove YouTube Credentials`
@@ -58,7 +62,7 @@ If you would like to have no console window on your screen, you will need to fin
 #### Mac and Unix
 `meleeuploader &` if you want to hide the terminal window. There are probably ways to launch the program quicker, but I don't use macOS/Unix for uploading usually.
 
-## How to use fields
+## How to use each field
 ### Required
 `Event Name`, `Title Format`, `Video Privacy`, `File`, `Match Type`, and `Player Tags` are the only required fields for uploading any file.
 
@@ -68,7 +72,7 @@ File is able to be used as either a file or directory input. Because of how the 
 When using this quirk of the field, it will find the newest file in the directory you give it, so make sure no other files are written to this folder other than the OBS recordings. This is best used for uploading or queueing videos during an event.
 
 #### Title Format 
-Options can be expanded upon on request.
+All the options support no characters and the available options can be expanded upon on request.
 
 ### Optional
 #### Match Type Prefix and Suffix
