@@ -269,20 +269,20 @@ class MeleeUploader(BaseWidget):
             print("Added to playlist")
         if ret:
             if consts.sheets:
-                totalTime = datetime.now() - options.then
+                totalTime = datetime.now() - opts.then
                 values = [[
                     str(datetime.now()),
                     str(totalTime), f"https://www.youtube.com/watch?v={vid}",
-                    options.ename,
-                    options.titleformat,
+                    opts.ename,
+                    opts.titleformat,
                     title,
-                    str(options.loadedQueue)
+                    str(consts.loadedQueue)
                 ]]
                 sheetbody = {"values": values}
                 try:
                     consts.sheets.spreadsheets().values().append(
-                        spreadsheetId=spreadsheetID,
-                        range=rowRange,
+                        spreadsheetId=consts.spreadsheetID,
+                        range=consts.rowRange,
                         valueInputOption="USER_ENTERED",
                         body=sheetbody).execute()
                     print("Added data to spreadsheet")
