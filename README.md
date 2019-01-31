@@ -132,5 +132,5 @@ I've set it up so once recording has been stopped, the application will submit t
 In addition to enabling the settings you will need to update OBS with the websocket plugin found here: https://github.com/Palakis/obs-websocket
 
 ### Custom Character List
-You can add your own custom character lists by putting a file with comma separated names in a file called `.smash_custom_list.txt` in your root directory.  
-Your root directory is probably `C:\Users\[Your Username]\` if you use Windows. If you are on macOS or Unix, use whatever `echo ~` returns in terminal. macOS users can also just do `open ~` to open a Finder window at that directory.
+You can add your own custom character lists by putting comma separated names in a file called `.smash_custom_list.txt` in your root directory.  
+If you don't know where your root directory is, open the program and select `Characters -> Custom` and the program will make a blank text file where it is supposed to be.
