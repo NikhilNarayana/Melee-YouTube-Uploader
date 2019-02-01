@@ -354,8 +354,8 @@ class MeleeUploader(BaseWidget):
                     row[17] = deepcopy(options.titleformat)
                     with open(consts.form_values, 'w') as f:
                         f.write(json.dumps(row))
-                self._qview -= 0
                 self._queueref.pop(0)
+            self._qview -= 0
             self._queue.task_done()
         print("Stopping Upload Service")
 
