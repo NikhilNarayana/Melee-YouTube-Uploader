@@ -86,10 +86,10 @@
         },
         "meleeuploader": {
             "hashes": [
-                "sha256:8c9f332586a29f30167309d2f1592539135ce9a23a277a4876ddd14ee83ecac7"
+                "sha256:e1eff9fffb9b1e64dedbf135e9f8bc8b31b4b4c858ec1420fbc01a6825a85874"
             ],
             "index": "pypi",
-            "version": "==1.9.2"
+            "version": "==1.9.3"
         },
         "msgpack": {
             "hashes": [
