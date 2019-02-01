@@ -250,25 +250,21 @@ class MeleeUploader(BaseWidget):
             status=dict(
                 privacyStatus=opts.privacy)
         )
-        vid = None
-        while not vid:
-            insert_request = consts.yt.videos().insert(
-                part=",".join(body.keys()),
-                body=body,
-                media_body=MediaFileUpload(opts.file,
-                                           chunksize=104857600,
-                                           resumable=True),)
-            ret, vid = yt.upload(insert_request)
+        ret, vid = upload(consts.yt, body, opts.file)
         if ret and opts.pID[:2] == "PL":
-            consts.yt.playlistItems().insert(
-                part="snippet",
-                body=dict(
-                    snippet=dict(
-                        playlistId=opts.pID,
-                        resourceId=dict(
-                            kind='youtube#video',
-                            videoId=vid)))).execute()
-            print("Added to playlist")
+            try:
+                consts.yt.playlistItems().insert(
+                    part="snippet",
+                    body=dict(
+                        snippet=dict(
+                            playlistId=opts.pID,
+                            resourceId=dict(
+                                kind='youtube#video',
+                                videoId=vid)))).execute()
+                print("Added to playlist")
+            except Exception as e:
+                print("Failed to add to playlist")
+                print(e)
         if ret:
             if consts.sheets:
                 totalTime = datetime.now() - opts.then

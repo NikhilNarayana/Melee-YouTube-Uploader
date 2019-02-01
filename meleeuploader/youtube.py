@@ -32,7 +32,21 @@ YOUTUBE_UPLOAD_SCOPE = "https://www.googleapis.com/auth/youtube.upload https://w
 SPREADSHEETS_SCOPE = "https://www.googleapis.com/auth/spreadsheets"
 
 
-def upload(insert_request):
+def upload(yt, body, file):
+    vid = None
+    ret = None
+    while not vid:
+        insert_request = yt.videos().insert(
+            part=",".join(body.keys()),
+            body=body,
+            media_body=MediaFileUpload(file,
+                                       chunksize=104857600,
+                                       resumable=True),)
+        ret, vid = upload_service(insert_request)
+    return ret, vid
+
+
+def upload_service(insert_request):
         response = None
         retry_exceptions = get_retry_exceptions()
         retry_status_codes = get_retry_status_codes()
