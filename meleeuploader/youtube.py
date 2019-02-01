@@ -24,7 +24,7 @@ RETRIABLE_EXCEPTIONS = (httplib2.HttpLib2Error, IOError, httplib.NotConnected,
                         httplib.CannotSendRequest, httplib.CannotSendHeader,
                         httplib.ResponseNotReady, httplib.BadStatusLine)
 
-RETRIABLE_STATUS_CODES = [500, 502, 503, 504]
+RETRIABLE_STATUS_CODES = [500, 502, 504]
 YOUTUBE_API_SERVICE_NAME = "youtube"
 YOUTUBE_API_VERSION = "v3"
 
@@ -50,6 +50,9 @@ def upload(insert_request):
             except HttpError as e:
                 if e.resp.status in retry_status_codes:
                     print(f"A retriable HTTP error {e.resp.status} occurred:\n{e.content}")
+                elif "503" in e.content:
+                    print("Backend Error: will attempt to retry upload")
+                    return False, None
             except retry_exceptions as e:
                 print(f"A retriable error occurred: {e}")
 
