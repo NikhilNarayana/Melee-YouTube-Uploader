@@ -4,7 +4,11 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-meleeuploader = "*"
+cachecontrol = "*"
+google-api-python-client = "*"
+"oauth2client" = "*"
+obs-websocket-py = "*"
+pyforms-lite = "*"
 
 [dev-packages]
 
