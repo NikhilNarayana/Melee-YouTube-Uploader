@@ -16,9 +16,9 @@ def main():
         if os.geteuid() != 0:
             print("Need sudo for writing files")
             subprocess.call(['sudo', 'python3', sys.argv[0]])
-    # Always get the initial YT credentials outside of a thread. Threads break the setup process.
+    # Always get the initial YT credentials outside of your app for safety.
     try:
-        consts.yt = yt.get_youtube_service()
+        consts.youtube = yt.get_youtube_service()
         consts.sheets = yt.get_spreadsheet_service()
         pyforms_lite.start_app(form.MeleeUploader, geometry=(200, 200, 1, 1))
     except Exception as e:

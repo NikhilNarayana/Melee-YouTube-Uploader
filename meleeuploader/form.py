@@ -250,10 +250,10 @@ class MeleeUploader(BaseWidget):
             status=dict(
                 privacyStatus=opts.privacy)
         )
-        ret, vid = upload(consts.yt, body, opts.file)
+        ret, vid = yt.upload(consts.youtube, body, opts.file)
         if ret and opts.pID[:2] == "PL":
             try:
-                consts.yt.playlistItems().insert(
+                consts.youtube.playlistItems().insert(
                     part="snippet",
                     body=dict(
                         snippet=dict(
@@ -298,7 +298,7 @@ class MeleeUploader(BaseWidget):
             print(text, file=sys.__stdout__, end='')
 
     def __reset_cred_event(self):
-        if consts.yt:
+        if consts.youtube:
             os.remove(os.path.join(os.path.expanduser("~"), ".smash-oauth2-youtube.json"))
         if consts.sheets:
             os.remove(os.path.join(os.path.expanduser("~"), ".smash-oauth2-spreadsheet.json"))

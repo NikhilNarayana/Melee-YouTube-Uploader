@@ -12,6 +12,8 @@ from decimal import Decimal
 
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+from googleapiclient.http import MediaFileUpload
+
 from oauth2client.file import Storage
 from oauth2client.tools import run_flow
 from oauth2client.client import flow_from_clientsecrets

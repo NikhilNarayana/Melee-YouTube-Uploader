@@ -6,7 +6,7 @@ firstrun = True
 stop_thread = False
 melee = True
 custom = False
-yt = None
+youtube = None
 sheets = None
 loadedQueue = False
 
