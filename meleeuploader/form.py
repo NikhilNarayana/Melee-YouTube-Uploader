@@ -502,9 +502,9 @@ class MeleeUploader(BaseWidget):
             try:
                 p1char = " ".join(data['image1'].split(" ")[:-1])
                 p2char = " ".join(data['image2'].split(" ")[:-1])
-                if p1char not self.__p1chars:
+                if p1char not in self.__p1chars:
                     self.__p1chars.append(p1char)
-                if p2char not self.__p2chars:
+                if p2char not in self.__p2chars:
                     self.__p2chars.append(p2char)
                 self._p1char.load_form(dict(selected=self.__p1chars))
                 self._p2char.load_form(dict(selected=self.__p2chars))
