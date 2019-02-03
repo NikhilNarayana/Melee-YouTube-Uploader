@@ -21,7 +21,7 @@ def make_title(opts, chars_exist, min_ename=False):
         return opts.titleformat.format(ename=opts.ename, round=opts.mtype, p1=opts.p1, p2=opts.p2, p1char='/'.join(opts.p1char), p2char='/'.join(opts.p2char)) if chars_exist else consts.titleformat_min[opts.titleformat].format(ename=opts.ename, round=opts.mtype, p1=opts.p1, p2=opts.p2)
 
 
-def minify_mtype(self, opts, middle=False):
+def minify_mtype(opts, middle=False):
     for k, v in consts.min_match_types.items():
         opts.mprefix = opts.mprefix.replace(k, v)
         opts.mprefix = opts.mprefix.replace(k.lower(), v)

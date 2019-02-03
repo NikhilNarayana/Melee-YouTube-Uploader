@@ -21,7 +21,6 @@ from argparse import Namespace
 from PyQt5 import QtCore, QtGui
 from pyforms_lite import BaseWidget
 from obswebsocket import obsws, events
-from googleapiclient.http import MediaFileUpload
 from pyforms_lite.controls import ControlText, ControlFile
 from pyforms_lite.controls import ControlTextArea, ControlList
 from pyforms_lite.controls import ControlCombo, ControlProgress
@@ -143,6 +142,10 @@ class MeleeUploader(BaseWidget):
             self._description, self._ename_min, self._titleformat
         )
 
+        # Did the thing
+        self.__p1chars = []
+        self.__p2chars = []
+
         # Set character list
         if consts.melee:
             self.__melee_chars()
@@ -157,6 +160,8 @@ class MeleeUploader(BaseWidget):
         if any(not x for x in (self._ename.value, self._p1.value, self._p2.value, self._file.value)):
             print("Missing one of the required fields (event name, player names, file name)")
             return
+        self.__p1chars = []
+        self.__p2chars = []
         options = Namespace()
         self.__history.append(self.__save_form())
         options.ename = self._ename.value
@@ -286,6 +291,7 @@ class MeleeUploader(BaseWidget):
                     print("Added data to spreadsheet")
                 except Exception as e:
                     print("Failed to write to spreadsheet")
+                    print(e)
             print("DONE\n")
         else:
             print(vid)
@@ -489,6 +495,21 @@ class MeleeUploader(BaseWidget):
         prefix = ""
         mtype = ""
         suffix = ""
+        if data == self.__wsdata:
+            return
+        self.__wsdata = data
+        if consts.melee:
+            try:
+                p1char = " ".join(data['image1'].split(" ")[:-1])
+                p2char = " ".join(data['image2'].split(" ")[:-1])
+                if p1char not self.__p1chars:
+                    self.__p1chars.append(p1char)
+                if p2char not self.__p2chars:
+                    self.__p2chars.append(p2char)
+                self._p1char.load_form(dict(selected=self.__p1chars))
+                self._p2char.load_form(dict(selected=self.__p2chars))
+            except Exception as e:
+                pass
         try:
             self._p1.value = data['player1']
             self._p2.value = data['player2']
@@ -514,6 +535,7 @@ class MeleeUploader(BaseWidget):
             self._ws = websocket.WebSocketApp("ws://localhost:58341", on_message=self.__update_form)
             self._wst = threading.Thread(target=self._ws.run_forever)
             self._wst.daemon = True
+            self.__wsdata = None
             self._wst.start()
         else:
             print("Closing the Websocket")
