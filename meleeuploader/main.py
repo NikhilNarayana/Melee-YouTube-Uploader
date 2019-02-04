@@ -12,6 +12,7 @@ import pyforms_lite
 
 
 def main():
+    subprocess.call(('pip3', 'install', '-U', 'meleeuploader'))
     if "linux" in sys.platform:  # root needed for writing files
         if os.geteuid() != 0:
             print("Need sudo for writing files")
