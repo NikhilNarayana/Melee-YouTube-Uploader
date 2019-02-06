@@ -49,6 +49,7 @@ class MeleeUploader(BaseWidget):
 
         # Websocket
         self._ws = None
+        self._obs = None
 
         # History
         self.__history = []
@@ -106,7 +107,7 @@ class MeleeUploader(BaseWidget):
 
         # Main Menu Layout
         self.mainmenu = [
-            {'Settings': [{'Save Form': self.__save_form}, {'Remove YouTube Credentials': self.__reset_cred_event}, {'Toggle Websocket for SA': self.__toggle_websocket}, {'Hook into OBS': self.__hook_obs}],
+            {'Settings': [{'Save Form': self.__save_form}, {'Remove YouTube Credentials': self.__reset_cred_event}, {'Toggle Websocket for SA': self.__toggle_websocket}, {'Toggle Hook into OBS': self.__hook_obs}],
                 'Clear': [{'Clear Match Values': self.__reset_match}, {'Clear Event Values': self.__reset_event}, {'Clear All': self.__reset_forms}],
                 'Queue': [{'Toggle Uploads': self.__toggle_worker}, {'Save Queue': self.__save_queue}, {'Load Queue': self.__load_queue}],
                 'History': [{'Show History': self.__show_h_view}],
@@ -545,9 +546,14 @@ class MeleeUploader(BaseWidget):
 
     def __hook_obs(self):
         try:
-            self._obs = obsws("localhost", "4444")
-            self._obs.register(self.__buttonAction, events.RecordingStopped)
-            self._obs.connect()
-            print("Hooked into OBS")
+            if not self._obs:
+                self._obs = obsws("localhost", "4444")
+                self._obs.register(self.__buttonAction, events.RecordingStopped)
+                self._obs.connect()
+                print("Hooked into OBS")
+            else:
+                self._obs.disconnect()
+                print("Unhooked from OBS")
+                self._obs = None
         except Exception as e:
             print("OBS Websocket server might not be enabled")
