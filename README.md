@@ -14,6 +14,9 @@ This application **DOES NOT** support enabling monetization at the moment. I hig
 * Automate creation of thumbnails
 * Maybe other stuff
 
+## Known Issues
+* Fails to work when antivirus software is installed
+
 ## Contributing
 PRs are appreciated and will be reviewed quickly, the only code quality standard I have is to follow PEP8 standard except for the line length. If you have trouble understanding my code just ask me.
 
