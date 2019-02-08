@@ -120,14 +120,16 @@ Queue was built so I could upload VODs after an event because the venue didn't h
 
 Queue refers to the list of upcoming uploads in the status tab. By selecting `Toggle Uploads` you can toggle the uploading function, but continue to add entries to the queue. Once you have finished adding all the VODs you want to upload, selecting `Save Queue` will write the entire queue to your disk to be loaded later on. Finally, using `Load Queue` will load the entire queue file and start uploading immediately.
 
-### Scoreboard Assistant Websocket
+### Scoreboard Assistant Websocket - Never retype anything
 SA Websocket was built so I could avoid retyping information that I put into Scoreboard Assistant.
 
 To enable the websocket open the `Settings` menu tab and select the `Enable Websocket` option. Just make sure that SA is open before you start the websocket.
 
 The program will pull from the `Player 1`, `Player 2`, and `Match` fields. The `Match` field will be parsed to find which of the match types defined in the program are a substring, then it will split the input at the substring and update `Match Prefix` and `Match Suffix` with whatever is left over. For example, `Doubles - Winners R1` as the input would result in `Doubles -` and `R1` being the prefix and suffix respectively.
 
-### OBS Websocket
+There is also support for character selection if you use stock icons from this [link](https://drive.google.com/file/d/1L8M-4FUDcQo-2cuh1Ak_VabJSQlWz8B_/view?usp=sharing).
+
+### OBS Websocket - Never submit manually
 This is a peculiar feature that I built with only myself in mind. There are no plans to expand what I've set it up to do.
 
 I've set it up so once recording has been stopped, the application will submit the information that is currently inputted. This combined with `SA Websocket` is a powerful feature set to quickly queue sets. The only info that will have to be set if using that combo is the `Characters` for both players or you could just ignore those and automate the whole uploading procedure from start to finish.
