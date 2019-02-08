@@ -501,6 +501,8 @@ class MeleeUploader(BaseWidget):
         self.__wsdata = data
         if consts.melee:
             try:
+                self.__p1chars = self._p1char.value
+                self.__p2chars = self._p2char.value
                 p1char = " ".join(data['image1'].split(" ")[:-1])
                 p2char = " ".join(data['image2'].split(" ")[:-1])
                 if p1char not in self.__p1chars:

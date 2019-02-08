@@ -111,6 +111,29 @@ def get_youtube_service():
         http=credentials.authorize(httplib2.Http()))
 
 
+def get_partner_service():
+    CLIENT_SECRETS_FILE = get_secrets((
+        os.path.expanduser("~"),
+        sys.prefix,
+        os.path.join(sys.prefix, "local"), "/usr",
+        os.path.join("/usr", "local")
+    ), ("client_secrets.json", ".client_secrets.json", "share/meleeuploader/client_secrets.json"))
+
+    flow = flow_from_clientsecrets(CLIENT_SECRETS_FILE, scope=("https://www.googleapis.com/auth/youtubepartner", "https://www.googleapis.com/auth/youtube",))
+
+    flow.user_agent = "Melee YouTube Uploader"
+    storage = Storage(os.path.join(os.path.expanduser("~"), ".smash-oauth2-partner.json"))
+    credentials = storage.get()
+
+    if credentials is None or credentials.invalid:
+        credentials = run_flow(flow, storage)
+
+    return build(
+        "youtubePartner",
+        "v1",
+        http=credentials.authorize(httplib2.Http()))
+
+
 def get_spreadsheet_service():
     CLIENT_SECRETS_FILE = get_secrets((
         os.path.expanduser("~"),
