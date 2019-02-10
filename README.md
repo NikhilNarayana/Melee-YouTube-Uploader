@@ -38,12 +38,12 @@ I am always open to help setup the program or fix any techincal issues you may h
 ## How to Setup - Video Version: https://youtu.be/zrcf4t_qk5A
 1. Install [Python 3.7.2](https://www.python.org/downloads/release/python-372/) for your OS with the PATH added and make sure there are no other versions of Python 3.
 2. Install the program by typing `pip3 install -U meleeuploader` into Command Prompt/Terminal. If you want untested features you can download the repo and install with `pip3 install -U /path/to/repo`
-3. Start the program by running `meleeuploader` in for the Melee character list or `smashuploader` for the Ultimate character list in Command Prompt/Terminal.
+3. Start the program by running `meleeuploader` for the Melee character list or `smashuploader` for the Ultimate character list in Command Prompt/Terminal.
 4. Select the YouTube profile you would like to use for the first authentication request and then any google account for the second authentication request. If the second one fails, close your web browser and then run the command to open the program again.
 5. Add in the necessary info in the Event Values and Match Values tabs
 6. Hit submit when the match finishes.
 7. Update forms with the next match's info.
-8. Repeat steps 4-6 and enjoy not having to deal with YouTube's front end 🎉.
+8. Repeat steps 5-7 and enjoy not having to deal with YouTube's front end 🎉.
 
 ### Create Your Own Credentials
 In the future I will not be including YouTube API credentials with this project. So here is a guide to create your own credentials.
