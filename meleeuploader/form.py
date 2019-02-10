@@ -387,6 +387,7 @@ class MeleeUploader(BaseWidget):
     def __save_queue(self):
         with open(consts.queue_values, "wb") as f:
             f.write(pickle.dumps(self._queueref))
+        print("Saved Queue")
 
     def __load_queue(self):
         try:
@@ -516,9 +517,14 @@ class MeleeUploader(BaseWidget):
         try:
             self._p1.value = data['player1']
             self._p2.value = data['player2']
+        except Exception as e:
+            pass
+        try:
             for t in consts.match_types:
                 if t.lower() in data['match'].lower():
                     mtype = t
+                    prefix = ""
+                    suffix = ""
                     if not data['match'].find(t):
                         sections = data['match'].split(t)
                         suffix = sections[1].strip()
