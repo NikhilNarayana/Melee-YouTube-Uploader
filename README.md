@@ -35,7 +35,7 @@ I am always open to help setup the program or fix any techincal issues you may h
 * Melee and Ultimate Character Lists
 * Hook into Scoreboard Assistant and OBS
 
-## How to Setup
+## How to Setup - Video Version: https://youtu.be/zrcf4t_qk5A
 1. Install [Python 3.7.2](https://www.python.org/downloads/release/python-372/) for your OS with the PATH added and make sure there are no other versions of Python 3.
 2. Install the program by typing `pip3 install -U meleeuploader` into Command Prompt/Terminal. If you want untested features you can download the repo and install with `pip3 install -U /path/to/repo`
 3. Start the program by running `meleeuploader` in for the Melee character list or `smashuploader` for the Ultimate character list in Command Prompt/Terminal.
