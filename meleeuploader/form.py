@@ -387,7 +387,7 @@ class MeleeUploader(BaseWidget):
     def __save_queue(self):
         with open(consts.queue_values, "wb") as f:
             f.write(pickle.dumps(self._queueref))
-        print("Saved Queue")
+        print("Saved Queue, you can now close the program")
 
     def __load_queue(self):
         try:
@@ -564,4 +564,4 @@ class MeleeUploader(BaseWidget):
                 print("Unhooked from OBS")
                 self._obs = None
         except Exception as e:
-            print("OBS Websocket server might not be enabled")
+            print("OBS Websocket Server might not be enabled or installed")
