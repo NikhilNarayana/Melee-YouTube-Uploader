@@ -37,12 +37,13 @@ I am always open to help setup the program or fix any techincal issues you may h
 
 ## How to Setup
 1. Install [Python 3.7.2](https://www.python.org/downloads/release/python-372/) for your OS with the PATH added and make sure there are no other versions of Python 3.
-2. Install the program with `pip3 install -U meleeuploader`. If you want untested features you can download the repo and install with `pip3 install -U /path/to/repo`
-3. Start the program by running `meleeuploader` for the Melee character list or `smashuploader` for the Ultimate character list in terminal.
-4. Add in the necessary info in the Event Values and Match Values tabs
-5. Hit submit when the match finishes.
-6. Update forms with the next match's info.
-7. Repeat steps 4-6 and enjoy not having to deal with YouTube's front end 🎉.
+2. Install the program by typing `pip3 install -U meleeuploader` into Command Prompt/Terminal. If you want untested features you can download the repo and install with `pip3 install -U /path/to/repo`
+3. Start the program by running `meleeuploader` in for the Melee character list or `smashuploader` for the Ultimate character list in Command Prompt/Terminal.
+4. Select the YouTube profile you would like to use for the first authentication request and then any google account for the second authentication request. If the second one fails, close your web browser and then run the command to open the program again.
+5. Add in the necessary info in the Event Values and Match Values tabs
+6. Hit submit when the match finishes.
+7. Update forms with the next match's info.
+8. Repeat steps 4-6 and enjoy not having to deal with YouTube's front end 🎉.
 
 ### Create Your Own Credentials
 In the future I will not be including YouTube API credentials with this project. So here is a guide to create your own credentials.
@@ -60,7 +61,7 @@ In the future I will not be including YouTube API credentials with this project.
 #### Windows
 If you want to launch the application easily, you can find the exe by hitting the Windows key and typing `meleeuploader`, if that doesn't show the option to run the command then you can probably find the exe at `C:\Users\[Your Username]\AppData\Local\Programs\Python\Python37\Scripts\`. Pinning the exe to the taskbar allows quick access to the program.
 
-If you would like to have no console window on your screen, you will need to find out where your pythonw.exe file is (it should be in the same place your python.exe) and create a shortcut to it. Then open the shortcut properties window and edit the target to include `-m meleeuploader` for melee or `-m meleeuploader ult` for ultimate at the end. This can then be pinned to your taskbar for easy access.
+If you would like to have no console window on your screen, you will need to find out where your pythonw.exe file is (it should be in the same place your python.exe) and create a shortcut to it. Then open the shortcut properties window and edit the target to include `-m meleeuploader` for melee or `-m meleeuploader ult` for ultimate at the end. This can then be pinned to your taskbar for easy access. This method does not allow authenticating yourself so you will have to fall back to CMD/Terminal for that part.
 
 #### Mac and Unix
 `meleeuploader &` if you want to hide the terminal window. There are probably ways to launch the program quicker, but I don't use macOS/Unix for uploading usually.
