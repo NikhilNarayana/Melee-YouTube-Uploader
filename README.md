@@ -109,7 +109,7 @@ Additional text can be added to the description here, it will go between the bra
 #### Submit
 The submit button does a lot, it adds submission to queue, clears fields in match values that aren't generally needed for consecutive matches, and prevents you from adding submissions that don't meet the minimum criteria.
 
-## How to use advanced features
+## How to use advanced features - Video Version: https://youtu.be/mw0sP7YJVfE
 
 ### History - Fixing an upload that didn't work
 History was built so I could fix uploads that exceeded the title limit on YouTube (100 characters). 
