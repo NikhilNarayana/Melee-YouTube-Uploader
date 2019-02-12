@@ -613,16 +613,15 @@ class MeleeUploader(BaseWidget):
         data = None
         ndata = None
         while True:
-            print("Checking streamcontrol.json")
             with open(self._scf.value) as f:
                 ndata = json.load(f)
                 if not data:
                     data = ndata
             if data['timestamp'] != ndata['timestamp']:
                 data = ndata
-                print("New timestamp")
                 mtype = ""
                 suffix = ""
+                prefix = ""
                 if consts.melee:
                     try:
                         self.__p1chars = self._p1char.value
@@ -653,10 +652,14 @@ class MeleeUploader(BaseWidget):
                             suffix = ""
                             sections = data['event_round'].split(t)
                             suffix = sections[1].strip()
+                            prefix = data['event_bracket']
+                        elif t.lower() in data['event_bracket'].lower():
+                            mtype = t
+                            prefix = ""
+                            suffix = ""
                     self._mtype.value = mtype
-                    self._mprefix.value = data['event_bracket']
+                    self._mprefix.value = prefix
                     self._msuffix.value = suffix
                 except Exception as e:
                     print(e)
-            print("Sleeping for 5 seconds")
             sleep(5)
