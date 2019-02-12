@@ -38,6 +38,27 @@ class EmittingStream(QtCore.QObject):
         pass
 
 
+class SCFileInput(BaseWidget):
+    def __init__(self, f = ""):
+        super(SCFileInput, self).__init__("Stream Control")
+        self._file = ControlFile("File")
+        self.formset = ["_file", "_button"]
+        self._button = ControlButton('Submit')
+
+        self._file.value = f.value
+
+        self._file.form.lineEdit.setPlaceholderText("Find your streamcontrol.json")
+
+        self._button.value = self.__buttonAction
+
+    def __buttonAction(self, data=None):
+        if self._file.value:
+            self.parent._MeleeUploader__start_sc(self._file.value)
+        else:
+            print("You must select a file")
+
+
+
 class MeleeUploader(BaseWidget):
     def __init__(self):
         if consts.melee:
@@ -107,7 +128,7 @@ class MeleeUploader(BaseWidget):
 
         # Main Menu Layout
         self.mainmenu = [
-            {'Settings': [{'Save Form': self.__save_form}, {'Remove YouTube Credentials': self.__reset_cred_event}, {'Toggle Websocket for SA': self.__toggle_websocket}, {'Toggle Hook into OBS': self.__hook_obs}],
+            {'Settings': [{'Save Form': self.__save_form}, {'Remove YouTube Credentials': self.__reset_cred_event}, {'Toggle Websocket for SA': self.__toggle_websocket}, {'Toggle Hook into OBS': self.__hook_obs}, {'Stream Control': self.__show_sc_view}],
                 'Clear': [{'Clear Match Values': self.__reset_match}, {'Clear Event Values': self.__reset_event}, {'Clear All': self.__reset_forms}],
                 'Queue': [{'Toggle Uploads': self.__toggle_worker}, {'Save Queue': self.__save_queue}, {'Load Queue': self.__load_queue}],
                 'History': [{'Show History': self.__show_h_view}],
@@ -135,15 +156,7 @@ class MeleeUploader(BaseWidget):
         # Define the button action
         self._button.value = self.__buttonAction
 
-        # Define the existing form fields
-        self._form_fields = (
-            self._ename, self._pID, self._mtype, self._p1, self._p2, self._p1char,
-            self._p2char, self._bracket, self._file, self._tags, self._msuffix,
-            self._mprefix, self._p1sponsor, self._p2sponsor, self._privacy,
-            self._description, self._ename_min, self._titleformat
-        )
-
-        # Did the thing
+        # For pulling characters from SA
         self.__p1chars = []
         self.__p2chars = []
 
@@ -152,6 +165,18 @@ class MeleeUploader(BaseWidget):
             self.__melee_chars()
         else:
             self.__ultimate_chars()
+
+        # Stream Control
+        self.scthr = None
+        self._scf = ControlText()
+
+        # Define the existing form fields
+        self._form_fields = (
+            self._ename, self._pID, self._mtype, self._p1, self._p2, self._p1char,
+            self._p2char, self._bracket, self._file, self._tags, self._msuffix,
+            self._mprefix, self._p1sponsor, self._p2sponsor, self._privacy,
+            self._description, self._ename_min, self._titleformat, self._scf,
+        )
 
         # Get latest values from form_values.txt
         self.__load_form()
@@ -364,15 +389,31 @@ class MeleeUploader(BaseWidget):
             self._queue.task_done()
         print("Stopping Upload Service")
 
+    def __show_sc_view(self):
+        self._scwin = SCFileInput(self._scf)
+        self._scwin.parent = self
+        self._scwin.show()
+
+    def __start_sc(self, f):
+        self._scwin.close()
+        if self.scthr:
+            self.scthr.join()
+            self.scthr = None
+        else:
+            self._scf.value = f
+            self.scthr = threading.Thread(target=self.__hook_sc)
+            self.scthr.daemon = True
+            self.scthr.start()
+
     def __show_o_view(self, row, column):
         win = OptionsViewer(row, self._queueref[row])
         win.parent = self
         win.show()
 
     def __show_h_view(self):
-        win = HistoryViewer(self.__history, self)
-        win.parent = self
-        win.show()
+        self._hwin = HistoryViewer(self.__history)
+        self._hwin.parent = self
+        self._hwin.show()
 
     def __toggle_worker(self):
         if not consts.stop_thread:
@@ -430,6 +471,7 @@ class MeleeUploader(BaseWidget):
             row[15] = deepcopy(options.descrip)
             row[16] = deepcopy(options.ename_min)
             row[17] = deepcopy(options.titleformat)
+            row[18] = deepcopy(self._scf.value)
         else:
             f = self._pID.value.find("PL")
             self._pID.value = self._pID.value[f:f + 34]
@@ -441,6 +483,7 @@ class MeleeUploader(BaseWidget):
 
     def __load_form(self, history=[]):
         if history:
+            self._hwin.close()
             for val, var in zip(history, self._form_fields):
                 if isinstance(val, (list, dict)):
                     var.load_form(dict(selected=val))
@@ -565,3 +608,55 @@ class MeleeUploader(BaseWidget):
                 self._obs = None
         except Exception as e:
             print("OBS Websocket server might not be enabled")
+
+    def __hook_sc(self):
+        data = None
+        ndata = None
+        while True:
+            print("Checking streamcontrol.json")
+            with open(self._scf.value) as f:
+                ndata = json.load(f)
+                if not data:
+                    data = ndata
+            if data['timestamp'] != ndata['timestamp']:
+                data = ndata
+                print("New timestamp")
+                mtype = ""
+                suffix = ""
+                if consts.melee:
+                    try:
+                        self.__p1chars = self._p1char.value
+                        self.__p2chars = self._p2char.value
+                        p1char = data['p1_char']
+                        p2char = data['p2_char']
+                        if p1char == "Doctor Mario":
+                            p1char = "Dr. Mario"
+                        if p2char == "Doctor Mario":
+                            p2char = "Dr. Mario"
+                        if p1char not in self.__p1chars:
+                            self.__p1chars.append(p1char)
+                        if p2char not in self.__p2chars:
+                            self.__p2chars.append(p2char)
+                        self._p1char.load_form(dict(selected=self.__p1chars))
+                        self._p2char.load_form(dict(selected=self.__p2chars))
+                    except Exception as e:
+                        print(e)
+                try:
+                    self._p1.value = data['p1_name']
+                    self._p2.value = data['p2_name']
+                except Exception as e:
+                    print(e)
+                try:
+                    for t in consts.match_types:
+                        if t.lower() in data['event_round'].lower():
+                            mtype = t
+                            suffix = ""
+                            sections = data['event_round'].split(t)
+                            suffix = sections[1].strip()
+                    self._mtype.value = mtype
+                    self._mprefix.value = data['event_bracket']
+                    self._msuffix.value = suffix
+                except Exception as e:
+                    print(e)
+            print("Sleeping for 5 seconds")
+            sleep(5)

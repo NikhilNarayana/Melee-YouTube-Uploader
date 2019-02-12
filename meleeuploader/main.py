@@ -23,6 +23,7 @@ def main():
         consts.sheets = yt.get_spreadsheet_service()
         pyforms_lite.start_app(form.MeleeUploader, geometry=(200, 200, 1, 1))
     except Exception as e:
+        print(e)
         print("This program needs internet access to work")
         sys.exit(1)
 
