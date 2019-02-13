@@ -38,6 +38,62 @@ class EmittingStream(QtCore.QObject):
         pass
 
 
+class SAHostPortInput(BaseWidget):
+    def __init__(self):
+        super(SAHostPortInput, self).__init__("SA Websocket")
+        self._host = ControlText("Host IP")
+        self._port = ControlText("Host Port")
+        self._host.value = "localhost"
+        self._port.value = "58341"
+        self._button = ControlButton("Submit")
+        self.formset = ["_host", "_port", "_button"]
+        self._button.value = self.__buttonAction
+
+    def __buttonAction(self):
+        if self._host.value and self._port.value:
+            self.parent._MeleeUploader__hook_sa(self._host.value, self._port.value)
+        else:
+            print("You must input a host IP and port number")
+
+
+class OBSHostPortInput(BaseWidget):
+    def __init__(self):
+        super(OBSHostPortInput, self).__init__("OBS Websocket")
+        self._host = ControlText("Host IP")
+        self._port = ControlText("Host Port")
+        self._host.value = "localhost"
+        self._port.value = "4444"
+        self._button = ControlButton("Submit")
+        self.formset = ["_host", "_port", "_button"]
+        self._button.value = self.__buttonAction
+
+    def __buttonAction(self):
+        if self._host.value and self._port.value:
+            self.parent._MeleeUploader__hook_obs(self._host.value, self._port.value)
+        else:
+            print("You must input a host IP and port number")
+
+
+class SCFileInput(BaseWidget):
+    def __init__(self, f=""):
+        super(SCFileInput, self).__init__("Stream Control")
+        self._file = ControlFile("File")
+        self.formset = ["_file", "_button"]
+        self._button = ControlButton('Submit')
+
+        self._file.value = f.value
+
+        self._file.form.lineEdit.setPlaceholderText("Find your streamcontrol.json")
+
+        self._button.value = self.__buttonAction
+
+    def __buttonAction(self, data=None):
+        if self._file.value:
+            self.parent._MeleeUploader__start_sc(self._file.value)
+        else:
+            print("You must select a file")
+
+
 class MeleeUploader(BaseWidget):
     def __init__(self):
         if consts.melee:
@@ -107,8 +163,8 @@ class MeleeUploader(BaseWidget):
 
         # Main Menu Layout
         self.mainmenu = [
-            {'Settings': [{'Save Form': self.__save_form}, {'Remove YouTube Credentials': self.__reset_cred_event}, {'Toggle Websocket for SA': self.__toggle_websocket}, {'Toggle Hook into OBS': self.__hook_obs}],
-                'Clear': [{'Clear Match Values': self.__reset_match}, {'Clear Event Values': self.__reset_event}, {'Clear All': self.__reset_forms}],
+            {'Settings': [{'Remove YouTube Credentials': self.__reset_cred_event}, {'Toggle SA Hook': self.__show_sa_form}, {'Toggle OBS Hook': self.__show_obs_form}, {'Toggle SC Hook': self.__show_sc_form}],
+                'Save/Clear': [{'Save Form': self.__save_form}, {'Clear Match Values': self.__reset_match}, {'Clear Event Values': self.__reset_event}, {'Clear All': self.__reset_forms}],
                 'Queue': [{'Toggle Uploads': self.__toggle_worker}, {'Save Queue': self.__save_queue}, {'Load Queue': self.__load_queue}],
                 'History': [{'Show History': self.__show_h_view}],
                 'Characters': [{'Melee': self.__melee_chars}, {'Ultimate': self.__ultimate_chars}, {'Custom': self.__custom_chars}]}]
@@ -135,15 +191,7 @@ class MeleeUploader(BaseWidget):
         # Define the button action
         self._button.value = self.__buttonAction
 
-        # Define the existing form fields
-        self._form_fields = (
-            self._ename, self._pID, self._mtype, self._p1, self._p2, self._p1char,
-            self._p2char, self._bracket, self._file, self._tags, self._msuffix,
-            self._mprefix, self._p1sponsor, self._p2sponsor, self._privacy,
-            self._description, self._ename_min, self._titleformat
-        )
-
-        # Did the thing
+        # For pulling characters from SA
         self.__p1chars = []
         self.__p2chars = []
 
@@ -152,6 +200,19 @@ class MeleeUploader(BaseWidget):
             self.__melee_chars()
         else:
             self.__ultimate_chars()
+
+        # Stream Control
+        self._scthr = None
+        self._scf = ControlText()
+        self._scrun = False
+
+        # Define the existing form fields
+        self._form_fields = (
+            self._ename, self._pID, self._mtype, self._p1, self._p2, self._p1char,
+            self._p2char, self._bracket, self._file, self._tags, self._msuffix,
+            self._mprefix, self._p1sponsor, self._p2sponsor, self._privacy,
+            self._description, self._ename_min, self._titleformat, self._scf,
+        )
 
         # Get latest values from form_values.txt
         self.__load_form()
@@ -312,8 +373,6 @@ class MeleeUploader(BaseWidget):
         sys.exit(0)
 
     def __reset_match(self, menu=True, isadir=False):
-        if not isadir:
-            self._file.value = ""
         self._p1char.load_form(dict(selected=[]))
         self._p2char.load_form(dict(selected=[]))
         self._p1.value = ""
@@ -322,8 +381,14 @@ class MeleeUploader(BaseWidget):
         self._p2sponsor.value = ""
         self._msuffix.value = ""
         if menu:
+            isadir = os.path.isdir(self._file.value)
+            if not isadir:
+                self._file.value = ""
             self._mtype.value = "Pools"
             self._mprefix.value = ""
+        else:
+            if not isadir:
+                self._file.value = ""
 
     def __reset_event(self):
         self._privacy.value = "public"
@@ -364,15 +429,55 @@ class MeleeUploader(BaseWidget):
             self._queue.task_done()
         print("Stopping Upload Service")
 
+    def __show_sc_form(self):
+        if self._scthr:
+            print("Closing Stream Control Hook")
+            self._scrun = False
+            self._scthr.join()
+            self._scthr = None
+        else:
+            self._scrun = True
+            self._scwin = SCFileInput(self._scf)
+            self._scwin.parent = self
+            self._scwin.show()
+
+    def __start_sc(self, f):
+        self._scwin.close()
+        self._scf.value = f
+        self._scthr = threading.Thread(target=self.__hook_sc)
+        self._scthr.daemon = True
+        self._scthr.start()
+
+    def __show_sa_form(self):
+        if self._ws:
+            print("Closing the Websocket")
+            self._ws.close()
+            self._ws = None
+            self._wst.join()
+        else:
+            self._sawin = SAHostPortInput()
+            self._sawin.parent = self
+            self._sawin.show()
+
+    def __show_obs_form(self):
+        if self._obs:
+            self._obs.disconnect()
+            print("Unhooked from OBS")
+            self._obs = None
+        else:
+            self._obswin = OBSHostPortInput()
+            self._obswin.parent = self
+            self._obswin.show()
+
     def __show_o_view(self, row, column):
         win = OptionsViewer(row, self._queueref[row])
         win.parent = self
         win.show()
 
     def __show_h_view(self):
-        win = HistoryViewer(self.__history, self)
-        win.parent = self
-        win.show()
+        self._hwin = HistoryViewer(self.__history)
+        self._hwin.parent = self
+        self._hwin.show()
 
     def __toggle_worker(self):
         if not consts.stop_thread:
@@ -430,6 +535,7 @@ class MeleeUploader(BaseWidget):
             row[15] = deepcopy(options.descrip)
             row[16] = deepcopy(options.ename_min)
             row[17] = deepcopy(options.titleformat)
+            row[18] = deepcopy(self._scf.value)
         else:
             f = self._pID.value.find("PL")
             self._pID.value = self._pID.value[f:f + 34]
@@ -441,6 +547,7 @@ class MeleeUploader(BaseWidget):
 
     def __load_form(self, history=[]):
         if history:
+            self._hwin.close()
             for val, var in zip(history, self._form_fields):
                 if isinstance(val, (list, dict)):
                     var.load_form(dict(selected=val))
@@ -538,30 +645,76 @@ class MeleeUploader(BaseWidget):
         except Exception as e:
             pass
 
-    def __toggle_websocket(self):
-        if self._ws is None:
-            print("Starting Websocket, please make sure Scoreboard Assistant is open")
-            self._ws = websocket.WebSocketApp("ws://localhost:58341", on_message=self.__update_form)
-            self._wst = threading.Thread(target=self._ws.run_forever)
-            self._wst.daemon = True
-            self.__wsdata = None
-            self._wst.start()
-        else:
-            print("Closing the Websocket")
-            self._ws.close()
-            self._ws = None
-            self._wst.join()
+    def __hook_sa(self, host, port):
+        self._sawin.close()
+        print("Starting Websocket, please make sure Scoreboard Assistant is open")
+        self._ws = websocket.WebSocketApp(f"ws://{host}:{port}", on_message=self.__update_form)
+        self._wst = threading.Thread(target=self._ws.run_forever)
+        self._wst.daemon = True
+        self.__wsdata = None
+        self._wst.start()
 
-    def __hook_obs(self):
+    def __hook_obs(self, host, port):
+        self._obswin.close()
         try:
-            if not self._obs:
-                self._obs = obsws("localhost", "4444")
-                self._obs.register(self.__buttonAction, events.RecordingStopped)
-                self._obs.connect()
-                print("Hooked into OBS")
-            else:
-                self._obs.disconnect()
-                print("Unhooked from OBS")
-                self._obs = None
+            self._obs = obsws(host, port)
+            self._obs.register(self.__buttonAction, events.RecordingStopped)
+            self._obs.connect()
+            print("Hooked into OBS")
         except Exception as e:
             print("OBS Websocket Server might not be enabled or installed")
+
+    def __hook_sc(self):
+        data = None
+        ndata = None
+        while self._scrun:
+            with open(self._scf.value) as f:
+                ndata = json.load(f)
+                if not data:
+                    data = ndata
+            if data['timestamp'] != ndata['timestamp']:
+                data = ndata
+                mtype = ""
+                suffix = ""
+                prefix = ""
+                if consts.melee:
+                    try:
+                        self.__p1chars = self._p1char.value
+                        self.__p2chars = self._p2char.value
+                        p1char = data['p1_char']
+                        p2char = data['p2_char']
+                        if p1char == "Doctor Mario":
+                            p1char = "Dr. Mario"
+                        if p2char == "Doctor Mario":
+                            p2char = "Dr. Mario"
+                        if p1char not in self.__p1chars:
+                            self.__p1chars.append(p1char)
+                        if p2char not in self.__p2chars:
+                            self.__p2chars.append(p2char)
+                        self._p1char.load_form(dict(selected=self.__p1chars))
+                        self._p2char.load_form(dict(selected=self.__p2chars))
+                    except Exception as e:
+                        print(e)
+                try:
+                    self._p1.value = data['p1_name']
+                    self._p2.value = data['p2_name']
+                except Exception as e:
+                    print(e)
+                try:
+                    for t in consts.match_types:
+                        if t.lower() in data['event_round'].lower():
+                            mtype = t
+                            suffix = ""
+                            sections = data['event_round'].split(t)
+                            suffix = sections[1].strip()
+                            prefix = data['event_bracket']
+                        elif t.lower() in data['event_bracket'].lower():
+                            mtype = t
+                            prefix = ""
+                            suffix = ""
+                    self._mtype.value = mtype
+                    self._mprefix.value = prefix
+                    self._msuffix.value = suffix
+                except Exception as e:
+                    print(e)
+            sleep(5)
