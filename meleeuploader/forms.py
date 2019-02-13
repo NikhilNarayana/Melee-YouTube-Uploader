@@ -202,8 +202,9 @@ class MeleeUploader(BaseWidget):
             self.__ultimate_chars()
 
         # Stream Control
-        self.scthr = None
+        self._scthr = None
         self._scf = ControlText()
+        self._scrun = False
 
         # Define the existing form fields
         self._form_fields = (
@@ -429,10 +430,13 @@ class MeleeUploader(BaseWidget):
         print("Stopping Upload Service")
 
     def __show_sc_form(self):
-        if self.scthr:
-            self.scthr.join()
-            self.scthr = None
+        if self._scthr:
+            print("Closing Stream Control Hook")
+            self._scrun = False
+            self._scthr.join()
+            self._scthr = None
         else:
+            self._scrun = True
             self._scwin = SCFileInput(self._scf)
             self._scwin.parent = self
             self._scwin.show()
@@ -440,9 +444,9 @@ class MeleeUploader(BaseWidget):
     def __start_sc(self, f):
         self._scwin.close()
         self._scf.value = f
-        self.scthr = threading.Thread(target=self.__hook_sc)
-        self.scthr.daemon = True
-        self.scthr.start()
+        self._scthr = threading.Thread(target=self.__hook_sc)
+        self._scthr.daemon = True
+        self._scthr.start()
 
     def __show_sa_form(self):
         if self._ws:
@@ -663,7 +667,7 @@ class MeleeUploader(BaseWidget):
     def __hook_sc(self):
         data = None
         ndata = None
-        while True:
+        while self._scrun:
             with open(self._scf.value) as f:
                 ndata = json.load(f)
                 if not data:
