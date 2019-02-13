@@ -4,7 +4,7 @@ import os
 import sys
 import subprocess
 
-from . import form
+from . import forms
 from . import consts
 from . import youtube as yt
 
@@ -21,7 +21,7 @@ def main():
     try:
         consts.youtube = yt.get_youtube_service()
         consts.sheets = yt.get_spreadsheet_service()
-        pyforms_lite.start_app(form.MeleeUploader, geometry=(200, 200, 1, 1))
+        pyforms_lite.start_app(forms.MeleeUploader, geometry=(200, 200, 1, 1))
     except Exception as e:
         print(e)
         print("This program needs internet access to work")

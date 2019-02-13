@@ -38,8 +38,44 @@ class EmittingStream(QtCore.QObject):
         pass
 
 
+class SAHostPortInput(BaseWidget):
+    def __init__(self):
+        super(SAHostPortInput, self).__init__("SA Websocket")
+        self._host = ControlText("Host IP")
+        self._port = ControlText("Host Port")
+        self._host.value = "localhost"
+        self._port.value = "58341"
+        self._button = ControlButton("Submit")
+        self.formset = ["_host", "_port", "_button"]
+        self._button.value = self.__buttonAction
+
+    def __buttonAction(self):
+        if self._host.value and self._port.value:
+            self.parent._MeleeUploader__hook_sa(self._host.value, self._port.value)
+        else:
+            print("You must input a host IP and port number")
+
+
+class OBSHostPortInput(BaseWidget):
+    def __init__(self):
+        super(OBSHostPortInput, self).__init__("OBS Websocket")
+        self._host = ControlText("Host IP")
+        self._port = ControlText("Host Port")
+        self._host.value = "localhost"
+        self._port.value = "4444"
+        self._button = ControlButton("Submit")
+        self.formset = ["_host", "_port", "_button"]
+        self._button.value = self.__buttonAction
+
+    def __buttonAction(self):
+        if self._host.value and self._port.value:
+            self.parent._MeleeUploader__hook_obs(self._host.value, self._port.value)
+        else:
+            print("You must input a host IP and port number")
+
+
 class SCFileInput(BaseWidget):
-    def __init__(self, f = ""):
+    def __init__(self, f=""):
         super(SCFileInput, self).__init__("Stream Control")
         self._file = ControlFile("File")
         self.formset = ["_file", "_button"]
@@ -56,7 +92,6 @@ class SCFileInput(BaseWidget):
             self.parent._MeleeUploader__start_sc(self._file.value)
         else:
             print("You must select a file")
-
 
 
 class MeleeUploader(BaseWidget):
@@ -128,8 +163,8 @@ class MeleeUploader(BaseWidget):
 
         # Main Menu Layout
         self.mainmenu = [
-            {'Settings': [{'Save Form': self.__save_form}, {'Remove YouTube Credentials': self.__reset_cred_event}, {'Toggle Websocket for SA': self.__toggle_websocket}, {'Toggle Hook into OBS': self.__hook_obs}, {'Stream Control': self.__show_sc_view}],
-                'Clear': [{'Clear Match Values': self.__reset_match}, {'Clear Event Values': self.__reset_event}, {'Clear All': self.__reset_forms}],
+            {'Settings': [{'Remove YouTube Credentials': self.__reset_cred_event}, {'Toggle SA Hook': self.__show_sa_form}, {'Toggle OBS Hook': self.__show_obs_form}, {'Toggle SC Hook': self.__show_sc_form}],
+                'Save/Clear': [{'Save Form': self.__save_form}, {'Clear Match Values': self.__reset_match}, {'Clear Event Values': self.__reset_event}, {'Clear All': self.__reset_forms}],
                 'Queue': [{'Toggle Uploads': self.__toggle_worker}, {'Save Queue': self.__save_queue}, {'Load Queue': self.__load_queue}],
                 'History': [{'Show History': self.__show_h_view}],
                 'Characters': [{'Melee': self.__melee_chars}, {'Ultimate': self.__ultimate_chars}, {'Custom': self.__custom_chars}]}]
@@ -337,8 +372,6 @@ class MeleeUploader(BaseWidget):
         sys.exit(0)
 
     def __reset_match(self, menu=True, isadir=False):
-        if not isadir:
-            self._file.value = ""
         self._p1char.load_form(dict(selected=[]))
         self._p2char.load_form(dict(selected=[]))
         self._p1.value = ""
@@ -347,8 +380,14 @@ class MeleeUploader(BaseWidget):
         self._p2sponsor.value = ""
         self._msuffix.value = ""
         if menu:
+            isadir = os.path.isdir(self._file.value)
+            if not isadir:
+                self._file.value = ""
             self._mtype.value = "Pools"
             self._mprefix.value = ""
+        else:
+            if not isadir:
+                self._file.value = ""
 
     def __reset_event(self):
         self._privacy.value = "public"
@@ -389,21 +428,42 @@ class MeleeUploader(BaseWidget):
             self._queue.task_done()
         print("Stopping Upload Service")
 
-    def __show_sc_view(self):
-        self._scwin = SCFileInput(self._scf)
-        self._scwin.parent = self
-        self._scwin.show()
-
-    def __start_sc(self, f):
-        self._scwin.close()
+    def __show_sc_form(self):
         if self.scthr:
             self.scthr.join()
             self.scthr = None
         else:
-            self._scf.value = f
-            self.scthr = threading.Thread(target=self.__hook_sc)
-            self.scthr.daemon = True
-            self.scthr.start()
+            self._scwin = SCFileInput(self._scf)
+            self._scwin.parent = self
+            self._scwin.show()
+
+    def __start_sc(self, f):
+        self._scwin.close()
+        self._scf.value = f
+        self.scthr = threading.Thread(target=self.__hook_sc)
+        self.scthr.daemon = True
+        self.scthr.start()
+
+    def __show_sa_form(self):
+        if self._ws:
+            print("Closing the Websocket")
+            self._ws.close()
+            self._ws = None
+            self._wst.join()
+        else:
+            self._sawin = SAHostPortInput()
+            self._sawin.parent = self
+            self._sawin.show()
+
+    def __show_obs_form(self):
+        if self._obs:
+            self._obs.disconnect()
+            print("Unhooked from OBS")
+            self._obs = None
+        else:
+            self._obswin = OBSHostPortInput()
+            self._obswin.parent = self
+            self._obswin.show()
 
     def __show_o_view(self, row, column):
         win = OptionsViewer(row, self._queueref[row])
@@ -581,33 +641,24 @@ class MeleeUploader(BaseWidget):
         except Exception as e:
             pass
 
-    def __toggle_websocket(self):
-        if self._ws is None:
-            print("Starting Websocket, please make sure Scoreboard Assistant is open")
-            self._ws = websocket.WebSocketApp("ws://localhost:58341", on_message=self.__update_form)
-            self._wst = threading.Thread(target=self._ws.run_forever)
-            self._wst.daemon = True
-            self.__wsdata = None
-            self._wst.start()
-        else:
-            print("Closing the Websocket")
-            self._ws.close()
-            self._ws = None
-            self._wst.join()
+    def __hook_sa(self, host, port):
+        self._sawin.close()
+        print("Starting Websocket, please make sure Scoreboard Assistant is open")
+        self._ws = websocket.WebSocketApp(f"ws://{host}:{port}", on_message=self.__update_form)
+        self._wst = threading.Thread(target=self._ws.run_forever)
+        self._wst.daemon = True
+        self.__wsdata = None
+        self._wst.start()
 
-    def __hook_obs(self):
+    def __hook_obs(self, host, port):
+        self._obswin.close()
         try:
-            if not self._obs:
-                self._obs = obsws("localhost", "4444")
-                self._obs.register(self.__buttonAction, events.RecordingStopped)
-                self._obs.connect()
-                print("Hooked into OBS")
-            else:
-                self._obs.disconnect()
-                print("Unhooked from OBS")
-                self._obs = None
+            self._obs = obsws(host, port)
+            self._obs.register(self.__buttonAction, events.RecordingStopped)
+            self._obs.connect()
+            print("Hooked into OBS")
         except Exception as e:
-        	print("OBS Websocket Server might not be enabled or installed")
+            print("OBS Websocket Server might not be enabled or installed")
 
     def __hook_sc(self):
         data = None
