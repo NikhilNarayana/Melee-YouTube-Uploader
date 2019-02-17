@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 
 import os
+import pkg_resources
+
+__version__ = pkg_resources.require("MeleeUploader")[0].version
 
 firstrun = True
 stop_thread = False
