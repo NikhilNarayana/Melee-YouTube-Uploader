@@ -5,6 +5,7 @@ import sys
 import json
 import pickle
 import threading
+import subprocess
 from time import sleep
 from queue import Queue
 from copy import deepcopy
@@ -15,6 +16,7 @@ from . import utils
 from . import consts
 from . import youtube as yt
 
+import requests
 import websocket
 import pyforms_lite
 from argparse import Namespace
@@ -47,9 +49,9 @@ class SAHostPortInput(BaseWidget):
         self._port.value = "58341"
         self._button = ControlButton("Submit")
         self.formset = ["_host", "_port", "_button"]
-        self._button.value = self.__buttonAction
+        self._button.value = self.__button_action
 
-    def __buttonAction(self):
+    def __button_action(self):
         if self._host.value and self._port.value:
             self.parent._MeleeUploader__hook_sa(self._host.value, self._port.value)
         else:
@@ -65,9 +67,9 @@ class OBSHostPortInput(BaseWidget):
         self._port.value = "4444"
         self._button = ControlButton("Submit")
         self.formset = ["_host", "_port", "_button"]
-        self._button.value = self.__buttonAction
+        self._button.value = self.__button_action
 
-    def __buttonAction(self):
+    def __button_action(self):
         if self._host.value and self._port.value:
             self.parent._MeleeUploader__hook_obs(self._host.value, self._port.value)
         else:
@@ -85,9 +87,9 @@ class SCFileInput(BaseWidget):
 
         self._file.form.lineEdit.setPlaceholderText("Find your streamcontrol.json")
 
-        self._button.value = self.__buttonAction
+        self._button.value = self.__button_action
 
-    def __buttonAction(self, data=None):
+    def __button_action(self, data=None):
         if self._file.value:
             self.parent._MeleeUploader__start_sc(self._file.value)
         else:
@@ -96,6 +98,15 @@ class SCFileInput(BaseWidget):
 
 class MeleeUploader(BaseWidget):
     def __init__(self):
+        try:  # check if the user can update the app
+            latest_version = requests.get('https://pypi.python.org/pypi/meleeuploader/json').json()['info']['version']
+            if (consts.__version__ != latest_version):
+                resp = self.question(f"Current Version: {consts.__version__}\nVersion {latest_version} is available. Would you like to update?")
+                if resp == "yes":
+                    subprocess.call(('pip3', 'install', '-U', 'meleeuploader'))
+                    print("You can now restart the app to use the new version")
+        except Exception as e:
+            print(e)
         if consts.melee:
             super(MeleeUploader, self).__init__("Melee YouTube Uploader")
         else:
@@ -189,7 +200,7 @@ class MeleeUploader(BaseWidget):
         self._pID.form.lineEdit.setPlaceholderText("Accepts full YT link")
 
         # Define the button action
-        self._button.value = self.__buttonAction
+        self._button.value = self.__button_action
 
         # For pulling characters from SA
         self.__p1chars = []
@@ -217,7 +228,7 @@ class MeleeUploader(BaseWidget):
         # Get latest values from form_values.txt
         self.__load_form()
 
-    def __buttonAction(self, data=None):
+    def __button_action(self, data=None):
         """Button action event"""
         if any(not x for x in (self._ename.value, self._p1.value, self._p2.value, self._file.value)):
             print("Missing one of the required fields (event name, player names, file name)")
@@ -658,7 +669,7 @@ class MeleeUploader(BaseWidget):
         self._obswin.close()
         try:
             self._obs = obsws(host, port)
-            self._obs.register(self.__buttonAction, events.RecordingStopped)
+            self._obs.register(self.__button_action, events.RecordingStopped)
             self._obs.connect()
             print("Hooked into OBS")
         except Exception as e:
