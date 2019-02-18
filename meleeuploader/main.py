@@ -7,7 +7,6 @@ from . import forms
 from . import consts
 from . import youtube as yt
 
-import requests
 import pyforms_lite
 
 
