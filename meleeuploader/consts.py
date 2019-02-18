@@ -63,11 +63,12 @@ ult_chars = ('Mario', 'Donkey Kong', 'Link', 'Samus', 'Dark Samus', 'Yoshi',
              'Squirtle', 'Ivysaur', 'Charizard', 'Diddy Kong', 'Lucas',
              'Sonic', 'King Dedede', 'Olimar', 'Lucario', 'R.O.B', 'Toon Link',
              'Wolf', 'Villager', 'Mega Man', 'Wii Fit Trainer',
-             'Rosalina & Luma', 'Little Mac', 'Greninja', 'Mii Fighter',
-             'Palutena', 'Pac-Man', 'Robin', 'Shulk', 'Bowser Jr.',
-             'Duck Hunt', 'Ryu', 'Ken', 'Cloud', 'Corrin', 'Bayonetta',
-             'Inkling', 'Ridley', 'Simon', 'Richter', 'King K. Rool',
-             'Isabelle', 'Incineroar', 'Piranha Plant', 'Joker')
+             'Rosalina & Luma', 'Little Mac', 'Greninja', 'Mii Brawler',
+             'Mii Gunner', 'Mii Swordfighter', 'Palutena', 'Pac-Man', 'Robin',
+             'Shulk', 'Bowser Jr.', 'Duck Hunt', 'Ryu', 'Ken', 'Cloud',
+             'Corrin', 'Bayonetta', 'Inkling', 'Ridley', 'Simon', 'Richter',
+             'King K. Rool', 'Isabelle', 'Incineroar', 'Piranha Plant',
+             'Joker')
 
 melee_chars = ('Fox', 'Falco', 'Marth', 'Sheik', 'Jigglypuff', 'Peach',
                'Captain Falcon', 'Ice Climbers', 'Pikachu', 'Samus',

@@ -101,10 +101,13 @@ class MeleeUploader(BaseWidget):
         try:  # check if the user can update the app
             latest_version = requests.get('https://pypi.python.org/pypi/meleeuploader/json').json()['info']['version']
             if (consts.__version__ != latest_version):
-                resp = self.question(f"Current Version: {consts.__version__}\nVersion {latest_version} is available. Would you like to update?", title="MeleeUploader")
-                if resp == "yes":
-                    subprocess.call(('pip3', 'install', '-U', 'meleeuploader'))
-                    print("You can now restart the app to use the new version")
+                if "linux" in sys.platform:
+                    self.message(f"Current Version: {consts.__version__}\nVersion {latest_version} is available.", title="MeleeUploader")
+                else:
+                    resp = self.question(f"Current Version: {consts.__version__}\nVersion {latest_version} is available. Would you like to update?", title="MeleeUploader")
+                    if resp == "yes":
+                        subprocess.call(('pip3', 'install', '-U', 'meleeuploader'))
+                        print("You can now restart the app to use the new version")
         except Exception as e:
             print(e)
 
