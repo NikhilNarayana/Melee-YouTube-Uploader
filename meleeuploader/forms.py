@@ -181,7 +181,7 @@ class MeleeUploader(BaseWidget):
 
         # Main Menu Layout
         self.mainmenu = [
-            {'Settings': [{'Remove YouTube Credentials': self.__reset_cred_event}, {'Toggle SA Hook': self.__show_sa_form}, {'Toggle OBS Hook': self.__show_obs_form}, {'Toggle SC Hook': self.__show_sc_form}],
+            {'Settings': [{'YouTube Log Out': self.__reset_cred_event}, {'Toggle SA Hook': self.__show_sa_form}, {'Toggle OBS Hook': self.__show_obs_form}, {'Toggle SC Hook': self.__show_sc_form}],
                 'Save/Clear': [{'Save Form': self.__save_form}, {'Clear Match Values': self.__reset_match}, {'Clear Event Values': self.__reset_event}, {'Clear All': self.__reset_forms}],
                 'Queue': [{'Toggle Uploads': self.__toggle_worker}, {'Save Queue': self.__save_queue}, {'Load Queue': self.__load_queue}],
                 'History': [{'Show History': self.__show_h_view}],
@@ -380,11 +380,15 @@ class MeleeUploader(BaseWidget):
             print(text, file=sys.__stdout__, end='')
 
     def __reset_cred_event(self):
-        if consts.youtube:
-            os.remove(os.path.join(os.path.expanduser("~"), ".smash-oauth2-youtube.json"))
-        if consts.sheets:
-            os.remove(os.path.join(os.path.expanduser("~"), ".smash-oauth2-spreadsheet.json"))
-        sys.exit(0)
+        title = consts.youtube.channels().list(part='snippet', mine=True).execute()
+        title = title['items'][0]['snippet']['title']
+        resp = self.question(f"You are currently logged into {title}\nWould you like to log out?", title="MeleeUploader")
+        if resp == "yes":
+            if consts.youtube:
+                os.remove(os.path.join(os.path.expanduser("~"), ".smash-oauth2-youtube.json"))
+            if consts.sheets:
+                os.remove(os.path.join(os.path.expanduser("~"), ".smash-oauth2-spreadsheet.json"))
+            sys.exit(0)
 
     def __reset_match(self, menu=True, isadir=False):
         self._p1char.load_form(dict(selected=[]))
