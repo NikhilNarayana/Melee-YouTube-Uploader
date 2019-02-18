@@ -107,10 +107,12 @@ class MeleeUploader(BaseWidget):
                     print("You can now restart the app to use the new version")
         except Exception as e:
             print(e)
+
         if consts.melee:
             super(MeleeUploader, self).__init__("Melee YouTube Uploader")
         else:
             super(MeleeUploader, self).__init__("Smash YouTube Uploader")
+
         # Redirct print output
         sys.stdout = EmittingStream(textWritten=self.writePrint)
 
@@ -139,6 +141,7 @@ class MeleeUploader(BaseWidget):
         self._bracket = ControlText("Bracket Link")
         self._tags = ControlText("Tags")
         self._description = ControlTextArea("Description")
+
         # Match Values
         self._file = ControlFile("File")
         self._p1 = ControlText()
@@ -161,6 +164,7 @@ class MeleeUploader(BaseWidget):
 
         # Button
         self._button = ControlButton('Submit')
+        self._button.value = self.__button_action
 
         # Title Formats
         for f in consts.titleformat:
@@ -183,9 +187,8 @@ class MeleeUploader(BaseWidget):
         # Add ControlCombo values
         for t in consts.match_types:
             self._mtype += t
-        self._privacy += "public"
-        self._privacy += "unlisted"
-        self._privacy += "private"
+        for t in ("public", "unlisted", "private"):
+            self._privacy += t
 
         # Set placeholder text
         self._ename_min.form.lineEdit.setPlaceholderText("Shortened Event Name")
@@ -198,9 +201,6 @@ class MeleeUploader(BaseWidget):
         self._bracket.form.lineEdit.setPlaceholderText("Include https://")
         self._tags.form.lineEdit.setPlaceholderText("Separate with commas")
         self._pID.form.lineEdit.setPlaceholderText("Accepts full YT link")
-
-        # Define the button action
-        self._button.value = self.__button_action
 
         # For pulling characters from SA
         self.__p1chars = []
