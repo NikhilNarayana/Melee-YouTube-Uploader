@@ -3,7 +3,7 @@ A YouTube Uploader for my Melee recordings
 
 A modified version of FRC-YouTube-Uploader for Super Smash Bros. Melee and Super Smash Bros. Ultimate.
 
-Minimal, anonymous or already public data is collected on Google Sheets [here](https://docs.google.com/spreadsheets/d/1TavrlG3uiLLJUwrx6UB0CCyjbiWElYE8sCev6fWclaw/edit#gid=0), this is to help figure out if certain highly specific features are being used.
+Already public/non-sensitive data is collected on Google Sheets [here](https://docs.google.com/spreadsheets/d/1TavrlG3uiLLJUwrx6UB0CCyjbiWElYE8sCev6fWclaw/edit#gid=0), this is to help figure out if certain highly specific features are being used.
 
 
 **IMPORTANT NOTE**
@@ -15,7 +15,7 @@ This application **DOES NOT** support enabling monetization at the moment. I hig
 * Maybe other stuff
 
 ## Known Issues
-* Fails to work when antivirus software is installed
+* Fails to work when antivirus software is installed, maybe
 
 ## Contributing
 PRs are appreciated and will be reviewed quickly, the only code quality standard I have is to follow PEP8 standard except for the line length. If you have trouble understanding my code just ask me.
@@ -33,7 +33,10 @@ I am always open to help setup the program or fix any techincal issues you may h
 * Load old submissions from history
 * Save a queue to be uploaded later
 * Melee and Ultimate Character Lists
-* Hook into Scoreboard Assistant and OBS
+* Hook into Scoreboard Assistant, Stream Control<sup>*</sup>, OBS
+* Automatic Updates
+
+<sup>*</sup>you must adjust your configuration to use specific key names listed [here](https://github.com/NikhilNarayana/Melee-YouTube-Uploader/releases/tag/v1.10)
 
 ## How to Setup - Video Version: https://youtu.be/zrcf4t_qk5A
 1. Install [Python 3.7.2](https://www.python.org/downloads/release/python-372/) for your OS with the PATH added and make sure there are no other versions of Python 3.
@@ -73,7 +76,7 @@ If you would like to have no console window on your screen, you will need to fin
 #### File
 File is able to be used as either a file or directory input. Because of how the input selector is setup you will need to select a file within the directory you wish to use and then you can delete the filename from the field. If you select a directory it will not be deleted after submission.
 
-When using this quirk of the field, it will find the newest file in the directory you give it, so make sure no other files are written to this folder other than the OBS recordings. This is best used for uploading or queueing videos during an event.
+When using this quirk of the field, it will find the newest file in the directory you give it, so make sure no other files are written to this folder other than the recordings. This is best used for uploading or queueing videos during an event.
 
 #### Title Format 
 All the options support no characters and the available options can be expanded upon on request.
