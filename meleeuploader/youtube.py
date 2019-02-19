@@ -85,7 +85,7 @@ def upload_service(insert_request):
                 else:
                     print(response)
                     print(status)
-                    return False, "Upload failed, no id in response"
+                    return False, None
 
 
 def get_youtube_service():
