@@ -117,7 +117,7 @@ class MeleeUploader(BaseWidget):
             super(MeleeUploader, self).__init__("Smash YouTube Uploader")
 
         # Redirct print output
-        sys.stdout = EmittingStream(textWritten=self.writePrint)
+        sys.stdout = EmittingStream(textWritten=self.write_print)
 
         # Websocket
         self._sa = None
@@ -372,7 +372,7 @@ class MeleeUploader(BaseWidget):
             print(vid)
         return ret
 
-    def writePrint(self, text):
+    def write_print(self, text):
         self._output.value += text
         self._output._form.plainTextEdit.moveCursor(QtGui.QTextCursor.End)
         if sys.__stdout__:
