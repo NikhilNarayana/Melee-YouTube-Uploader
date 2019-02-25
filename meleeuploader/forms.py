@@ -216,9 +216,8 @@ class MeleeUploader(BaseWidget):
             self.__ultimate_chars()
 
         # Stream Control
-        self._scthr = None
+        self._sc = None
         self._scf = ControlText()
-        self._scrun = False
 
         # Define the existing form fields
         self._form_fields = (
@@ -447,9 +446,9 @@ class MeleeUploader(BaseWidget):
 
     def __show_sc_form(self):
         if self._sc:
-            print("Closing Stream Control Hook")
             self._sc.stopsc()
-            self._sc.close()
+            print("Unhooked from SC")
+            self._sct.quit()
             self._sc = None
         else:
             self._scrun = True
@@ -462,15 +461,16 @@ class MeleeUploader(BaseWidget):
         self._scf.value = f
         self._sc = workers.SCWorker(f)
         self._sct = QtCore.QThread()
-        self._sct.moveToThread(self._sct)
+        self._sc.moveToThread(self._sct)
         self._sc.sig.connect(self.__sc_update)
         self._sct.started.connect(self._sc.get_update)
         self._sct.start()
+        print("Hooked into SC")
 
     def __show_sa_form(self):
         if self._sa:
-            print("Closing the Websocket")
             self._sa.closews()
+            print("Unhooked from SA")
             self._sat.quit()
             self._sa = None
         else:
@@ -663,23 +663,25 @@ class MeleeUploader(BaseWidget):
 
     def __hook_sa(self, host, port):
         self._sawin.close()
-        print("Starting Websocket, please make sure Scoreboard Assistant is open")
+        self.message("Please make sure Scoreboard Assistant is open", title="MeleeUploader")
         self._sa = workers.SAWorker(f"ws://{host}:{port}")
         self._sat = QtCore.QThread()
-        self._sat.moveToThread(self._sat)
+        self._sa.moveToThread(self._sat)
         self._sa.sig.connect(self.__sa_update)
         self._sat.started.connect(self._sa.startws)
         self._sat.start()
+        print("Hooked into SA")
 
     def __hook_obs(self, host, port):
         self._obswin.close()
-        print("Starting OBS Connection")
+        self.message("Please make sure OBS is open and the Websocket server is enabled with the default settings and no password", title="MeleeUploader")
         self._obs = workers.OBSWorker(host, port)
         self._obst = QtCore.QThread()
-        self._obst.moveToThread(self._obst)
+        self._obs.moveToThread(self._obst)
         self._obs.sig.connect(self.__button_action)
         self._obst.started.connect(self._obs.startobs)
         self._obst.start()
+        print("Hooked into OBS")
 
     def __sc_update(self, data):
         mtype = ""
