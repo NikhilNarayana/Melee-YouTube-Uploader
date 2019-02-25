@@ -14,6 +14,7 @@ from datetime import datetime
 from .viewer import *
 from . import utils
 from . import consts
+from . import workers
 from . import youtube as yt
 
 import requests
@@ -120,7 +121,7 @@ class MeleeUploader(BaseWidget):
         sys.stdout = EmittingStream(textWritten=self.writePrint)
 
         # Websocket
-        self._ws = None
+        self._sa = None
         self._obs = None
 
         # History
@@ -467,11 +468,10 @@ class MeleeUploader(BaseWidget):
         self._scthr.start()
 
     def __show_sa_form(self):
-        if self._ws:
+        if self._sa:
             print("Closing the Websocket")
-            self._ws.close()
-            self._ws = None
-            self._wst.join()
+            self._sa.closews()
+            self._sat.quit()
         else:
             self._sawin = SAHostPortInput()
             self._sawin.parent = self
@@ -617,7 +617,7 @@ class MeleeUploader(BaseWidget):
         self._p1char.load_form(dict(selected=p1))
         self._p2char.load_form(dict(selected=p2))
 
-    def __update_form(self, message):
+    def __sa_update(self, message):
         data = json.loads(message)
         prefix = ""
         mtype = ""
@@ -666,11 +666,12 @@ class MeleeUploader(BaseWidget):
     def __hook_sa(self, host, port):
         self._sawin.close()
         print("Starting Websocket, please make sure Scoreboard Assistant is open")
-        self._ws = websocket.WebSocketApp(f"ws://{host}:{port}", on_message=self.__update_form)
-        self._wst = threading.Thread(target=self._ws.run_forever)
-        self._wst.daemon = True
-        self.__wsdata = None
-        self._wst.start()
+        self._sa = workers.SAWorker(f"ws://{host}:{port}")
+        self._sat = QtCore.QThread()
+        self._sa.sig.connect(self.__sa_update)
+        self._sat.moveToThread(self._sat)
+        self._sat.started.connect(self._sa.startws)
+        self._sat.start()
 
     def __hook_obs(self, host, port):
         self._obswin.close()
