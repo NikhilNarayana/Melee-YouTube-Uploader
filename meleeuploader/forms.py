@@ -23,7 +23,6 @@ import pyforms_lite
 from argparse import Namespace
 from PyQt5 import QtCore, QtGui
 from pyforms_lite import BaseWidget
-from obswebsocket import obsws, events
 from pyforms_lite.controls import ControlText, ControlFile
 from pyforms_lite.controls import ControlTextArea, ControlList
 from pyforms_lite.controls import ControlCombo, ControlProgress
@@ -463,9 +462,12 @@ class MeleeUploader(BaseWidget):
     def __start_sc(self, f):
         self._scwin.close()
         self._scf.value = f
-        self._scthr = threading.Thread(target=self.__hook_sc)
-        self._scthr.daemon = True
-        self._scthr.start()
+        self._sc = workers.SCWorker(f)
+        self._sct = QtCore.QThread()
+        self._sc.sig.connect(self.__hook_sc)
+        self._sct.moveToThread(self._sct)
+        self._sct.started.connect(self._sc.startsc)
+        self._sct.start()
 
     def __show_sa_form(self):
         if self._sa:
@@ -480,8 +482,9 @@ class MeleeUploader(BaseWidget):
 
     def __show_obs_form(self):
         if self._obs:
-            self._obs.disconnect()
+            self._obs.closeobs()
             print("Unhooked from OBS")
+            self._obst.quit()
             self._obs = None
         else:
             self._obswin = OBSHostPortInput()
@@ -672,65 +675,56 @@ class MeleeUploader(BaseWidget):
 
     def __hook_obs(self, host, port):
         self._obswin.close()
-        try:
-            self._obs = obsws(host, port)
-            self._obs.register(self.__button_action, events.RecordingStopped)
-            self._obs.connect()
-            print("Hooked into OBS")
-        except Exception as e:
-            print("OBS Websocket Server might not be enabled or installed")
+        print("Starting OBS Connection")
+        self._obs = workers.OBSWorker(host, port)
+        self._obst = QtCore.QThread()
+        self._obs.sig.connect(self.__button_action)
+        self._obst.moveToThread(self._obst)
+        self._obst.started.connect(self._obs.startobs)
+        self._obst.start()
+        
 
-    def __hook_sc(self):
-        data = None
-        ndata = None
-        while self._scrun:
-            with open(self._scf.value) as f:
-                ndata = json.load(f)
-                if not data:
-                    data = ndata
-            if data['timestamp'] != ndata['timestamp']:
-                data = ndata
-                mtype = ""
-                suffix = ""
-                prefix = ""
-                if consts.melee:
-                    try:
-                        self.__p1chars = self._p1char.value
-                        self.__p2chars = self._p2char.value
-                        p1char = data['p1_char']
-                        p2char = data['p2_char']
-                        if p1char == "Doctor Mario":
-                            p1char = "Dr. Mario"
-                        if p2char == "Doctor Mario":
-                            p2char = "Dr. Mario"
-                        if p1char not in self.__p1chars:
-                            self.__p1chars.append(p1char)
-                        if p2char not in self.__p2chars:
-                            self.__p2chars.append(p2char)
-                        self._p1char.load_form(dict(selected=self.__p1chars))
-                        self._p2char.load_form(dict(selected=self.__p2chars))
-                    except Exception as e:
-                        print(e)
-                try:
-                    self._p1.value = data['p1_name']
-                    self._p2.value = data['p2_name']
-                except Exception as e:
-                    print(e)
-                try:
-                    for t in consts.match_types:
-                        if t.lower() in data['event_round'].lower():
-                            mtype = t
-                            suffix = ""
-                            sections = data['event_round'].split(t)
-                            suffix = sections[1].strip()
-                            prefix = data['event_bracket']
-                        elif t.lower() in data['event_bracket'].lower():
-                            mtype = t
-                            prefix = ""
-                            suffix = ""
-                    self._mtype.value = mtype
-                    self._mprefix.value = prefix
-                    self._msuffix.value = suffix
-                except Exception as e:
-                    print(e)
-            sleep(5)
+    def __hook_sc(self, data):
+        mtype = ""
+        suffix = ""
+        prefix = ""
+        if consts.melee:
+            try:
+                self.__p1chars = self._p1char.value
+                self.__p2chars = self._p2char.value
+                p1char = data['p1_char']
+                p2char = data['p2_char']
+                if p1char == "Doctor Mario":
+                    p1char = "Dr. Mario"
+                if p2char == "Doctor Mario":
+                    p2char = "Dr. Mario"
+                if p1char not in self.__p1chars:
+                    self.__p1chars.append(p1char)
+                if p2char not in self.__p2chars:
+                    self.__p2chars.append(p2char)
+                self._p1char.load_form(dict(selected=self.__p1chars))
+                self._p2char.load_form(dict(selected=self.__p2chars))
+            except Exception as e:
+                print(e)
+        try:
+            self._p1.value = data['p1_name']
+            self._p2.value = data['p2_name']
+        except Exception as e:
+            print(e)
+        try:
+            for t in consts.match_types:
+                if t.lower() in data['event_round'].lower():
+                    mtype = t
+                    suffix = ""
+                    sections = data['event_round'].split(t)
+                    suffix = sections[1].strip()
+                    prefix = data['event_bracket']
+                elif t.lower() in data['event_bracket'].lower():
+                    mtype = t
+                    prefix = ""
+                    suffix = ""
+            self._mtype.value = mtype
+            self._mprefix.value = prefix
+            self._msuffix.value = suffix
+        except Exception as e:
+            print(e)
