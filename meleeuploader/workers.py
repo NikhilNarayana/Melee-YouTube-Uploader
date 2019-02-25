@@ -20,13 +20,9 @@ class SAWorker(QObject):
     def startws(self):
         self.ws = websocket.WebSocketApp(self.addr, on_message=self.get_update)
         self.ws.run_forever()
-        # self.thr = threading.Thread(target=self.ws.run_forever)
-        # self.thr.daemon = True
-        # self.thr.start()
 
     def closews(self):
         self.ws.close()
-        # self.thr.join()
 
     def get_update(self, message):
         data = json.loads(message)
@@ -70,15 +66,8 @@ class SCWorker(QObject):
         self.file = file
         self._run = True
 
-    def startsc(self):
-        pass
-        # self.thr = threading.Thread(target=self.get_update)
-        # self.thr.daemon = True
-        # self.thr.start()
-
     def stopsc(self):
         self._run = False
-        # self.thr.join()
 
     def get_update(self):
         while self._run:
@@ -86,6 +75,7 @@ class SCWorker(QObject):
                 ndata = json.load(f)
                 if not self.data:
                     self.data = ndata
+                    self.send_update()
             if self.data['timestamp'] != ndata['timestamp']:
                 self.data = ndata
                 self.send_update()
