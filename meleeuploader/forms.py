@@ -29,17 +29,6 @@ from pyforms_lite.controls import ControlCombo, ControlProgress
 from pyforms_lite.controls import ControlButton, ControlCheckBox, ControlCheckBoxList
 
 
-class EmittingStream(QtCore.QObject):
-
-    textWritten = QtCore.pyqtSignal(str)
-
-    def write(self, text):
-        self.textWritten.emit(str(text))
-
-    def flush(self):
-        pass
-
-
 class SAHostPortInput(BaseWidget):
     def __init__(self):
         super(SAHostPortInput, self).__init__("SA Websocket")
@@ -117,7 +106,7 @@ class MeleeUploader(BaseWidget):
             super(MeleeUploader, self).__init__("Smash YouTube Uploader")
 
         # Redirct print output
-        sys.stdout = EmittingStream(textWritten=self.write_print)
+        sys.stdout = workers.WriteWorker(textWritten=self.write_print)
 
         # Websocket
         self._sa = None

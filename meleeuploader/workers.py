@@ -84,3 +84,15 @@ class SCWorker(QObject):
     @pyqtSlot()
     def send_update(self):
         self.sig.emit(self.data)
+
+
+class WriteWorker(QObject):
+
+    textWritten = pyqtSignal(str)
+
+    @pyqtSlot(str)
+    def write(self, text):
+        self.textWritten.emit(str(text))
+
+    def flush(self):
+        pass
