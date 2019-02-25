@@ -102,7 +102,7 @@ class MeleeUploader(BaseWidget):
             latest_version = requests.get('https://pypi.python.org/pypi/meleeuploader/json').json()['info']['version']
             if (consts.__version__ != latest_version):
                 if "linux" in sys.platform:
-                    self.message(f"Current Version: {consts.__version__}\nVersion {latest_version} is available.", title="MeleeUploader")
+                    self.message(f"Current Version: {consts.__version__}\nVersion {latest_version} is available.\nUse sudo pip3 install -U meleeuploader=={latest_version} in terminal to update to the newest verison", title="MeleeUploader")
                 else:
                     resp = self.question(f"Current Version: {consts.__version__}\nVersion {latest_version} is available. Would you like to update?", title="MeleeUploader")
                     if resp == "yes":
