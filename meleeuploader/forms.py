@@ -472,6 +472,7 @@ class MeleeUploader(BaseWidget):
             print("Closing the Websocket")
             self._sa.closews()
             self._sat.quit()
+            self._sa = None
         else:
             self._sawin = SAHostPortInput()
             self._sawin.parent = self
