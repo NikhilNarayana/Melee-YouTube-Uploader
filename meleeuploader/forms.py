@@ -6,15 +6,14 @@ import json
 import pickle
 import threading
 import subprocess
-from time import sleep
 from queue import Queue
 from copy import deepcopy
 from datetime import datetime
 
-from .viewer import *
 from . import utils
 from . import consts
 from . import workers
+from .viewer import *
 from . import youtube as yt
 
 import requests
@@ -123,7 +122,6 @@ class MeleeUploader(BaseWidget):
         self._queue = Queue()
         self._queueref = []
 
-        # Create form fields
         # Event Values
         self._privacy = ControlCombo("Video Privacy")
         self._titleformat = ControlCombo("Title Format")
@@ -194,7 +192,7 @@ class MeleeUploader(BaseWidget):
         self._tags.form.lineEdit.setPlaceholderText("Separate with commas")
         self._pID.form.lineEdit.setPlaceholderText("Accepts full YT link")
 
-        # For pulling characters from SA
+        # For pulling characters
         self.__p1chars = []
         self.__p2chars = []
 
