@@ -20,7 +20,7 @@ def main():
     try:
         consts.sheets = yt.get_spreadsheet_service()
     except Exception as e:
-        pass
+        print(e)
     try:
         pyforms_lite.start_app(forms.MeleeUploader, geometry=(200, 200, 1, 1))
     except Exception as e:

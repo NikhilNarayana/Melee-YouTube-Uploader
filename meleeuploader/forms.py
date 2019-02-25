@@ -99,7 +99,7 @@ class SCFileInput(BaseWidget):
 class MeleeUploader(BaseWidget):
     def __init__(self):
         try:  # check if the user can update the app
-            latest_version = requests.get('https://pypi.python.org/pypi/meleeuploader/json').json()['info']['version']
+            latest_version = requests.get('https://pypi.org/pypi/MeleeUploader/json').json()['info']['version']
             if (consts.__version__ != latest_version):
                 if "linux" in sys.platform:
                     self.message(f"Current Version: {consts.__version__}\nVersion {latest_version} is available.\nUse sudo pip3 install -U meleeuploader=={latest_version} in terminal to update to the newest verison", title="MeleeUploader")
@@ -636,12 +636,12 @@ class MeleeUploader(BaseWidget):
                 self._p1char.load_form(dict(selected=self.__p1chars))
                 self._p2char.load_form(dict(selected=self.__p2chars))
             except Exception as e:
-                pass
+                print(e)
         try:
             self._p1.value = data['player1']
             self._p2.value = data['player2']
         except Exception as e:
-            pass
+            print(e)
         try:
             for t in consts.match_types:
                 if t.lower() in data['match'].lower():
@@ -659,7 +659,7 @@ class MeleeUploader(BaseWidget):
             self._mprefix.value = prefix
             self._msuffix.value = suffix
         except Exception as e:
-            pass
+            print(e)
 
     def __hook_sa(self, host, port):
         self._sawin.close()
