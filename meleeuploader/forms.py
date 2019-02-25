@@ -94,7 +94,7 @@ class MeleeUploader(BaseWidget):
                 else:
                     resp = self.question(f"Current Version: {consts.__version__}\nVersion {latest_version} is available. Would you like to update?", title="MeleeUploader")
                     if resp == "yes":
-                        subprocess.call(('pip3', 'install', '-U', 'meleeuploader'))
+                        subprocess.call(('pip3', 'install', '-U', f'meleeuploader=={latest_version}'))
                         self.message("You can now restart the app to use the new version", title="MeleeUploader")
         except Exception as e:
             print(e)
