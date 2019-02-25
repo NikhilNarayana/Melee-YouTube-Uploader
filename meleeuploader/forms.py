@@ -618,14 +618,10 @@ class MeleeUploader(BaseWidget):
         self._p1char.load_form(dict(selected=p1))
         self._p2char.load_form(dict(selected=p2))
 
-    def __sa_update(self, message):
-        data = json.loads(message)
+    def __sa_update(self, data):
         prefix = ""
         mtype = ""
         suffix = ""
-        if data == self.__wsdata:
-            return
-        self.__wsdata = data
         if consts.melee:
             try:
                 self.__p1chars = self._p1char.value
