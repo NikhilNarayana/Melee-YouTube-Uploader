@@ -22,6 +22,11 @@ def main():
     except Exception as e:
         print(e)
     try:
+        if os.path.isfile(os.path.join(os.path.expanduser("~"), ".smash-oauth2-partner.json")):
+            consts.partner = yt.get_partner_service()
+    except Exception as e:
+        print(e)
+    try:
         pyforms_lite.start_app(forms.MeleeUploader, geometry=(200, 200, 1, 1))
     except Exception as e:
         print("Error:", e)

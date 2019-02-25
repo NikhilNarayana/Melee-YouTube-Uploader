@@ -112,12 +112,10 @@ def get_youtube_service():
 
 
 def get_partner_service():
-    CLIENT_SECRETS_FILE = get_secrets((
-        os.path.expanduser("~"),
-        sys.prefix,
-        os.path.join(sys.prefix, "local"), "/usr",
-        os.path.join("/usr", "local")
-    ), ("client_secrets.json", ".client_secrets.json", "share/meleeuploader/client_secrets.json"))
+    CLIENT_SECRETS_FILE = get_secrets((os.path.expanduser("~"),), ("client_secrets.json", ".client_secrets.json"))
+
+    if not CLIENT_SECRETS_FILE:
+        return None
 
     flow = flow_from_clientsecrets(CLIENT_SECRETS_FILE, scope=("https://www.googleapis.com/auth/youtubepartner", "https://www.googleapis.com/auth/youtube",))
 
@@ -182,3 +180,5 @@ def get_secrets(prefixes, relative_paths):
                 path = os.path.join(prefix, relative_path)
                 if os.path.exists(path):
                     return path
+            else:
+                return None

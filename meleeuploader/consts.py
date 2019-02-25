@@ -11,6 +11,7 @@ melee = True
 custom = False
 youtube = None
 sheets = None
+partner = None
 loadedQueue = False
 
 form_values = os.path.join(os.path.expanduser("~"), '.smash_form_values.json')
