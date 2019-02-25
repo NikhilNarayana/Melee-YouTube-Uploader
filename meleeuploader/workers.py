@@ -19,13 +19,14 @@ class SAWorker(QObject):
 
     def startws(self):
         self.ws = websocket.WebSocketApp(self.addr, on_message=self.get_update)
-        self.thr = threading.Thread(target=self.ws.run_forever)
-        self.thr.daemon = True
-        self.thr.start()
+        self.ws.run_forever()
+        # self.thr = threading.Thread(target=self.ws.run_forever)
+        # self.thr.daemon = True
+        # self.thr.start()
 
     def closews(self):
         self.ws.close()
-        self.thr.join()
+        # self.thr.join()
 
     def get_update(self, message):
         data = json.loads(message)
@@ -59,6 +60,7 @@ class OBSWorker(QObject):
     def submit(self, data=None):
         self.sig.emit()
 
+
 class SCWorker(QObject):
     sig = pyqtSignal(object)
     data = None
@@ -69,9 +71,14 @@ class SCWorker(QObject):
         self._run = True
 
     def startsc(self):
-        self.thr = threading.Thread(target=self.get_update)
-        self.thr.daemon = True
-        self.thr.start()
+        pass
+        # self.thr = threading.Thread(target=self.get_update)
+        # self.thr.daemon = True
+        # self.thr.start()
+
+    def stopsc(self):
+        self._run = False
+        # self.thr.join()
 
     def get_update(self):
         while self._run:

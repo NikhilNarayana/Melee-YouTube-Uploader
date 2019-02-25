@@ -429,8 +429,6 @@ class MeleeUploader(BaseWidget):
                 options.then = datetime.now()
                 if self._init(options):
                     row = [None] * 20
-                    f = self._pID.value.find("PL")
-                    self._pID.value = self._pID.value[f:f + 34]
                     row[0] = deepcopy(options.ename)
                     row[1] = deepcopy(options.pID)
                     row[7] = deepcopy(options.bracket)
@@ -448,11 +446,11 @@ class MeleeUploader(BaseWidget):
         print("Stopping Upload Service")
 
     def __show_sc_form(self):
-        if self._scthr:
+        if self._sc:
             print("Closing Stream Control Hook")
-            self._scrun = False
-            self._scthr.join()
-            self._scthr = None
+            self._sc.stopsc()
+            self._sc.close()
+            self._sc = None
         else:
             self._scrun = True
             self._scwin = SCFileInput(self._scf)
@@ -464,9 +462,9 @@ class MeleeUploader(BaseWidget):
         self._scf.value = f
         self._sc = workers.SCWorker(f)
         self._sct = QtCore.QThread()
-        self._sc.sig.connect(self.__hook_sc)
         self._sct.moveToThread(self._sct)
-        self._sct.started.connect(self._sc.startsc)
+        self._sc.sig.connect(self.__sc_update)
+        self._sct.started.connect(self._sc.get_update)
         self._sct.start()
 
     def __show_sa_form(self):
@@ -668,8 +666,8 @@ class MeleeUploader(BaseWidget):
         print("Starting Websocket, please make sure Scoreboard Assistant is open")
         self._sa = workers.SAWorker(f"ws://{host}:{port}")
         self._sat = QtCore.QThread()
-        self._sa.sig.connect(self.__sa_update)
         self._sat.moveToThread(self._sat)
+        self._sa.sig.connect(self.__sa_update)
         self._sat.started.connect(self._sa.startws)
         self._sat.start()
 
@@ -678,13 +676,12 @@ class MeleeUploader(BaseWidget):
         print("Starting OBS Connection")
         self._obs = workers.OBSWorker(host, port)
         self._obst = QtCore.QThread()
-        self._obs.sig.connect(self.__button_action)
         self._obst.moveToThread(self._obst)
+        self._obs.sig.connect(self.__button_action)
         self._obst.started.connect(self._obs.startobs)
         self._obst.start()
-        
 
-    def __hook_sc(self, data):
+    def __sc_update(self, data):
         mtype = ""
         suffix = ""
         prefix = ""
