@@ -180,5 +180,5 @@ def get_secrets(prefixes, relative_paths):
                 path = os.path.join(prefix, relative_path)
                 if os.path.exists(path):
                     return path
-            else:
-                return None
+        else:
+            return None
