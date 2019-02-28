@@ -14,7 +14,6 @@ from . import utils
 from . import consts
 from . import workers
 from .viewer import *
-from . import youtube as yt
 
 import requests
 import websocket
@@ -79,7 +78,7 @@ class SCFileInput(BaseWidget):
 
     def __button_action(self, data=None):
         if self._file.value:
-            self.parent._MeleeUploader__start_sc(self._file.value)
+            self.parent._MeleeUploader__hook_sc(self._file.value)
         else:
             print("You must select a file")
 
@@ -170,7 +169,7 @@ class MeleeUploader(BaseWidget):
         self.mainmenu = [
             {'Settings': [{'YouTube Log Out': self.__reset_cred_event}, {'Toggle SA Hook': self.__show_sa_form}, {'Toggle OBS Hook': self.__show_obs_form}, {'Toggle SC Hook': self.__show_sc_form}],
                 'Save/Clear': [{'Save Form': self.__save_form}, {'Clear Match Values': self.__reset_match}, {'Clear Event Values': self.__reset_event}, {'Clear All': self.__reset_forms}],
-                'Queue': [{'Toggle Uploads': self.__toggle_worker}, {'Save Queue': self.__save_queue}, {'Load Queue': self.__load_queue}],
+                'Queue': [{'Toggle Uploads': utils.toggle_worker}, {'Save Queue': self.__save_queue}, {'Load Queue': self.__load_queue}],
                 'History': [{'Show History': self.__show_h_view}],
                 'Characters': [{'Melee': self.__melee_chars}, {'Ultimate': self.__ultimate_chars}, {'Custom': self.__custom_chars}]}]
 
@@ -268,97 +267,6 @@ class MeleeUploader(BaseWidget):
             thr.start()
             consts.firstrun = False
 
-    def _init(self, opts):
-        if opts.mprefix and opts.msuffix:
-            opts.mtype = " ".join((opts.mprefix, opts.mtype, opts.msuffix))
-        elif opts.mprefix:
-            opts.mtype = " ".join((opts.mprefix, opts.mtype))
-        elif opts.msuffix:
-            opts.mtype = " ".join((opts.mtype, opts.msuffix))
-        chars_exist = all(x for x in [opts.p1char, opts.p2char])
-        title = utils.make_title(opts, chars_exist)
-        if len(title) > 100:
-            opts.p1char = utils.minify_chars(opts.p1char)
-            opts.p2char = utils.minify_chars(opts.p2char)
-            title = utils.make_title(opts, chars_exist)
-            if len(title) > 100:
-                opts.mtype = utils.minify_mtype(opts)
-                title = utils.make_title(opts, chars_exist)
-                if len(title) > 100:
-                    opts.mtype = utils.minify_mtype(opts, True)
-                    title = utils.make_title(opts, chars_exist)
-                    if len(title) > 100:
-                        title = utils.make_title(opts, chars_exist, True)
-                        if len(title) > 100:
-                            # I can only hope no one ever goes this far
-                            print("Title is greater than 100 characters after minifying all options")
-                            print(title)
-                            print(f"Title Length: {len(title)}")
-                            print("Killing this upload now\n\n")
-                            return False
-        print(f"Uploading {title}")
-        if opts.descrip:
-            descrip = f"Bracket: {opts.bracket}\n{opts.descrip}\n\n{consts.credit}" if opts.bracket else f"{opts.descrip}\n\n{consts.credit}"
-        else:
-            descrip = f"Bracket: {opts.bracket}\n\n{consts.credit}" if opts.bracket else consts.credit
-        tags = list(consts.melee_tags) if consts.melee else list(consts.ult_tags)
-        if consts.custom:
-            tags = []
-        tags.extend((*opts.p1char, *opts.p2char, opts.ename, opts.ename_min, opts.p1, opts.p2))
-        if opts.tags:
-            tags.extend([x.strip() for x in opts.tags.split(",")])
-        body = dict(
-            snippet=dict(
-                title=title,
-                description=descrip,
-                tags=tags,
-                categoryID=20
-            ),
-            status=dict(
-                privacyStatus=opts.privacy)
-        )
-        ret, vid = yt.upload(consts.youtube, body, opts.file)
-        if ret and opts.pID[:2] == "PL":
-            try:
-                consts.youtube.playlistItems().insert(
-                    part="snippet",
-                    body=dict(
-                        snippet=dict(
-                            playlistId=opts.pID,
-                            resourceId=dict(
-                                kind='youtube#video',
-                                videoId=vid)))).execute()
-                print("Added to playlist")
-            except Exception as e:
-                print("Failed to add to playlist")
-                print(e)
-        if ret:
-            if consts.sheets:
-                totalTime = datetime.now() - opts.then
-                values = [[
-                    str(datetime.now()),
-                    str(totalTime), f"https://www.youtube.com/watch?v={vid}",
-                    opts.ename,
-                    opts.titleformat,
-                    title,
-                    str(consts.loadedQueue)
-                ]]
-                sheetbody = {"values": values}
-                try:
-                    consts.sheets.spreadsheets().values().append(
-                        spreadsheetId=consts.spreadsheetID,
-                        range=consts.rowRange,
-                        valueInputOption="USER_ENTERED",
-                        body=sheetbody).execute()
-                    print("Added data to spreadsheet")
-                except Exception as e:
-                    print("Failed to write to spreadsheet")
-                    print(e)
-            print("DONE\n")
-        else:
-            print(vid)
-        return ret
-
     def write_print(self, text):
         self._output.value += text
         self._output._form.plainTextEdit.moveCursor(QtGui.QTextCursor.End)
@@ -413,7 +321,7 @@ class MeleeUploader(BaseWidget):
             options = self._queue.get()
             if not options.ignore:
                 options.then = datetime.now()
-                if self._init(options):
+                if utils.pre_upload(options):
                     row = [None] * 20
                     row[0] = deepcopy(options.ename)
                     row[1] = deepcopy(options.pID)
@@ -430,29 +338,6 @@ class MeleeUploader(BaseWidget):
             self._qview -= 0
             self._queue.task_done()
         print("Stopping Upload Service")
-
-    def __show_sc_form(self):
-        if self._sc:
-            self._sc.stopsc()
-            print("Unhooked from SC")
-            self._sct.quit()
-            self._sc = None
-        else:
-            self._scrun = True
-            self._scwin = SCFileInput(self._scf)
-            self._scwin.parent = self
-            self._scwin.show()
-
-    def __start_sc(self, f):
-        self._scwin.close()
-        self._scf.value = f
-        self._sc = workers.SCWorker(f)
-        self._sct = QtCore.QThread()
-        self._sc.moveToThread(self._sct)
-        self._sc.sig.connect(self.__sc_update)
-        self._sct.started.connect(self._sc.get_update)
-        self._sct.start()
-        print("Hooked into SC")
 
     def __show_sa_form(self):
         if self._sa:
@@ -476,6 +361,51 @@ class MeleeUploader(BaseWidget):
             self._obswin.parent = self
             self._obswin.show()
 
+    def __show_sc_form(self):
+        if self._sc:
+            self._sc.stopsc()
+            print("Unhooked from SC")
+            self._sct.quit()
+            self._sc = None
+        else:
+            self._scrun = True
+            self._scwin = SCFileInput(self._scf)
+            self._scwin.parent = self
+            self._scwin.show()
+
+    def __hook_sa(self, host, port):
+        self._sawin.close()
+        self.message("Please make sure Scoreboard Assistant is open", title="MeleeUploader")
+        self._sa = workers.SAWorker(f"ws://{host}:{port}")
+        self._sat = QtCore.QThread()
+        self._sa.moveToThread(self._sat)
+        self._sa.sig.connect(self.__sa_update)
+        self._sat.started.connect(self._sa.startws)
+        self._sat.start()
+        print("Hooked into SA")
+
+    def __hook_obs(self, host, port):
+        self._obswin.close()
+        self.message("Please make sure OBS is open and the Websocket server is enabled with the default settings and no password", title="MeleeUploader")
+        self._obs = workers.OBSWorker(host, port)
+        self._obst = QtCore.QThread()
+        self._obs.moveToThread(self._obst)
+        self._obs.sig.connect(self.__button_action)
+        self._obst.started.connect(self._obs.startobs)
+        self._obst.start()
+        print("Hooked into OBS")
+
+    def __hook_sc(self, f):
+        self._scwin.close()
+        self._scf.value = f
+        self._sc = workers.SCWorker(f)
+        self._sct = QtCore.QThread()
+        self._sc.moveToThread(self._sct)
+        self._sc.sig.connect(self.__sc_update)
+        self._sct.started.connect(self._sc.get_update)
+        self._sct.start()
+        print("Hooked into SC")
+
     def __show_o_view(self, row, column):
         win = OptionsViewer(row, self._queueref[row])
         win.parent = self
@@ -485,16 +415,6 @@ class MeleeUploader(BaseWidget):
         self._hwin = HistoryViewer(self.__history)
         self._hwin.parent = self
         self._hwin.show()
-
-    def __toggle_worker(self):
-        if not consts.stop_thread:
-            print("Stopping Uploads")
-            consts.stop_thread = True
-            consts.firstrun = False
-        else:
-            print("Ready to Upload")
-            consts.stop_thread = False
-            consts.firstrun = True
 
     def __save_queue(self):
         with open(consts.queue_values, "wb") as f:
@@ -647,28 +567,6 @@ class MeleeUploader(BaseWidget):
             self._msuffix.value = suffix
         except Exception as e:
             print(e)
-
-    def __hook_sa(self, host, port):
-        self._sawin.close()
-        self.message("Please make sure Scoreboard Assistant is open", title="MeleeUploader")
-        self._sa = workers.SAWorker(f"ws://{host}:{port}")
-        self._sat = QtCore.QThread()
-        self._sa.moveToThread(self._sat)
-        self._sa.sig.connect(self.__sa_update)
-        self._sat.started.connect(self._sa.startws)
-        self._sat.start()
-        print("Hooked into SA")
-
-    def __hook_obs(self, host, port):
-        self._obswin.close()
-        self.message("Please make sure OBS is open and the Websocket server is enabled with the default settings and no password", title="MeleeUploader")
-        self._obs = workers.OBSWorker(host, port)
-        self._obst = QtCore.QThread()
-        self._obs.moveToThread(self._obst)
-        self._obs.sig.connect(self.__button_action)
-        self._obst.started.connect(self._obs.startobs)
-        self._obst.start()
-        print("Hooked into OBS")
 
     def __sc_update(self, data):
         mtype = ""
