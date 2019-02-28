@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import os
+import sys
 from datetime import datetime
 
 from . import consts
@@ -36,7 +38,7 @@ def pre_upload(opts):
                         return False
     print(f"Uploading {title}")
     if opts.descrip:
-        descrip = f"Bracket: {opts.bracket}\n{opts.descrip}\n\n{consts.credit}" if opts.bracket else f"{opts.descrip}\n\n{consts.credit}"
+        descrip = f"Bracket: {opts.bracket}\n\n{opts.descrip}\n\n{consts.credit}" if opts.bracket else f"{opts.descrip}\n\n{consts.credit}"
     else:
         descrip = f"Bracket: {opts.bracket}\n\n{consts.credit}" if opts.bracket else consts.credit
     tags = list(consts.melee_tags) if consts.melee else list(consts.ult_tags)
@@ -144,3 +146,13 @@ def toggle_worker():
             print("Ready to Upload")
             consts.stop_thread = False
             consts.firstrun = True
+
+
+def restart():
+        args = sys.argv[:]
+
+        args.insert(0, sys.executable)
+        if sys.platform == 'win32':
+            args = ['"%s"' % arg for arg in args]
+
+        os.execv(sys.executable, args)

@@ -21,11 +21,14 @@ custom_list_file = os.path.join(os.path.expanduser("~"), ".smash_custom_list.txt
 
 spreadsheetID = "1TavrlG3uiLLJUwrx6UB0CCyjbiWElYE8sCev6fWclaw"
 rowRange = "Data!A1:G1"
+
 credit = "Uploaded with Melee-YouTube-Uploader (https://github.com/NikhilNarayana/Melee-YouTube-Uploader) by Nikhil Narayana"
 
 
-melee_tags = ("Melee", "Super Smash Brothers Melee", "Smash Brothers", "Super Smash Bros. Melee", "meleeuploader", "SSBM", "ssbm")
-ult_tags = ("Ultimate", "Super Smash Brothers Ultimate", "Smash Brothers", "Super Smash Bros. Ultimate", "smashuploader", "SSBU", "ssbu")
+melee_tags = ("Melee", "Super Smash Brothers Melee", "Smash Brothers",
+              "Super Smash Bros. Melee", "meleeuploader", "SSBM", "ssbm")
+ult_tags = ("Ultimate", "Super Smash Brothers Ultimate", "Smash Brothers",
+            "Super Smash Bros. Ultimate", "smashuploader", "SSBU", "ssbu")
 
 minchars = {
     'Jigglypuff': "Puff",
@@ -51,7 +54,7 @@ minchars = {
     'Mii Fighter': "Mii",
     'Bayonetta': "Bayo",
     'King K. Rool': "K. Rool",
-    'Piranha Plant': "Plant"
+    'Piranha Plant': "Plant",
 }
 
 ult_chars = ('Mario', 'Donkey Kong', 'Link', 'Samus', 'Dark Samus', 'Yoshi',
