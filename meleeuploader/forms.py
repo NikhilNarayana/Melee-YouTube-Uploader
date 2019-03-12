@@ -576,37 +576,31 @@ class MeleeUploader(BaseWidget):
             try:
                 self.__p1chars = self._p1char.value
                 self.__p2chars = self._p2char.value
-                p1char = data['p1_char']
-                p2char = data['p2_char']
-                if p1char == "Doctor Mario":
-                    p1char = "Dr. Mario"
-                if p2char == "Doctor Mario":
-                    p2char = "Dr. Mario"
-                if p1char not in self.__p1chars:
-                    self.__p1chars.append(p1char)
-                if p2char not in self.__p2chars:
-                    self.__p2chars.append(p2char)
+                p1char = data['img_alpha-1-char'].split("-")[0]
+                p2char = data['img_beta-1-char'].split("-")[0]
+                for char in consts.melee_chars:
+                    if p1char in char.lower() and char not in self.__p1chars:
+                        self.__p1chars.append(char)
+                    if p2char in char.lower() and char not in self.__p2chars:
+                        self.__p2chars.append(char)
                 self._p1char.load_form(dict(selected=self.__p1chars))
                 self._p2char.load_form(dict(selected=self.__p2chars))
             except Exception as e:
                 print(e)
         try:
-            self._p1.value = data['p1_name']
-            self._p2.value = data['p2_name']
+            self._p1.value = data['text_team-a-name']
+            self._p2.value = data['text_team-b-name']
         except Exception as e:
             print(e)
         try:
             for t in consts.match_types:
-                if t.lower() in data['event_round'].lower():
+                if t.lower() in data['text_current-round'].lower():
                     mtype = t
                     suffix = ""
-                    sections = data['event_round'].split(t)
-                    suffix = sections[1].strip()
-                    prefix = data['event_bracket']
-                elif t.lower() in data['event_bracket'].lower():
-                    mtype = t
                     prefix = ""
-                    suffix = ""
+                    sections = data['text_current-round'].split(t)
+                    suffix = sections[0].strip()
+                    suffix = sections[1].strip()
             self._mtype.value = mtype
             self._mprefix.value = prefix
             self._msuffix.value = suffix

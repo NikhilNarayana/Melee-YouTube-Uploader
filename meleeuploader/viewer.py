@@ -36,9 +36,8 @@ class OptionsViewer(BaseWidget):
 
 
 class HistoryViewer(BaseWidget):
-    def __init__(self, history, mainprog):
+    def __init__(self, history):
         super(HistoryViewer, self).__init__("History")
-        self._mainprog = mainprog
         self._history = history
         self._qview = ControlList(select_entire_row=True)
         self._qview.cell_double_clicked_event = self.__load_row
@@ -49,4 +48,4 @@ class HistoryViewer(BaseWidget):
             self._qview += (options[3], options[4], " ".join((options[11], options[2], options[10])))
 
     def __load_row(self, row, c):
-        self._mainprog._MeleeUploader__load_form(self._history[row])  # this has got to be jank
+        self.parent._MeleeUploader__load_form(self._history[row])  # this has got to be jank
