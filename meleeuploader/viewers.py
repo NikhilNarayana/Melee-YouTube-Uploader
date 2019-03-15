@@ -48,4 +48,4 @@ class HistoryViewer(BaseWidget):
             self._qview += (options[3], options[4], " ".join((options[11], options[2], options[10])))
 
     def __load_row(self, row, c):
-        self.parent._MeleeUploader__load_form(self._history[row])  # this has got to be jank
+        self.parent._MeleeUploader__load_form(self._history[row])
