@@ -10,6 +10,8 @@ import sys
 import errno
 from decimal import Decimal
 
+from . import consts
+
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload
@@ -37,7 +39,8 @@ SPREADSHEETS_SCOPE = "https://www.googleapis.com/auth/spreadsheets"
 def upload(yt, body, file):
     vid = None
     ret = None
-    while not vid:
+    retries = 0
+    while not vid and retries < 10:
         insert_request = yt.videos().insert(
             part=",".join(body.keys()),
             body=body,
@@ -45,6 +48,7 @@ def upload(yt, body, file):
                                        chunksize=104857600,
                                        resumable=True),)
         ret, vid = upload_service(insert_request)
+        retries += 1
     return ret, vid
 
 
@@ -69,6 +73,13 @@ def upload_service(insert_request):
                 elif b"503" in e.content:
                     print("Backend Error: will attempt to retry upload")
                     return False, None
+                elif b"uploadLimitExceeded" in e.content:
+                    print("You have exceeded the YouTube Upload Limit")
+                    print("Waiting 10 minutes before retrying to avoid the limit")
+                    sleep(600)
+                    return False, None
+                else:
+                    print("")
             except retry_exceptions as e:
                 print(f"A retriable error occurred: {e}")
 
@@ -94,12 +105,12 @@ def get_youtube_service():
         sys.prefix,
         os.path.join(sys.prefix, "local"), "/usr",
         os.path.join("/usr", "local")
-    ), ("client_secrets.json", ".client_secrets.json", "share/meleeuploader/client_secrets.json"))
+    ), ("client_secrets.json", ".client_secrets.json", f"share/{consts.short_name}/client_secrets.json"))
 
     flow = flow_from_clientsecrets(CLIENT_SECRETS_FILE, scope=YOUTUBE_UPLOAD_SCOPE)
 
-    flow.user_agent = "Melee YouTube Uploader"
-    storage = Storage(os.path.join(os.path.expanduser("~"), ".smash-oauth2-youtube.json"))
+    flow.user_agent = consts.long_name
+    storage = Storage(os.path.join(os.path.expanduser("~"), f".{consts.abbrv}-oauth2-youtube.json"))
     credentials = storage.get()
 
     if credentials is None or credentials.invalid:
@@ -119,8 +130,8 @@ def get_partner_service():
 
     flow = flow_from_clientsecrets(CLIENT_SECRETS_FILE, scope=("https://www.googleapis.com/auth/youtubepartner", "https://www.googleapis.com/auth/youtube",))
 
-    flow.user_agent = "Melee YouTube Uploader"
-    storage = Storage(os.path.join(os.path.expanduser("~"), ".smash-oauth2-partner.json"))
+    flow.user_agent = consts.long_name
+    storage = Storage(os.path.join(os.path.expanduser("~"), f".{consts.abbrv}-oauth2-partner.json"))
     credentials = storage.get()
 
     if credentials is None or credentials.invalid:
@@ -138,13 +149,12 @@ def get_spreadsheet_service():
         sys.prefix,
         os.path.join(sys.prefix, "local"), "/usr",
         os.path.join("/usr", "local")
-    ), ("client_secrets.json", ".client_secrets.json", "share/meleeuploader/client_secrets.json"))
+    ), ("client_secrets.json", ".client_secrets.json", f"share/{consts.short_name}/client_secrets.json"))
 
     flow = flow_from_clientsecrets(CLIENT_SECRETS_FILE, scope=SPREADSHEETS_SCOPE)
 
-    flow.user_agent = "Melee YouTube Uploader"
-
-    storage = Storage(os.path.join(os.path.expanduser("~"), ".smash-oauth2-spreadsheet.json"))
+    flow.user_agent = consts.long_name
+    storage = Storage(os.path.join(os.path.expanduser("~"), f".{consts.abbrv}-oauth2-spreadsheet.json"))
     credentials = storage.get()
 
     if credentials is None or credentials.invalid:
