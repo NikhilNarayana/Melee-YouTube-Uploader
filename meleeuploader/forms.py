@@ -107,7 +107,7 @@ class MeleeUploader(BaseWidget):
         sys.stdout = workers.WriteWorker(textWritten=self.write_print)
 
         # Redirect error output to window, console, and file
-        sys.stderr = EmittingStream(textWritten=self.write_err)
+        sys.stderr = workers.WriteWorker(textWritten=self.write_err)
 
         # Websocket
         self._sa = None
@@ -229,8 +229,6 @@ class MeleeUploader(BaseWidget):
             options.ename_min = self._ename_min.value
         else:
             options.ename_min = options.ename
-        f = self._pID.value.find("PL")
-        self._pID.value = self._pID.value[f:f + 34]
         options.pID = self._pID.value
         options.mtype = self._mtype.value
         options.mmid = options.mtype
@@ -241,7 +239,7 @@ class MeleeUploader(BaseWidget):
         options.bracket = self._bracket.value
         isadir = os.path.isdir(self._file.value)
         if isadir:
-            options.file = max([os.path.join(self._file.value, f) for f in os.listdir(self._file.value) if os.path.isfile(os.path.join(self._file.value, f))], key=os.path.getctime)
+            options.file = max([os.path.join(self._file.value, f) for f in os.listdir(self._file.value) if os.path.isfile(os.path.join(self._file.value, f))], key=os.path.getmtime)
         else:
             options.file = self._file.value
         options.tags = self._tags.value

@@ -58,21 +58,21 @@ def pre_upload(opts):
             privacyStatus=opts.privacy)
     )
     ret, vid = yt.upload(consts.youtube, body, opts.file)
-    if ret and opts.pID[:2] == "PL":
-        try:
-            consts.youtube.playlistItems().insert(
-                part="snippet",
-                body=dict(
-                    snippet=dict(
-                        playlistId=opts.pID,
-                        resourceId=dict(
-                            kind='youtube#video',
-                            videoId=vid)))).execute()
-            print("Added to playlist")
-        except Exception as e:
-            print("Failed to add to playlist")
-            print(e)
     if ret:
+        if opts.pID[:2] == "PL":
+            try:
+                consts.youtube.playlistItems().insert(
+                    part="snippet",
+                    body=dict(
+                        snippet=dict(
+                            playlistId=opts.pID,
+                            resourceId=dict(
+                                kind='youtube#video',
+                                videoId=vid)))).execute()
+                print("Added to playlist")
+            except Exception as e:
+                print("Failed to add to playlist")
+                print(e)
         if consts.sheets:
             totalTime = datetime.now() - opts.then
             values = [[
