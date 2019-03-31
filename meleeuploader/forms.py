@@ -106,16 +106,15 @@ class MeleeUploader(BaseWidget):
         # Redirct print output
         sys.stdout = workers.WriteWorker(textWritten=self.write_print)
 
+        # Redirect error output to window, console, and file
+        sys.stderr = EmittingStream(textWritten=self.write_err)
+
         # Websocket
         self._sa = None
         self._obs = None
 
         # History
         self.__history = []
-
-        # Redirect error output to a file
-        if not sys.stderr:
-            sys.stderr = open(consts.log_file, "a")
 
         # Queue
         self._queue = Queue()
@@ -167,7 +166,7 @@ class MeleeUploader(BaseWidget):
 
         # Main Menu Layout
         self.mainmenu = [
-            {'Settings': [{'YouTube Log Out': self.__reset_cred_event}, {'Toggle SA Hook': self.__show_sa_form}, {'Toggle OBS Hook': self.__show_obs_form}, {'Toggle SC Hook': self.__show_sc_form}],
+            {'Settings': [{'YouTube Log Out': self.__reset_cred}, {'Toggle SA Hook': self.__show_sa_form}, {'Toggle OBS Hook': self.__show_obs_form}, {'Toggle SC Hook': self.__show_sc_form}],
                 'Save/Clear': [{'Save Form': self.__save_form}, {'Clear Match Values': self.__reset_match}, {'Clear Event Values': self.__reset_event}, {'Clear All': self.__reset_forms}],
                 'Queue': [{'Toggle Uploads': utils.toggle_worker}, {'Save Queue': self.__save_queue}, {'Load Queue': self.__load_queue}],
                 'History': [{'Show History': self.__show_h_view}],
@@ -273,7 +272,15 @@ class MeleeUploader(BaseWidget):
         if sys.__stdout__:
             print(text, file=sys.__stdout__, end='')
 
-    def __reset_cred_event(self):
+    def write_err(self, text):
+        self._output.value += text
+        self._output._form.plainTextEdit.moveCursor(QtGui.QTextCursor.End)
+        if sys.__stdout__:
+            print(text, file=sys.__stdout__, end='')
+        with open(consts.log_file, "a") as f:
+            f.write(text)
+
+    def __reset_cred(self):
         title = consts.youtube.channels().list(part='snippet', mine=True).execute()
         title = title['items'][0]['snippet']['title']
         resp = self.question(f"You are currently logged into {title}\nWould you like to log out?", title="MeleeUploader")
@@ -440,7 +447,7 @@ class MeleeUploader(BaseWidget):
         thr.start()
 
     def __save_form(self, options=[]):
-        row = [None] * 20
+        row = [None] * (len(self._form_fields) + 1)
         if options:
             f = options.pID.find("PL")
             options.pID = options.pID[f:f + 34]
@@ -466,7 +473,7 @@ class MeleeUploader(BaseWidget):
         else:
             f = self._pID.value.find("PL")
             self._pID.value = self._pID.value[f:f + 34]
-            for i, var in zip(range(20), self._form_fields):
+            for i, var in zip(range(len(self._form_fields) + 1), self._form_fields):
                 row[i] = deepcopy(var.value)
         with open(consts.form_values, 'w') as f:
                 f.write(json.dumps(row))
@@ -490,7 +497,7 @@ class MeleeUploader(BaseWidget):
                         elif val:
                             var.value = val
             except (IOError, OSError, StopIteration, json.decoder.JSONDecodeError) as e:
-                print("No smash_form_values.json to read from, continuing with default values")
+                print(f"No {consts.abbrv}_form_values.json to read from, continuing with default values")
 
     def __melee_chars(self):
         consts.custom = False
