@@ -39,6 +39,7 @@ minchars = {
     'Captain Falcon': "Falcon",
     'Ice Climbers': "Icies",
     'Pikachu': "Pika",
+    'Doctor Mario': "Dr. Mario",
     'Dr. Mario': "Doc",
     'Ganondorf': "Ganon",
     'Young Link': "YLink",

@@ -146,13 +146,3 @@ def toggle_worker():
             print("Ready to Upload")
             consts.stop_thread = False
             consts.firstrun = True
-
-
-def restart():
-        args = sys.argv[:]
-
-        args.insert(0, sys.executable)
-        if sys.platform == 'win32':
-            args = ['"%s"' % arg for arg in args]
-
-        os.execv(sys.executable, args)

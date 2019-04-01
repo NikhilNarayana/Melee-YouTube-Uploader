@@ -29,10 +29,9 @@ RETRIABLE_EXCEPTIONS = (httplib2.HttpLib2Error, IOError, httplib.NotConnected,
                         httplib.ResponseNotReady, httplib.BadStatusLine)
 
 RETRIABLE_STATUS_CODES = [500, 502, 504]
-YOUTUBE_API_SERVICE_NAME = "youtube"
-YOUTUBE_API_VERSION = "v3"
 
 YOUTUBE_UPLOAD_SCOPE = "https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube https://www.googleapis.com/auth/youtube.readonly https://www.googleapis.com/auth/youtube.force-ssl"
+YOUTUBE_PARTNER_SCOPE = "https://www.googleapis.com/auth/youtubepartner"
 SPREADSHEETS_SCOPE = "https://www.googleapis.com/auth/spreadsheets"
 
 
@@ -54,8 +53,8 @@ def upload(yt, body, file):
 
 def upload_service(insert_request):
         response = None
-        retry_exceptions = get_retry_exceptions()
-        retry_status_codes = get_retry_status_codes()
+        retry_exceptions = RETRIABLE_EXCEPTIONS
+        retry_status_codes = RETRIABLE_STATUS_CODES
         ACCEPTABLE_ERRNO = (errno.EPIPE, errno.EINVAL, errno.ECONNRESET)
         try:
             ACCEPTABLE_ERRNO += (errno.WSAECONNABORTED,)
@@ -77,7 +76,6 @@ def upload_service(insert_request):
                     print("You have exceeded the YouTube Upload Limit")
                     print("Waiting 10 minutes before retrying to avoid the limit")
                     sleep(600)
-                    return False, None
                 else:
                     print("")
             except retry_exceptions as e:
@@ -99,82 +97,48 @@ def upload_service(insert_request):
                     return False, None
 
 
-def get_youtube_service():
+def get_service(scope, service, secret=None):
     CLIENT_SECRETS_FILE = get_secrets((
         os.path.expanduser("~"),
         sys.prefix,
         os.path.join(sys.prefix, "local"), "/usr",
         os.path.join("/usr", "local")
-    ), ("client_secrets.json", ".client_secrets.json", f"share/{consts.short_name}/client_secrets.json"))
+    ), ("client_secrets.json", ".client_secrets.json", f"share/{consts.short_name}/client_secrets.json")) if not secret else secret
 
-    flow = flow_from_clientsecrets(CLIENT_SECRETS_FILE, scope=YOUTUBE_UPLOAD_SCOPE)
+    if not CLIENT_SECRETS_FILE:
+        return None
+
+    flow = flow_from_clientsecrets(CLIENT_SECRETS_FILE, scope=scope)
 
     flow.user_agent = consts.long_name
-    storage = Storage(os.path.join(os.path.expanduser("~"), f".{consts.abbrv}-oauth2-youtube.json"))
+    storage = Storage(os.path.join(os.path.expanduser("~"), f".{consts.abbrv}-oauth2-{service}.json"))
     credentials = storage.get()
 
     if credentials is None or credentials.invalid:
         credentials = run_flow(flow, storage)
 
-    return build(
-        YOUTUBE_API_SERVICE_NAME,
-        YOUTUBE_API_VERSION,
-        http=credentials.authorize(httplib2.Http()))
+    return credentials
+
+
+def get_youtube_service():
+    credentials = get_service(YOUTUBE_UPLOAD_SCOPE, "youtube")
+
+    return build("youtube", "v3", http=credentials.authorize(httplib2.Http()))
 
 
 def get_partner_service():
     CLIENT_SECRETS_FILE = get_secrets((os.path.expanduser("~"),), ("client_secrets.json", ".client_secrets.json"))
 
-    if not CLIENT_SECRETS_FILE:
-        return None
+    credentials = get_service(YOUTUBE_PARTNER_SCOPE + YOUTUBE_UPLOAD_SCOPE, "partner", CLIENT_SECRETS_FILE)
 
-    flow = flow_from_clientsecrets(CLIENT_SECRETS_FILE, scope=("https://www.googleapis.com/auth/youtubepartner", "https://www.googleapis.com/auth/youtube",))
-
-    flow.user_agent = consts.long_name
-    storage = Storage(os.path.join(os.path.expanduser("~"), f".{consts.abbrv}-oauth2-partner.json"))
-    credentials = storage.get()
-
-    if credentials is None or credentials.invalid:
-        credentials = run_flow(flow, storage)
-
-    return build(
-        "youtubePartner",
-        "v1",
-        http=credentials.authorize(httplib2.Http()))
+    return build("youtubePartner", "v1", http=credentials.authorize(httplib2.Http()))
 
 
 def get_spreadsheet_service():
-    CLIENT_SECRETS_FILE = get_secrets((
-        os.path.expanduser("~"),
-        sys.prefix,
-        os.path.join(sys.prefix, "local"), "/usr",
-        os.path.join("/usr", "local")
-    ), ("client_secrets.json", ".client_secrets.json", f"share/{consts.short_name}/client_secrets.json"))
-
-    flow = flow_from_clientsecrets(CLIENT_SECRETS_FILE, scope=SPREADSHEETS_SCOPE)
-
-    flow.user_agent = consts.long_name
-    storage = Storage(os.path.join(os.path.expanduser("~"), f".{consts.abbrv}-oauth2-spreadsheet.json"))
-    credentials = storage.get()
-
-    if credentials is None or credentials.invalid:
-        credentials = run_flow(flow, storage)
-
-    http = credentials.authorize(httplib2.Http())
+    credentials = get_service(SPREADSHEETS_SCOPE, "spreadsheet")
     discoveryUrl = ('https://sheets.googleapis.com/$discovery/rest?version=v4')
-    return build('sheets', 'v4', http=http, discoveryServiceUrl=discoveryUrl)
 
-
-def get_retry_status_codes():
-    return RETRIABLE_STATUS_CODES
-
-
-def get_retry_exceptions():
-    return RETRIABLE_EXCEPTIONS
-
-
-def get_max_retries():
-    return 10
+    return build('sheets', 'v4', http=credentials.authorize(httplib2.Http()), discoveryServiceUrl=discoveryUrl)
 
 
 def get_secrets(prefixes, relative_paths):
