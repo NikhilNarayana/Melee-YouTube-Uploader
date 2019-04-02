@@ -479,7 +479,6 @@ class MeleeUploader(BaseWidget):
             thr.daemon = True
             consts.firstrun = False
             consts.stop_thread = False
-            consts.loadedQueue = True
             thr.start()
 
     def __save_form(self, options=[]):
