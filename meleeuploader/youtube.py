@@ -34,6 +34,9 @@ YOUTUBE_UPLOAD_SCOPE = "https://www.googleapis.com/auth/youtube.upload https://w
 YOUTUBE_PARTNER_SCOPE = "https://www.googleapis.com/auth/youtubepartner"
 SPREADSHEETS_SCOPE = "https://www.googleapis.com/auth/spreadsheets"
 
+PREFIXES = (os.path.expanduser("~"), sys.prefix, os.path.join(sys.prefix, "local"), "/usr", os.path.join("/usr", "local"))
+SUFFIXES = ("client_secrets.json", ".client_secrets.json", f"share/{consts.short_name}/client_secrets.json")
+
 
 def upload(yt, body, file):
     vid = None
@@ -98,12 +101,7 @@ def upload_service(insert_request):
 
 
 def get_service(scope, service, secret=None):
-    CLIENT_SECRETS_FILE = get_secrets((
-        os.path.expanduser("~"),
-        sys.prefix,
-        os.path.join(sys.prefix, "local"), "/usr",
-        os.path.join("/usr", "local")
-    ), ("client_secrets.json", ".client_secrets.json", f"share/{consts.short_name}/client_secrets.json")) if not secret else secret
+    CLIENT_SECRETS_FILE = get_secrets(PREFIXES, SUFFIXES) if not secret else secret
 
     if not CLIENT_SECRETS_FILE:
         return None
@@ -123,6 +121,9 @@ def get_service(scope, service, secret=None):
 def get_youtube_service():
     credentials = get_service(YOUTUBE_UPLOAD_SCOPE, "youtube")
 
+    if not credentials:
+        return None
+
     return build("youtube", "v3", http=credentials.authorize(httplib2.Http()))
 
 
@@ -131,11 +132,18 @@ def get_partner_service():
 
     credentials = get_service(YOUTUBE_PARTNER_SCOPE + YOUTUBE_UPLOAD_SCOPE, "partner", CLIENT_SECRETS_FILE)
 
+    if not credentials:
+        return None
+
     return build("youtubePartner", "v1", http=credentials.authorize(httplib2.Http()))
 
 
 def get_spreadsheet_service():
     credentials = get_service(SPREADSHEETS_SCOPE, "spreadsheet")
+
+    if not credentials:
+        return None
+
     discoveryUrl = ('https://sheets.googleapis.com/$discovery/rest?version=v4')
 
     return build('sheets', 'v4', http=credentials.authorize(httplib2.Http()), discoveryServiceUrl=discoveryUrl)
