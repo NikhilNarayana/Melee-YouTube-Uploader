@@ -90,12 +90,12 @@ class MeleeUploader(BaseWidget):
             latest_version = requests.get('https://pypi.org/pypi/MeleeUploader/json').json()['info']['version']
             if sv(latest_version) > sv(consts.__version__):  # prevents messages when developing
                 if "linux" in sys.platform:
-                    self.message(f"Current Version: {consts.__version__}\nVersion {latest_version} is available.\nUse sudo pip3 install -U meleeuploader=={latest_version} in terminal to update to the newest verison", title="MeleeUploader")
+                    self.info(f"Current Version: {consts.__version__}\nVersion {latest_version} is available.\nUse sudo pip3 install -U meleeuploader=={latest_version} in terminal to update to the newest verison", title="MeleeUploader")
                 else:
                     resp = self.question(f"Current Version: {consts.__version__}\nVersion {latest_version} is available. Would you like to update?", title="MeleeUploader")
                     if resp == "yes":
                         subprocess.call(('pip3', 'install', '-U', f'meleeuploader=={latest_version}'))
-                        self.message("You can now restart the app to use the new version", title="MeleeUploader")
+                        self.info("You can now restart the app to use the new version", title="MeleeUploader")
         except Exception as e:
             print(e)
 
@@ -379,7 +379,7 @@ class MeleeUploader(BaseWidget):
 
     def __hook_sa(self, host, port):
         self._sawin.close()
-        self.message("Please make sure Scoreboard Assistant is open", title="MeleeUploader")
+        self.warning("Please make sure Scoreboard Assistant is open", title="MeleeUploader")
         self._sa = workers.SAWorker(f"ws://{host}:{port}")
         self._sat = QtCore.QThread()
         self._sa.moveToThread(self._sat)
@@ -390,7 +390,7 @@ class MeleeUploader(BaseWidget):
 
     def __hook_obs(self, host, port):
         self._obswin.close()
-        self.message("Please make sure OBS is open and the Websocket server is enabled with the default settings and no password", title="MeleeUploader")
+        self.warning("Please make sure OBS is open and the Websocket server is enabled with the default settings and no password", title="MeleeUploader")
         self._obs = workers.OBSWorker(host, port)
         self._obst = QtCore.QThread()
         self._obs.moveToThread(self._obst)
@@ -443,7 +443,7 @@ class MeleeUploader(BaseWidget):
                         f.write(pickle.dumps(queueref))
                     print("Saved Queue, you can now close the program")
                 else:
-                    self.message("Not saving queue")
+                    self.alert("Not saving queue")
 
     def __load_queue(self):
         if self._queueref:
