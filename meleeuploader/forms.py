@@ -9,6 +9,7 @@ import subprocess
 from queue import Queue
 from copy import deepcopy
 from datetime import datetime
+from distutils.version import StrictVersion as sv
 
 from . import utils
 from . import consts
@@ -87,7 +88,7 @@ class MeleeUploader(BaseWidget):
     def __init__(self):
         try:  # check if the user can update the app
             latest_version = requests.get('https://pypi.org/pypi/MeleeUploader/json').json()['info']['version']
-            if any(int(x) > int(y) for x, y in zip(latest_version.split("."), consts.__version__.split("."))):  # prevents messages when developing
+            if sv(latest_version) > sv(consts.__version__):  # prevents messages when developing
                 if "linux" in sys.platform:
                     self.message(f"Current Version: {consts.__version__}\nVersion {latest_version} is available.\nUse sudo pip3 install -U meleeuploader=={latest_version} in terminal to update to the newest verison", title="MeleeUploader")
                 else:
