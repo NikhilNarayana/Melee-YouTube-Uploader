@@ -255,10 +255,8 @@ class MeleeUploader(BaseWidget):
             options.p2 = " | ".join((self._p2sponsor.value, options.p2))
         options.ignore = False
         self.__reset_match(False, isadir)
-        self._qview += (options.p1, options.p2, " ".join((options.mprefix, options.mtype, options.msuffix)))
-        self._queue.put(options)
+        self.__add_to_qview(options)
         self._queueref.append(options)
-        self._qview.resize_rows_contents()
         if consts.firstrun:
             thr = threading.Thread(target=self.__worker)
             thr.daemon = True
@@ -422,28 +420,67 @@ class MeleeUploader(BaseWidget):
         self._hwin.parent = self
         self._hwin.show()
 
+    def __add_to_qview(self, options):
+        self._qview += (options.p1, options.p2, " ".join((options.mprefix, options.mtype, options.msuffix)))
+        self._queue.put(options)
+        self._qview.resize_rows_contents()
+
     def __save_queue(self):
-        with open(consts.queue_values, "wb") as f:
-            f.write(pickle.dumps(self._queueref))
-        print("Saved Queue, you can now close the program")
+        if os.path.exists(consts.queue_values):
+            resp = self.question(f"A queue already exists would you like to overwrite it?\nIt was last modified on {datetime.utcfromtimestamp(int(os.path.getmtime(consts.queue_values))).strftime('%Y-%m-%d')}")
+            if resp == "yes":
+                with open(consts.queue_values, "wb") as f:
+                    f.write(pickle.dumps(self._queueref))
+                print("Saved Queue, you can now close the program")
+            elif resp == "no":
+                resp = self.question("Would you like to add onto the end of that queue?")
+                if resp == "yes":
+                    queueref = None
+                    with open(consts.queue_values, "rb") as f:
+                        queueref = pickle.load(f)
+                    queueref.extend(self._queueref)
+                    with open(consts.queue_values, "wb") as f:
+                        f.write(pickle.dumps(queueref))
+                    print("Saved Queue, you can now close the program")
+                else:
+                    self.message("Not saving queue")
 
     def __load_queue(self):
-        try:
-            with open(consts.queue_values, "rb") as f:
-                self._queueref = pickle.load(f)
-        except Exception as e:
-            print("You need to save a queue before loading a queue")
-        for options in self._queueref:
-            self._qview += (options.p1, options.p2, " ".join((options.mprefix, options.mtype, options.msuffix)))
-            self._queue.put(options)
-            self._qview.resize_rows_contents()
-            self.__history.append(self.__save_form(options))
-        thr = threading.Thread(target=self.__worker)
-        thr.daemon = True
-        consts.firstrun = False
-        consts.stop_thread = False
-        consts.loadedQueue = True
-        thr.start()
+        if self._queueref:
+            resp = self.question("Would you like to add to the existing queue?\nItems will be added to the front of the queue.")
+            if resp == "yes":
+                try:
+                    with open(consts.queue_values, "rb") as f:
+                        queueref = pickle.load(f)
+                    queueref.extend(self._queueref)
+                    self._queueref = queueref
+                    self._qview.clear()
+                    self._qview.horizontal_headers = ["Player 1", "Player 2", "Round"]
+                    for options in self._queueref:
+                        self.__add_to_qview(options)
+                        self.__history.append(self.__save_form(options))
+                except Exception as e:
+                    print("You need to save a queue before loading a queue")
+                    return
+        else:
+            try:
+                with open(consts.queue_values, "rb") as f:
+                    self._queueref = pickle.load(f)
+                for options in self._queueref:
+                    self.__add_to_qview(options)
+                    self.__history.append(self.__save_form(options))
+            except Exception as e:
+                print("You need to save a queue before loading a queue")
+                return
+
+        resp = self.question("Do you want to start uploading?")
+        if resp == "yes":
+            thr = threading.Thread(target=self.__worker)
+            thr.daemon = True
+            consts.firstrun = False
+            consts.stop_thread = False
+            consts.loadedQueue = True
+            thr.start()
 
     def __save_form(self, options=[]):
         row = [None] * (len(self._form_fields) + 1)
