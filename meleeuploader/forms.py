@@ -444,6 +444,10 @@ class MeleeUploader(BaseWidget):
                     print("Saved Queue, you can now close the program")
                 else:
                     self.alert("Not saving queue")
+        else:
+            with open(consts.queue_values, "wb") as f:
+                f.write(pickle.dumps(self._queueref))
+                print("Saved Queue, you can now close the program")
 
     def __load_queue(self):
         if self._queueref:
