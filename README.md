@@ -12,10 +12,11 @@ This application **DOES NOT** support enabling monetization at the moment. I hig
 
 ## To Do
 * Automate creation of thumbnails
+* Slippi Integration (plan is to allow pulling characters from the slippi stream, additional ideas are appreciated).
 * Maybe other stuff
 
 ## Known Issues
-* Fails to work when antivirus software is installed, maybe
+* Sometimes just fails to upload, haven't been able to find a solution other than doing a fresh install of your OS
 
 ## Contributing
 PRs are appreciated and will be reviewed quickly, the only code quality standard I have is to follow PEP8 standard except for the line length. If you have trouble understanding my code just ask me.
@@ -32,7 +33,7 @@ I am always open to help setup the program or fix any techincal issues you may h
 * Save and load form values
 * Load old submissions from history
 * Save a queue to be uploaded later
-* Melee and Ultimate Character Lists
+* Melee, Ultimate, and Custom Character Lists
 * Hook into Scoreboard Assistant, Stream Control<sup>*</sup>, OBS
 * Automatic Updates
 
@@ -40,7 +41,7 @@ I am always open to help setup the program or fix any techincal issues you may h
 
 ## How to Setup - Video Version: https://youtu.be/zrcf4t_qk5A
 1. Install [Python 3.7.2](https://www.python.org/downloads/release/python-372/) for your OS with the PATH added and make sure there are no other versions of Python 3.
-2. Install the program by typing `pip3 install -U meleeuploader` into Command Prompt/Terminal. If you want untested features you can download the repo and install with `pip3 install -U /path/to/repo`
+2. Install the program by typing `pip3 install -I meleeuploader` into Command Prompt/Terminal. If you want untested features you can download the repo and install with `pip3 install -I /path/to/repo`
 3. Start the program by running `meleeuploader` for the Melee character list or `smashuploader` for the Ultimate character list in Command Prompt/Terminal.
 4. Select the YouTube profile you would like to use for the first authentication request and then any google account for the second authentication request. If the second one fails, close your web browser and then run the command to open the program again.
 5. Add in the necessary info in the Event Values and Match Values tabs

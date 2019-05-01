@@ -4,6 +4,7 @@ import os
 import sys
 import json
 import pickle
+import shutil
 import threading
 import subprocess
 from queue import Queue
@@ -84,6 +85,31 @@ class SCFileInput(BaseWidget):
             print("You must select a file")
 
 
+class YouTubeSelector(BaseWidget):
+    def __init__(self):
+        super(YouTubeSelector, self).__init__("YouTubeSelector")
+        self._youtubes = ControlCombo("Accounts")
+        self._ok = ControlButton("Load")
+        self._new = ControlButton("New Account")
+
+        self.formset = ["_youtubes", ("_ok", "_new")]
+
+        accounts = os.listdir(consts.smash_folder)
+        for account in accounts:
+            self._youtubes += (account.split(".")[0], account)
+
+        self._ok.value = self._ok_action
+        self._new.value = self._new_action
+
+    def _ok_action(self):
+        account = self._youtubes.value
+        shutil.copyfile(os.path.join(consts.smash_folder, account), consts.youtube_file)
+        self.info("You can now close the window.\nI can't figure out how to make the window close itself.", title="¯\\_(ツ)_/¯")
+
+    def _new_action(self):
+        self.info("Just close the window.\nI can't figure out how to make the window close itself.", title="¯\\_(ツ)_/¯")
+
+
 class MeleeUploader(BaseWidget):
     def __init__(self):
         try:  # check if the user can update the app
@@ -94,8 +120,11 @@ class MeleeUploader(BaseWidget):
                 else:
                     resp = self.question(f"Current Version: {consts.__version__}\nVersion {latest_version} is available. Would you like to update?", title="MeleeUploader")
                     if resp == "yes":
-                        subprocess.call(('pip3', 'install', '-I', f'meleeuploader=={latest_version}'))
-                        self.info("You can now restart the app to use the new version", title="MeleeUploader")
+                        ret = subprocess.call(('pip3', 'install', '-I', f'meleeuploader=={latest_version}'))
+                        if ret:
+                            self.info(f'The app failed to update\nType "pip3 install -I meleeuploader=={latest_version}" into CMD/Terminal to update', title="MeleeUploader")
+                        else:
+                            self.info("You can now restart the app to use the new version", title="MeleeUploader")
         except Exception as e:
             print(e)
 
@@ -278,14 +307,14 @@ class MeleeUploader(BaseWidget):
             f.write(text)
 
     def __reset_cred(self):
-        title = consts.youtube.channels().list(part='snippet', mine=True).execute()
-        title = title['items'][0]['snippet']['title']
+        title = consts.youtube.channels().list(part='snippet', mine=True).execute()['items'][0]['snippet']['title']
         resp = self.question(f"You are currently logged into {title}\nWould you like to log out?", title="MeleeUploader")
         if resp == "yes":
+            shutil.copyfile(consts.youtube_file, os.path.join(consts.smash_folder, f"{title}.json"))
             if consts.youtube:
-                os.remove(os.path.join(os.path.expanduser("~"), ".smash-oauth2-youtube.json"))
+                os.remove(consts.youtube_file)
             if consts.sheets:
-                os.remove(os.path.join(os.path.expanduser("~"), ".smash-oauth2-spreadsheet.json"))
+                os.remove(consts.spreadsheet_file)
             sys.exit(0)
 
     def __reset_match(self, menu=True, isadir=False):

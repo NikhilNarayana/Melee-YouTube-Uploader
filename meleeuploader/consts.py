@@ -14,10 +14,17 @@ sheets = None
 partner = None
 loadedQueue = False
 
-form_values = os.path.join(os.path.expanduser("~"), '.smash_form_values.json')
-queue_values = os.path.join(os.path.expanduser("~"), ".smash_queue_values.txt")
-log_file = os.path.join(os.path.expanduser("~"), ".smash_log.txt")
-custom_list_file = os.path.join(os.path.expanduser("~"), ".smash_custom_list.txt")
+root = os.path.expanduser("~")
+smash_folder = os.path.join(root, ".smashuploader")
+os.makedirs(smash_folder, exist_ok=True)
+
+form_values = os.path.join(root, '.smash_form_values.json')
+queue_values = os.path.join(root, ".smash_queue_values.txt")
+log_file = os.path.join(root, ".smash_log.txt")
+custom_list_file = os.path.join(root, ".smash_custom_list.txt")
+youtube_file = os.path.join(root, ".smash-oauth2-youtube.json")
+spreadsheet_file = os.path.join(root, ".smash-oauth2-spreadsheet.json")
+partner_file = os.path.join(root, ".smash-oauth2-partner.json")
 
 abbrv = "smash"
 short_name = "meleeuploader"
