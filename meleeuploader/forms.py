@@ -104,10 +104,10 @@ class YouTubeSelector(BaseWidget):
     def _ok_action(self):
         account = self._youtubes.value
         shutil.copyfile(os.path.join(consts.smash_folder, account), consts.youtube_file)
-        self.info("You can now close the window.\nI can't figure out how to make the window close itself.", title="¯\\_(ツ)_/¯")
+        QtCore.QCoreApplication.instance().quit()
 
     def _new_action(self):
-        self.info("Just close the window.\nI can't figure out how to make the window close itself.", title="¯\\_(ツ)_/¯")
+        QtCore.QCoreApplication.instance().quit()
 
 
 class MeleeUploader(BaseWidget):
@@ -492,7 +492,7 @@ class MeleeUploader(BaseWidget):
                     for options in self._queueref:
                         self.__add_to_qview(options)
                         self.__history.append(self.__save_form(options))
-                except Exception as e:
+                except Exception:
                     print("You need to save a queue before loading a queue")
                     return
         else:
@@ -502,7 +502,7 @@ class MeleeUploader(BaseWidget):
                 for options in self._queueref:
                     self.__add_to_qview(options)
                     self.__history.append(self.__save_form(options))
-            except Exception as e:
+            except Exception:
                 print("You need to save a queue before loading a queue")
                 return
 
@@ -564,7 +564,7 @@ class MeleeUploader(BaseWidget):
                             var.load_form(dict(selected=val))
                         elif val:
                             var.value = val
-            except (IOError, OSError, StopIteration, json.decoder.JSONDecodeError) as e:
+            except (IOError, OSError, StopIteration, json.decoder.JSONDecodeError):
                 print(f"No {consts.abbrv}_form_values.json to read from, continuing with default values")
 
     def __melee_chars(self):
@@ -585,7 +585,7 @@ class MeleeUploader(BaseWidget):
             with open(consts.custom_list_file, "r") as f:
                 chars = [x.strip() for x in f.read().split(",")]
             self.__update_chars(chars)
-        except Exception as e:
+        except Exception:
             with open(consts.custom_list_file, "a") as f:
                 pass
             print("A custom list file as been created for you to modify, it can be found at " + consts.custom_list_file)
