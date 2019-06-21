@@ -4,6 +4,7 @@ import json
 import threading
 from time import sleep
 
+import requests
 import websocket
 from obswebsocket import obsws, events
 from PyQt5.QtCore import QThread, QObject, pyqtSignal, pyqtSlot
@@ -80,6 +81,34 @@ class SCWorker(QObject):
                 self.data = ndata
                 self.send_update()
             sleep(5)
+
+    @pyqtSlot()
+    def send_update(self):
+        self.sig.emit(self.data)
+
+
+class StreametaWorker(QObject):
+    sig = pyqtSignal(object)
+    data = None
+
+    def __init__(self, addr):
+        super().__init__()
+        self.addr = addr
+        self._run = True
+
+    def stopsm(self):
+        self._run = False
+
+    def get_update(self):
+        try:
+            while self._run:
+                resp = requests.get(self.addr).json()
+                if (resp != self.data):
+                    self.data = resp
+                    self.send_update()
+                sleep(10)
+        except Exception as e:
+            print(e)
 
     @pyqtSlot()
     def send_update(self):

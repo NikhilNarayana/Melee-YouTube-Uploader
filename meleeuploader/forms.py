@@ -44,7 +44,7 @@ class SAHostPortInput(BaseWidget):
         if self._host.value and self._port.value:
             self.parent._MeleeUploader__hook_sa(self._host.value, self._port.value)
         else:
-            print("You must input a host IP and port number")
+            self.warning("You must input a host IP and port number")
 
 
 class OBSHostPortInput(BaseWidget):
@@ -62,7 +62,7 @@ class OBSHostPortInput(BaseWidget):
         if self._host.value and self._port.value:
             self.parent._MeleeUploader__hook_obs(self._host.value, self._port.value)
         else:
-            print("You must input a host IP and port number")
+            self.warning("You must input a host IP and port number")
 
 
 class SCFileInput(BaseWidget):
@@ -82,7 +82,24 @@ class SCFileInput(BaseWidget):
         if self._file.value:
             self.parent._MeleeUploader__hook_sc(self._file.value)
         else:
-            print("You must select a file")
+            self.warning("You must select a file")
+
+
+class SMurlInput(BaseWidget):
+    def __init__(self, url=""):
+        super(SMurlInput, self).__init__("Streameta")
+        self._url = ControlText("URL")
+        self._url.value = url.value
+        self._url.form.lineEdit.setPlaceholderText("http://ns.streameta.com/api/?token=<token>")
+
+        self._button = ControlButton('Submit')
+        self._button.value = self.__button_action
+
+    def __button_action(self, data=None):
+        if self._url.value:
+            self.parent._MeleeUploader__hook_sm(self._url.value)
+        else:
+            self.warning("You must provide a URL")
 
 
 class YouTubeSelector(BaseWidget):
@@ -196,7 +213,7 @@ class MeleeUploader(BaseWidget):
 
         # Main Menu Layout
         self.mainmenu = [
-            {'Settings': [{'YouTube Log Out': self.__reset_cred}, {'Toggle SA Hook': self.__show_sa_form}, {'Toggle OBS Hook': self.__show_obs_form}, {'Toggle SC Hook': self.__show_sc_form}],
+            {'Settings': [{'YouTube Log Out': self.__reset_cred}, {'Toggle SA Hook': self.__show_sa_form}, {'Toggle OBS Hook': self.__show_obs_form}, {'Toggle SC Hook': self.__show_sc_form}, {'Toggle Streameta Hook': self.__show_sm_form}],
                 'Save/Clear': [{'Save Form': self.__save_form}, {'Clear Match Values': self.__reset_match}, {'Clear Event Values': self.__reset_event}, {'Clear All': self.__reset_forms}],
                 'Queue': [{'Toggle Uploads': utils.toggle_worker}, {'Save Queue': self.__save_queue}, {'Load Queue': self.__load_queue}],
                 'History': [{'Show History': self.__show_h_view}],
@@ -233,13 +250,19 @@ class MeleeUploader(BaseWidget):
         # Stream Control
         self._sc = None
         self._scf = ControlText()
+        self._scf.value = ""
+
+        # Streameta
+        self._sm = None
+        self._smf = ControlText()
+        self._smf.value = ""
 
         # Define the existing form fields
         self._form_fields = (
             self._ename, self._pID, self._mtype, self._p1, self._p2, self._p1char,
             self._p2char, self._bracket, self._file, self._tags, self._msuffix,
             self._mprefix, self._p1sponsor, self._p2sponsor, self._privacy,
-            self._description, self._ename_min, self._titleformat, self._scf,
+            self._description, self._ename_min, self._titleformat, self._scf, self._smf
         )
 
         # Get latest values from form_values.txt
@@ -401,10 +424,20 @@ class MeleeUploader(BaseWidget):
             self._sct.quit()
             self._sc = None
         else:
-            self._scrun = True
             self._scwin = SCFileInput(self._scf)
             self._scwin.parent = self
             self._scwin.show()
+
+    def __show_sm_form(self):
+        if self._sm:
+            self._sm.stopsm()
+            print("Unhooked from Streameta")
+            self._smt.quit()
+            self._sm = None
+        else:
+            self._smwin = SMurlInput(self._smf)
+            self._smwin.parent = self
+            self._smwin.show()
 
     def __hook_sa(self, host, port):
         self._sawin.close()
@@ -438,6 +471,20 @@ class MeleeUploader(BaseWidget):
         self._sct.started.connect(self._sc.get_update)
         self._sct.start()
         print("Hooked into SC")
+
+    def __hook_sm(self, url):
+        try:
+            self._smwin.close()
+            self._smf.value = url
+            self._sm = workers.StreametaWorker(url)
+            self._smt = QtCore.QThread()
+            self._sm.moveToThread(self._smt)
+            self._sm.sig.connect(self.__sm_update)
+            self._smt.started.connect(self._sm.get_update)
+            self._smt.start()
+            print("Hooked into Streameta")
+        except Exception as e:
+            print(e)
 
     def __show_o_view(self, row, column):
         win = OptionsViewer(row, self._queueref[row])
@@ -538,6 +585,7 @@ class MeleeUploader(BaseWidget):
             row[16] = deepcopy(options.ename_min)
             row[17] = deepcopy(options.titleformat)
             row[18] = deepcopy(self._scf.value)
+            row[19] = deepcopy(self._smf.value)
         else:
             f = self._pID.value.find("PL")
             self._pID.value = self._pID.value[f:f + 34]
@@ -682,6 +730,41 @@ class MeleeUploader(BaseWidget):
                     mtype = t
                     prefix = ""
                     suffix = ""
+            self._mtype.value = mtype
+            self._mprefix.value = prefix
+            self._msuffix.value = suffix
+        except Exception as e:
+            print(e)
+
+    def __sm_update(self, data):
+        mtype = ""
+        suffix = ""
+        prefix = ""
+        try:
+            self.__p1chars = self._p1char.value
+            self.__p2chars = self._p2char.value
+            p1char = data['teams'][0]['players'][0]['character']['name']
+            p2char = data['teams'][1]['players'][0]['character']['name']
+            if p1char not in self.__p1chars:
+                self.__p1chars.append(p1char)
+            if p2char not in self.__p2chars:
+                self.__p2chars.append(p2char)
+            self._p1char.load_form(dict(selected=self.__p1chars))
+            self._p2char.load_form(dict(selected=self.__p2chars))
+        except Exception as e:
+            print(e)
+        try:
+            self._p1.value = data['teams'][0]['players'][0]['person']['name']
+            self._p2.value = data['teams'][1]['players'][0]['person']['name']
+        except Exception as e:
+            print(e)
+        try:
+            for t in consts.match_types:
+                if t.lower() in data['rounds'][0]['round']['name'].lower():
+                    mtype = t
+                    sections = data['rounds'][0]['round']['name'].split(t)
+                    prefix = sections[0].strip()
+                    suffix = sections[1].strip()
             self._mtype.value = mtype
             self._mprefix.value = prefix
             self._msuffix.value = suffix
