@@ -322,8 +322,6 @@ class MeleeUploader(BaseWidget):
             print(text, file=sys.__stdout__, end='')
 
     def write_err(self, text):
-        self._output.value += text
-        self._output._form.plainTextEdit.moveCursor(QtGui.QTextCursor.End)
         if sys.__stdout__:
             print(text, file=sys.__stdout__, end='')
         with open(consts.log_file, "a") as f:
