@@ -120,4 +120,4 @@ titleformat_min = {
 
 match_types = ("Pools", "Round Robin", "Winners", "Losers", "Winners Finals",
                "Losers Finals", "Grand Finals", "Money Match", "Crew Battle",
-               "Ladder", "Friendlies")
+               "Ladder", "Friendlies", "Thug Finals")

@@ -137,9 +137,9 @@ class MeleeUploader(BaseWidget):
                 else:
                     resp = self.question(f"Current Version: {consts.__version__}\nVersion {latest_version} is available. Would you like to update?", title="MeleeUploader")
                     if resp == "yes":
-                        ret = subprocess.call(('pip3', 'install', '-I', f'meleeuploader=={latest_version}'))
+                        ret = subprocess.call(('pip3', 'install', '-U', f'meleeuploader=={latest_version}'))
                         if ret:
-                            self.info(f'The app failed to update\nType "pip3 install -I meleeuploader=={latest_version}" into CMD/Terminal to update', title="MeleeUploader")
+                            self.info(f'The app failed to update\nType "pip3 install -U meleeuploader=={latest_version}" into CMD/Terminal to update', title="MeleeUploader")
                         else:
                             self.info("You can now restart the app to use the new version", title="MeleeUploader")
         except Exception as e:
@@ -213,7 +213,7 @@ class MeleeUploader(BaseWidget):
 
         # Main Menu Layout
         self.mainmenu = [
-            {'Settings': [{'YouTube Log Out': self.__reset_cred}, {'Toggle SA Hook': self.__show_sa_form}, {'Toggle OBS Hook': self.__show_obs_form}, {'Toggle SC Hook': self.__show_sc_form}, {'Toggle Streameta Hook': self.__show_sm_form}],
+            {'Settings': [{'YouTube Log Out': self.__reset_cred}, {'Toggle SA Hook': self.__show_sa_form}, {'Toggle OBS Hook': self.__show_obs_form}, {'Toggle SC Hook': self.__show_sc_form}, {'Toggle Streameta Hook': self.__show_sm_form}, {'About': self.__about_info}],
                 'Save/Clear': [{'Save Form': self.__save_form}, {'Clear Match Values': self.__reset_match}, {'Clear Event Values': self.__reset_event}, {'Clear All': self.__reset_forms}],
                 'Queue': [{'Toggle Uploads': utils.toggle_worker}, {'Save Queue': self.__save_queue}, {'Load Queue': self.__load_queue}],
                 'History': [{'Show History': self.__show_h_view}],
@@ -768,3 +768,6 @@ class MeleeUploader(BaseWidget):
             self._msuffix.value = suffix
         except Exception as e:
             print(e)
+
+    def __about_info(self):
+        self.info(f"v{consts.__version__}\nWritten by Nikhil Narayana\nhttps://github.com/NikhilNarayana/Melee-YouTube-Uploader")

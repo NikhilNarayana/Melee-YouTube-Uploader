@@ -149,6 +149,19 @@ def get_spreadsheet_service():
     return build('sheets', 'v4', http=credentials.authorize(httplib2.Http()), discoveryServiceUrl=discoveryUrl)
 
 
+def add_to_playlist(pID, vID):
+    consts.youtube.playlistItems().insert(
+        part="snippet",
+        body=dict(
+            snippet=dict(
+                playlistId=pID,
+                resourceId=dict(
+                    kind='youtube#video',
+                    videoId=vID)))
+    ).execute()
+    print("Added to playlist")
+
+
 def get_secrets(prefixes, relative_paths):
     """
     Taken from https://github.com/tokland/youtube-upload/blob/master/youtube_upload/main.py

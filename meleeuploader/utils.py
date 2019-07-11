@@ -9,6 +9,10 @@ from . import youtube as yt
 
 
 def pre_upload(opts):
+    if opts.mtype == "Grand Finals" and any(x.lower() in opts.msuffix.lower() for x in ("Set 2", "Reset")):
+        opts.msuffix = ""
+    opts.p1 = opts.p1.split("[L]")[0].strip()
+    opts.p2 = opts.p2.split("[L]")[0].strip()
     if opts.mprefix and opts.msuffix:
         opts.mtype = " ".join((opts.mprefix, opts.mtype, opts.msuffix))
     elif opts.mprefix:
@@ -30,12 +34,14 @@ def pre_upload(opts):
                 if len(title) > 100:
                     title = make_title(opts, chars_exist, True)
                     if len(title) > 100:
-                        # I can only hope no one ever goes this far
-                        print("Title is greater than 100 characters after minifying all options")
-                        print(title)
-                        print(f"Title Length: {len(title)}")
-                        print("Killing this upload now\n\n")
-                        return False
+                        title = make_title(opts, False, True)
+                        if len(title) > 100:
+                            # I can only hope no one ever goes this far
+                            print("Title is greater than 100 characters after minifying all options")
+                            print(title)
+                            print(f"Title Length: {len(title)}")
+                            print("Killing this upload now\n\n")
+                            return False
     print(f"Uploading {title}")
     if opts.descrip:
         descrip = f"Bracket: {opts.bracket}\n\n{opts.descrip}\n\n{consts.credit}" if opts.bracket else f"{opts.descrip}\n\n{consts.credit}"
@@ -61,15 +67,7 @@ def pre_upload(opts):
     if ret:
         if opts.pID[:2] == "PL":
             try:
-                consts.youtube.playlistItems().insert(
-                    part="snippet",
-                    body=dict(
-                        snippet=dict(
-                            playlistId=opts.pID,
-                            resourceId=dict(
-                                kind='youtube#video',
-                                videoId=vid)))).execute()
-                print("Added to playlist")
+                yt.add_to_playlist(opts.pID, vid)
             except Exception as e:
                 print("Failed to add to playlist")
                 print(e)
