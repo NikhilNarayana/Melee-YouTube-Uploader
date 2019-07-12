@@ -9,6 +9,9 @@ firstrun = True
 stop_thread = False
 melee = True
 custom = False
+stopUpdates = False
+submitted = True
+
 youtube = None
 sheets = None
 partner = None

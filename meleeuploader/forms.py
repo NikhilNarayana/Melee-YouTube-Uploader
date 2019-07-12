@@ -23,7 +23,7 @@ import pyforms_lite
 from argparse import Namespace
 from PyQt5 import QtCore, QtGui
 from pyforms_lite import BaseWidget
-from pyforms_lite.controls import ControlText, ControlFile
+from pyforms_lite.controls import ControlText, ControlFile, ControlLabel
 from pyforms_lite.controls import ControlTextArea, ControlList
 from pyforms_lite.controls import ControlCombo, ControlProgress
 from pyforms_lite.controls import ControlButton, ControlCheckBox, ControlCheckBoxList
@@ -54,13 +54,22 @@ class OBSHostPortInput(BaseWidget):
         self._port = ControlText("Host Port")
         self._host.value = "localhost"
         self._port.value = "4444"
-        self._button = ControlButton("Submit")
-        self.formset = ["_host", "_port", "_button"]
-        self._button.value = self.__button_action
+        self._label = ControlLabel("When I stop recording I want the program to")
+        self._sub = ControlButton("Submit")
+        self._stop = ControlButton("Stop Updates")
+        self.formset = ["_host", "_port", "_label", ("_sub", "_stop")]
+        self._sub.value = self.__sub_action
+        self._stop.value = self.__stop_action
 
-    def __button_action(self):
+    def __sub_action(self):
         if self._host.value and self._port.value:
-            self.parent._MeleeUploader__hook_obs(self._host.value, self._port.value)
+            self.parent._MeleeUploader__hook_obs(self._host.value, self._port.value, True)
+        else:
+            self.warning("You must input a host IP and port number")
+
+    def __stop_action(self):
+        if self._host.value and self._port.value:
+            self.parent._MeleeUploader__hook_obs(self._host.value, self._port.value, False)
         else:
             self.warning("You must input a host IP and port number")
 
@@ -213,7 +222,7 @@ class MeleeUploader(BaseWidget):
 
         # Main Menu Layout
         self.mainmenu = [
-            {'Settings': [{'YouTube Log Out': self.__reset_cred}, {'Toggle SA Hook': self.__show_sa_form}, {'Toggle OBS Hook': self.__show_obs_form}, {'Toggle SC Hook': self.__show_sc_form}, {'Toggle Streameta Hook': self.__show_sm_form}, {'About': self.__about_info}],
+            {'Settings': [{'YouTube Log Out': self.__reset_cred}, {'Toggle OBS Hook': self.__show_obs_form}, {'Toggle SA Hook': self.__show_sa_form}, {'Toggle SC Hook': self.__show_sc_form}, {'Toggle Streameta Hook': self.__show_sm_form}, {'About': self.__about_info}],
                 'Save/Clear': [{'Save Form': self.__save_form}, {'Clear Match Values': self.__reset_match}, {'Clear Event Values': self.__reset_event}, {'Clear All': self.__reset_forms}],
                 'Queue': [{'Toggle Uploads': utils.toggle_worker}, {'Save Queue': self.__save_queue}, {'Load Queue': self.__load_queue}],
                 'History': [{'Show History': self.__show_h_view}],
@@ -270,6 +279,7 @@ class MeleeUploader(BaseWidget):
 
     def __button_action(self, data=None):
         """Button action event"""
+        consts.submitted = True
         if any(not x for x in (self._ename.value, self._p1.value, self._p2.value, self._file.value)):
             print("Missing one of the required fields (event name, player names, file name)")
             return
@@ -448,16 +458,26 @@ class MeleeUploader(BaseWidget):
         self._sat.start()
         print("Hooked into SA")
 
-    def __hook_obs(self, host, port):
+    def __hook_obs(self, host, port, sub):
+        if sub:
+            consts.stopUpdates = True
+        else:
+            consts.stopUpdates = False
         self._obswin.close()
         self.warning("Please make sure OBS is open and the Websocket server is enabled with the default settings and no password", title="MeleeUploader")
         self._obs = workers.OBSWorker(host, port)
         self._obst = QtCore.QThread()
         self._obs.moveToThread(self._obst)
-        self._obs.sig.connect(self.__button_action)
+        self._obs.sig.connect(self.__handle_obs)
         self._obst.started.connect(self._obs.startobs)
         self._obst.start()
         print("Hooked into OBS")
+
+    def __handle_obs(self):
+        if not consts.stopUpdates:
+            self.__button_action()
+        else:
+            consts.submitted = False
 
     def __hook_sc(self, f):
         self._scwin.close()
@@ -648,6 +668,8 @@ class MeleeUploader(BaseWidget):
         self._p2char.load_form(dict(selected=p2))
 
     def __sa_update(self, data):
+        if consts.stopUpdates and not consts.submitted:
+            return
         prefix = ""
         mtype = ""
         suffix = ""
@@ -690,6 +712,8 @@ class MeleeUploader(BaseWidget):
             print(e)
 
     def __sc_update(self, data):
+        if consts.stopUpdates and not consts.submitted:
+            return
         mtype = ""
         suffix = ""
         prefix = ""
@@ -735,6 +759,8 @@ class MeleeUploader(BaseWidget):
             print(e)
 
     def __sm_update(self, data):
+        if consts.stopUpdates and not consts.submitted:
+            return
         mtype = ""
         suffix = ""
         prefix = ""
