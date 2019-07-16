@@ -155,9 +155,9 @@ class MeleeUploader(BaseWidget):
             print(e)
 
         if consts.melee:
-            super(MeleeUploader, self).__init__("Melee YouTube Uploader")
+            super(MeleeUploader, self).__init__(f"Melee YouTube Uploader - {consts.__version__}")
         else:
-            super(MeleeUploader, self).__init__("Smash YouTube Uploader")
+            super(MeleeUploader, self).__init__(f"Smash YouTube Uploader - {consts.__version__}")
 
         # Redirct print output
         sys.stdout = workers.WriteWorker(textWritten=self.write_print)
