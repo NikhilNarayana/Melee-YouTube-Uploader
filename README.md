@@ -75,9 +75,9 @@ If you would like to have no console window on your screen, you will need to fin
 `Event Name`, `Title Format`, `Video Privacy`, `File`, `Match Type`, and `Player Tags` are the only required fields for uploading any file.
 
 #### File
-File is able to be used as either a file or directory input. Because of how the input selector is setup you will need to select a file within the directory you wish to use and then you can delete the filename from the field. If you select a directory it will not be deleted after submission.
+File is able to be used as either a file or directory input. Because of how the input selector is setup you will need to either type out the directory address or select a file within the directory you wish to use and then you can delete the filename from the field. If you select a directory the field will not be cleared after submission.
 
-When using this quirk of the field, it will find the newest file in the directory you give it, so make sure no other files are written to this folder other than the recordings. This is best used for uploading or queueing videos during an event.
+When using the directory feature, it will find the newest file in the directory you give it, so make sure no other files are written to this folder other than the recordings. This is best used for uploading or queueing videos during an event.
 
 #### Title Format 
 All the options support no characters and the available options can be expanded upon on request.
@@ -116,7 +116,7 @@ The submit button does a lot, it adds submission to queue, clears fields in matc
 ## How to use advanced features - Video Version: https://youtu.be/mw0sP7YJVfE
 
 ### History - Fixing an upload that didn't work
-History was built so I could fix uploads that exceeded the title limit on YouTube (100 characters). 
+History was built so I could fix uploads that exceeded the title limit on YouTube (100 characters). This actually happens very rarely now because I've employed a number of tricks to minify the title as much as possible.
 
 By loading the history window from the menubar, you can double click any row in the list to reload the form with the values you inputted for that submission. Every submission will create a new entry, but the history window is only updated on load, you will need to close and reopen it to see new entries.
 
@@ -133,6 +133,9 @@ To enable the websocket open the `Settings` menu tab and select the `Enable Webs
 The program will pull from the `Player 1`, `Player 2`, and `Match` fields. The `Match` field will be parsed to find which of the match types defined in the program are a substring, then it will split the input at the substring and update `Match Prefix` and `Match Suffix` with whatever is left over. For example, `Doubles - Winners R1` as the input would result in `Doubles -` and `R1` being the prefix and suffix respectively.
 
 There is also support for character selection if you use stock icons from this [link](https://drive.google.com/file/d/1L8M-4FUDcQo-2cuh1Ak_VabJSQlWz8B_/view?usp=sharing).
+
+### StreamControl and Streameta Integration
+This integration is similar to the SA websocket but is done by polling a file or HTTP endpoint respectively. The SC integration is designed around Recursion's setup so it won't work easily for everyone.
 
 ### OBS Websocket - Never submit manually
 This is a peculiar feature that I built with only myself in mind. There are no plans to expand what I've set it up to do.
