@@ -70,6 +70,7 @@ minchars = {
     'Bayonetta': "Bayo",
     'King K. Rool': "K. Rool",
     'Piranha Plant': "Plant",
+    'Banjo & Kazooie': "Banjo"
 }
 
 ult_chars = ('Mario', 'Donkey Kong', 'Link', 'Samus', 'Dark Samus', 'Yoshi',
@@ -87,7 +88,7 @@ ult_chars = ('Mario', 'Donkey Kong', 'Link', 'Samus', 'Dark Samus', 'Yoshi',
              'Shulk', 'Bowser Jr.', 'Duck Hunt', 'Ryu', 'Ken', 'Cloud',
              'Corrin', 'Bayonetta', 'Inkling', 'Ridley', 'Simon', 'Richter',
              'King K. Rool', 'Isabelle', 'Incineroar', 'Piranha Plant',
-             'Joker')
+             'Joker', 'Hero','Banjo & Kazooie')
 
 melee_chars = ('Fox', 'Falco', 'Marth', 'Sheik', 'Jigglypuff', 'Peach',
                'Captain Falcon', 'Ice Climbers', 'Pikachu', 'Samus',
