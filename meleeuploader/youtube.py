@@ -8,6 +8,7 @@ import httplib2
 import os
 import sys
 import errno
+from time import sleep
 from decimal import Decimal
 
 from . import consts

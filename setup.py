@@ -28,7 +28,7 @@ setup(
         "Natural Language :: English",
     ],
     entry_points=dict(console_scripts=['meleeuploader = meleeuploader.main:main', 'smashuploader = meleeuploader.main:ult']),
-    python_requires='~=3.6',
+    python_requires='>= 3.6.0, <3.7.4',
     version=version,
     packages=["meleeuploader"],
     install_requires=[
