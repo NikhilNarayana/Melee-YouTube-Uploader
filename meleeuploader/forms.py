@@ -139,7 +139,7 @@ class YouTubeSelector(BaseWidget):
 class MeleeUploader(BaseWidget):
     def __init__(self):
         try:  # check if the user can update the app
-            latest_version = requests.get('https://pypi.org/pypi/MeleeUploader/json').json()['info']['version']
+            latest_version = requests.get('https://pypi.org/pypi/MeleeUploader/json').json().get('info', {}).get('version')
             if sv(latest_version) > sv(consts.__version__):  # prevents messages when developing
                 if "linux" in sys.platform:
                     self.info(f"Current Version: {consts.__version__}\nVersion {latest_version} is available.\nUse sudo pip3 install -U meleeuploader=={latest_version} in terminal to update to the newest verison", title="MeleeUploader")
@@ -338,7 +338,7 @@ class MeleeUploader(BaseWidget):
             f.write(text)
 
     def __reset_cred(self):
-        title = consts.youtube.channels().list(part='snippet', mine=True).execute()['items'][0]['snippet']['title']
+        title = consts.youtube.channels().list(part='snippet', mine=True).execute().get('items', [])[0].get('snippet', {}).get('title')
         resp = self.question(f"You are currently logged into {title}\nWould you like to log out?", title="MeleeUploader")
         if resp == "yes":
             shutil.copyfile(consts.youtube_file, os.path.join(consts.smash_folder, f"{title}.json"))
@@ -674,8 +674,8 @@ class MeleeUploader(BaseWidget):
             try:
                 self.__p1chars = self._p1char.value
                 self.__p2chars = self._p2char.value
-                p1char = " ".join(data['image1'].split(" ")[:-1])
-                p2char = " ".join(data['image2'].split(" ")[:-1])
+                p1char = " ".join(data.get('image1', "").split(" ")[:-1])
+                p2char = " ".join(data.get('image2', "").split(" ")[:-1])
                 if p1char not in self.__p1chars:
                     self.__p1chars.append(p1char)
                 if p2char not in self.__p2chars:
@@ -685,21 +685,21 @@ class MeleeUploader(BaseWidget):
             except Exception as e:
                 print(e)
         try:
-            self._p1.value = data['player1']
-            self._p2.value = data['player2']
+            self._p1.value = data.get('player1', "")
+            self._p2.value = data.get('player2', "")
         except Exception as e:
             print(e)
         try:
             for t in consts.match_types:
-                if t.lower() in data['match'].lower():
+                if t.lower() in data.get('match', "").lower():
                     mtype = t
                     prefix = ""
                     suffix = ""
-                    if not data['match'].find(t):
-                        sections = data['match'].split(t)
+                    if not data.get('match', "").find(t):
+                        sections = data.get('match', "").split(t)
                         suffix = sections[1].strip()
                     else:
-                        sections = data['match'].split(t)
+                        sections = data.get('match', "").split(t)
                         prefix = sections[0].strip()
                         suffix = sections[1].strip()
             self._mtype.value = mtype
@@ -718,8 +718,8 @@ class MeleeUploader(BaseWidget):
             try:
                 self.__p1chars = self._p1char.value
                 self.__p2chars = self._p2char.value
-                p1char = data['p1_char']
-                p2char = data['p2_char']
+                p1char = data.get('p1_char', "")
+                p2char = data.get('p2_char', "")
                 if p1char == "Doctor Mario":
                     p1char = "Dr. Mario"
                 if p2char == "Doctor Mario":
@@ -733,19 +733,19 @@ class MeleeUploader(BaseWidget):
             except Exception as e:
                 print(e)
         try:
-            self._p1.value = data['p1_name']
-            self._p2.value = data['p2_name']
+            self._p1.value = data.get('p1_name', "")
+            self._p2.value = data.get('p2_name', "")
         except Exception as e:
             print(e)
         try:
             for t in consts.match_types:
-                if t.lower() in data['event_round'].lower():
+                if t.lower() in data.get('event_round', "").lower():
                     mtype = t
                     suffix = ""
-                    sections = data['event_round'].split(t)
+                    sections = data.get('event_round', "").split(t)
                     suffix = sections[1].strip()
-                    prefix = data['event_bracket']
-                elif t.lower() in data['event_bracket'].lower():
+                    prefix = data.get('event_bracket', "")
+                elif t.lower() in data.get('event_bracket', "").lower():
                     mtype = t
                     prefix = ""
                     suffix = ""
@@ -764,8 +764,8 @@ class MeleeUploader(BaseWidget):
         try:
             self.__p1chars = self._p1char.value
             self.__p2chars = self._p2char.value
-            p1char = data['teams'][0]['players'][0]['character']['name']
-            p2char = data['teams'][1]['players'][0]['character']['name']
+            p1char = data.get('teams', [])[0].get('players', [])[0].get('character', {}).get('name')
+            p2char = data.get('teams', [])[1].get('players', [])[0].get('character', {}).get('name')
             if p1char not in self.__p1chars:
                 self.__p1chars.append(p1char)
             if p2char not in self.__p2chars:
@@ -775,15 +775,15 @@ class MeleeUploader(BaseWidget):
         except Exception as e:
             print(e)
         try:
-            self._p1.value = data['teams'][0]['players'][0]['person']['name']
-            self._p2.value = data['teams'][1]['players'][0]['person']['name']
+            self._p1.value = data.get('teams', [])[0].get('players', [])[0].get('person', {}).get('name')
+            self._p2.value = data.get('teams', [])[1].get('players', [])[0].get('person', {}).get('name')
         except Exception as e:
             print(e)
         try:
             for t in consts.match_types:
-                if t.lower() in data['rounds'][0]['round']['name'].lower():
+                if t.lower() in data.get('rounds', [])[0].get('round', {}).get('name', "").lower():
                     mtype = t
-                    sections = data['rounds'][0]['round']['name'].split(t)
+                    sections = data.get('rounds', [])[0].get('round', {}).get('name', "").split(t)
                     prefix = sections[0].strip()
                     suffix = sections[1].strip()
             self._mtype.value = mtype
