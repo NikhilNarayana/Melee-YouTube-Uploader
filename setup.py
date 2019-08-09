@@ -19,7 +19,7 @@ setup(
     author="Nikhil Narayana",
     author_email="nikhil.narayana@live.com",
     license="GNU Public License v3.0",
-    keywords='smash melee youtube uploader',
+    keywords='smash melee ssbm ssbu ultimate youtube uploader',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Programming Language :: Python :: 3.7',
