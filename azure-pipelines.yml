@@ -13,7 +13,7 @@ pool:
 strategy:
   matrix:
     Python37:
-      python.version: '3.7.3'
+      python.version: '3.7'
 
 steps:
 - task: UsePythonVersion@0
@@ -23,8 +23,7 @@ steps:
 
 - script: |
     python -m pip install --upgrade pip setuptools wheel twine
-    pip install .
-  displayName: 'Install dependencies and build tools'
+  displayName: 'Install build tools'
 
 - script: |
     python setup.py sdist
