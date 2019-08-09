@@ -4,16 +4,16 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/python
 
 trigger:
-- master
+  tags:
+    include:
+    - v*
 
 pool:
   vmImage: 'ubuntu-latest'
 strategy:
   matrix:
-    Python36:
-      python.version: '3.6'
     Python37:
-      python.version: '3.7'
+      python.version: '3.7.3'
 
 steps:
 - task: UsePythonVersion@0
@@ -22,11 +22,10 @@ steps:
   displayName: 'Use Python $(python.version)'
 
 - script: |
-    python -m pip install --upgrade pip
+    python -m pip install --upgrade pip setuptools wheel twine
     pip install .
-  displayName: 'Install dependencies'
+  displayName: 'Install dependencies and build tools'
 
 - script: |
-    pip install pytest pytest-azurepipelines
-    pytest
-  displayName: 'pytest'
+    python setup.py sdist
+    twine upload -u $(pypi-username) -p $(pypi-password) dist/*
