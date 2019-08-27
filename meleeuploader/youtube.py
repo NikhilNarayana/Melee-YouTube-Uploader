@@ -39,7 +39,7 @@ PREFIXES = (consts.root, sys.prefix, os.path.join(sys.prefix, "local"), "/usr", 
 SUFFIXES = ("client_secrets.json", ".client_secrets.json", f"share/{consts.short_name}/client_secrets.json")
 
 
-def upload(yt, body, file):
+def upload(yt, body, file, notify=False):
     vid = None
     ret = None
     retries = 0
@@ -47,6 +47,7 @@ def upload(yt, body, file):
         insert_request = yt.videos().insert(
             part=",".join(body.keys()),
             body=body,
+            notifySubscribers=notify,
             media_body=MediaFileUpload(file,
                                        chunksize=104857600,
                                        resumable=True),)
