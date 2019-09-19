@@ -29,6 +29,7 @@ I am always open to help setup the program or fix any techincal issues you may h
 * Manual or automatic file selection
 * Queue and dequeue Videos to upload
 * Add many relevant YouTube tags
+* Make playlists
 * Add to a YouTube playlist
 * Save and load form values
 * Load old submissions from history
@@ -99,6 +100,7 @@ There is also the option to load your own character list, instructions can be fo
 
 #### YouTube PlaylistID
 The URL of the playlist after creation can be put here, the program will trim it to just the part it needs. The URL should look like `https://www.youtube.com/playlist?list=PLSCJwgNAP2cXdlHlwbZr38JDHuuc8vx_s`, if the address has a string with `PL` at the start, it should work.
+If you need to generate a playlist you can also that here by typing in a playlist name. Make sure it doesn't contain "PL" anywhere in the name otherwise it will fail.
 
 #### Bracket Link
 Any URL will work here, just make sure to include `https://` so YouTube users can click on the link in the description.
