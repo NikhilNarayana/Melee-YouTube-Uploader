@@ -575,6 +575,7 @@ class MeleeUploader(BaseWidget):
             consts.firstrun = False
             consts.stop_thread = False
             thr.start()
+        consts.loadedQueue = True
 
     def __save_form(self, options=[]):
         row = [None] * (len(self._form_fields) + 1)
