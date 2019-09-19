@@ -8,6 +8,8 @@ from datetime import datetime
 from . import consts
 from . import youtube as yt
 
+import requests
+
 
 def pre_upload(opts):
     if opts.mtype == "Grand Finals" and any(x.lower() in opts.msuffix.lower() for x in ("Set 2", "Reset")):
@@ -157,3 +159,19 @@ def read_queue():
 def write_queue(val):
     with open(consts.queue_values, "wb") as f:
         f.write(pickle.dumps(val))
+
+
+def create_playlist(name):
+    ret = consts.youtube.playlists().insert(
+        part='snippet,status',
+        body = {
+            "snippet": {
+                "title": name
+            },
+            "status": {
+                "privacyStatus": "public"
+            }
+        }
+    ).execute()
+
+    return ret['id'] or ret

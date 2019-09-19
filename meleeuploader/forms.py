@@ -244,7 +244,7 @@ class MeleeUploader(BaseWidget):
         self._msuffix.form.lineEdit.setPlaceholderText("Round Suffix")
         self._bracket.form.lineEdit.setPlaceholderText("Include https://")
         self._tags.form.lineEdit.setPlaceholderText("Separate with commas")
-        self._pID.form.lineEdit.setPlaceholderText("Accepts full YT link")
+        self._pID.form.lineEdit.setPlaceholderText("Accepts full YT link or a new playlist title")
 
         # For pulling characters
         self.__p1chars = []
@@ -581,7 +581,10 @@ class MeleeUploader(BaseWidget):
         row = [None] * (len(self._form_fields) + 1)
         if options:
             f = options.pID.find("PL")
-            options.pID = options.pID[f:f + 34]
+            if f == -1:
+                options.pID = utils.create_playlist(options.pID)
+            else:
+                options.pID = options.pID[f:f + 34]
             row[0] = deepcopy(options.ename)
             row[1] = deepcopy(options.pID)
             row[2] = deepcopy(options.mtype)
@@ -604,7 +607,10 @@ class MeleeUploader(BaseWidget):
             row[19] = deepcopy(self._smf.value)
         else:
             f = self._pID.value.find("PL")
-            self._pID.value = self._pID.value[f:f + 34]
+            if f == -1:
+                self._pID.value = utils.create_playlist(self._pID.value)
+            else:
+                self._pID.value = self._pID.value[f:f + 34]
             for i, var in zip(range(len(self._form_fields) + 1), self._form_fields):
                 row[i] = deepcopy(var.value)
         with open(consts.form_values, 'w') as f:
