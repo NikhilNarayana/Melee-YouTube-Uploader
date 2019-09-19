@@ -2,6 +2,7 @@
 
 import os
 import sys
+import pickle
 from datetime import datetime
 
 from . import consts
@@ -144,3 +145,15 @@ def toggle_worker():
             print("Ready to Upload")
             consts.stop_thread = False
             consts.firstrun = True
+
+
+def read_queue():
+    queue = None
+    with open(consts.queue_values, "rb") as f:
+        queue = pickle.load(f)
+    return queue
+
+
+def write_queue(val):
+    with open(consts.queue_values, "wb") as f:
+        f.write(pickle.dumps(val))
