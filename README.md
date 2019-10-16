@@ -142,7 +142,7 @@ This integration is similar to the SA websocket but is done by polling a file or
 ### OBS Websocket - Never submit manually
 This is a peculiar feature that I built with only myself in mind. There are no plans to expand what I've set it up to do.
 
-I've set it up so once recording has been stopped, the application will submit the information that is currently inputted. This combined with `SA Websocket` is a powerful feature set to quickly queue sets. The only info that will have to be set if using that combo is the `Characters` for both players or you could just ignore those and automate the whole uploading procedure from start to finish.
+I've set it up so once recording has been stopped, you can have the application either submit the information that is currently inputted or stop updating the form if you are using a SA/SC/Streameta hook. This combined with `SA Websocket` or `SC/Streameta Integration` is a powerful feature set to quickly queue sets. The only info that will have to be set if using that combo is the `Characters` for both players or you could just ignore those and automate the whole uploading procedure from start to finish.
 
 In addition to enabling the settings you will need to update OBS with the websocket plugin found here: https://github.com/Palakis/obs-websocket
 
