@@ -15,9 +15,6 @@ This application **DOES NOT** support enabling monetization at the moment. I hig
 * Slippi Integration (plan is to allow pulling characters from the slippi stream, additional ideas are appreciated).
 * Maybe other stuff
 
-## Known Issues
-* Sometimes just fails to upload, haven't been able to find a solution other than doing a fresh install of your OS
-
 ## Contributing
 PRs are appreciated and will be reviewed quickly, the only code quality standard I have is to follow PEP8 standard except for the line length. If you have trouble understanding my code just ask me.
 
