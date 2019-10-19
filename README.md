@@ -29,6 +29,7 @@ I am always open to help setup the program or fix any techincal issues you may h
 * Manual or automatic file selection
 * Queue and dequeue Videos to upload
 * Add many relevant YouTube tags
+* Make playlists
 * Add to a YouTube playlist
 * Save and load form values
 * Load old submissions from history
@@ -99,6 +100,7 @@ There is also the option to load your own character list, instructions can be fo
 
 #### YouTube PlaylistID
 The URL of the playlist after creation can be put here, the program will trim it to just the part it needs. The URL should look like `https://www.youtube.com/playlist?list=PLSCJwgNAP2cXdlHlwbZr38JDHuuc8vx_s`, if the address has a string with `PL` at the start, it should work.
+If you need to generate a playlist you can also that here by typing in a playlist name. Make sure it doesn't contain "PL" anywhere in the name otherwise it will fail.
 
 #### Bracket Link
 Any URL will work here, just make sure to include `https://` so YouTube users can click on the link in the description.
@@ -140,7 +142,7 @@ This integration is similar to the SA websocket but is done by polling a file or
 ### OBS Websocket - Never submit manually
 This is a peculiar feature that I built with only myself in mind. There are no plans to expand what I've set it up to do.
 
-I've set it up so once recording has been stopped, the application will submit the information that is currently inputted. This combined with `SA Websocket` is a powerful feature set to quickly queue sets. The only info that will have to be set if using that combo is the `Characters` for both players or you could just ignore those and automate the whole uploading procedure from start to finish.
+I've set it up so once recording has been stopped, you can have the application either submit the information that is currently inputted or stop updating the form if you are using a SA/SC/Streameta hook. This combined with `SA Websocket` or `SC/Streameta Integration` is a powerful feature set to quickly queue sets. The only info that will have to be set if using that combo is the `Characters` for both players or you could just ignore those and automate the whole uploading procedure from start to finish.
 
 In addition to enabling the settings you will need to update OBS with the websocket plugin found here: https://github.com/Palakis/obs-websocket
 
