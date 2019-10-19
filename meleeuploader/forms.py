@@ -251,7 +251,7 @@ class MeleeUploader(BaseWidget):
         self.__p2chars = []
 
         # Set character list
-        game_chars = {"64": self.__64_chars, "melee": self.__melee_chars, "ult": self.__ultimate_chars}
+        game_chars = {"64": self.__64_chars, "melee": self.__melee_chars, "ult": self.__ultimate_chars, "rivals": self.__rivals_chars, "splatoon": self.__splatoon_chars}
         game_chars[consts.game]()
 
         # Stream Control
@@ -636,22 +636,27 @@ class MeleeUploader(BaseWidget):
                 print(f"No {consts.abbrv}_form_values.json to read from, continuing with default values")
 
     def __melee_chars(self):
+        consts.game = "melee"
         consts.tags = consts.melee_tags
         self.__update_chars(consts.melee_chars)
 
     def __ultimate_chars(self):
+        consts.game = "ultimate"
         consts.tags = consts.ult_tags
         self.__update_chars(consts.ult_chars)
     
     def __64_chars(self):
+        consts.game = "64"
         consts.tags = consts.s64_tags
         self.__update_chars(consts.s64_chars)
     
     def __rivals_chars(self):
+        consts.game = "rivals"
         consts.tags = consts.rivals_tags
         self.__update_chars(consts.rivals_chars)
 
     def __splatoon_chars(self):
+        consts.game = "splatoon"
         consts.tags = consts.splatoon2_tags
         self.__update_chars(consts.splatoon2_chars)
 

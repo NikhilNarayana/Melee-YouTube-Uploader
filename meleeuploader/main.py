@@ -36,9 +36,23 @@ def main():
         print("Error:", e)
         sys.exit(1)
 
+def s64():
+    consts.game = "64"
+    main()
+
+def melee():
+    main()
 
 def ult():
     consts.game = "ult"
+    main()
+
+def rivals():
+    consts.game = "rivals"
+    main()
+
+def splatoon():
+    consts.game = "splatoon"
     main()
 
 
