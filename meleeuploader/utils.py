@@ -50,7 +50,7 @@ def pre_upload(opts):
         descrip = f"Bracket: {opts.bracket}\n\n{opts.descrip}\n\n{consts.credit}" if opts.bracket else f"{opts.descrip}\n\n{consts.credit}"
     else:
         descrip = f"Bracket: {opts.bracket}\n\n{consts.credit}" if opts.bracket else consts.credit
-    tags = list(consts.melee_tags) if consts.melee else list(consts.ult_tags)
+    tags = list(consts.tags)
     if consts.custom:
         tags = []
     tags.extend((*opts.p1char, *opts.p2char, opts.ename, opts.ename_min, opts.p1, opts.p2))

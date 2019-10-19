@@ -154,7 +154,7 @@ class MeleeUploader(BaseWidget):
         except Exception as e:
             print(e)
 
-        if consts.melee:
+        if consts.game == "melee":
             super(MeleeUploader, self).__init__(f"Melee YouTube Uploader - {consts.__version__}")
         else:
             super(MeleeUploader, self).__init__(f"Smash YouTube Uploader - {consts.__version__}")
@@ -226,7 +226,7 @@ class MeleeUploader(BaseWidget):
                 'Save/Clear': [{'Save Form': self.__save_form}, {'Clear Match Values': self.__reset_match}, {'Clear Event Values': self.__reset_event}, {'Clear All': self.__reset_forms}],
                 'Queue': [{'Toggle Uploads': utils.toggle_worker}, {'Save Queue': self.__save_queue}, {'Load Queue': self.__load_queue}],
                 'History': [{'Show History': self.__show_h_view}],
-                'Characters': [{'Melee': self.__melee_chars}, {'Ultimate': self.__ultimate_chars}, {'Custom': self.__custom_chars}]}]
+                'Characters': [{'Melee': self.__melee_chars}, {'Ultimate': self.__ultimate_chars}, {'64': self.__64_chars}, {'Rivals': self.__rivals_chars}, {'Splatoon': self.__splatoon_chars}, {'Custom': self.__custom_chars}]}]
 
         # Add ControlCombo values
         for t in consts.match_types:
@@ -251,10 +251,8 @@ class MeleeUploader(BaseWidget):
         self.__p2chars = []
 
         # Set character list
-        if consts.melee:
-            self.__melee_chars()
-        else:
-            self.__ultimate_chars()
+        game_chars = {"64": self.__64_chars, "melee": self.__melee_chars, "ult": self.__ultimate_chars}
+        game_chars[consts.game]()
 
         # Stream Control
         self._sc = None
@@ -638,18 +636,26 @@ class MeleeUploader(BaseWidget):
                 print(f"No {consts.abbrv}_form_values.json to read from, continuing with default values")
 
     def __melee_chars(self):
-        consts.custom = False
-        consts.melee = True
+        consts.tags = consts.melee_tags
         self.__update_chars(consts.melee_chars)
 
     def __ultimate_chars(self):
-        consts.custom = False
-        consts.melee = False
+        consts.tags = consts.ult_tags
         self.__update_chars(consts.ult_chars)
+    
+    def __64_chars(self):
+        consts.tags = consts.s64_tags
+        self.__update_chars(consts.s64_chars)
+    
+    def __rivals_chars(self):
+        consts.tags = consts.rivals_tags
+        self.__update_chars(consts.rivals_chars)
+
+    def __splatoon_chars(self):
+        consts.tags = consts.splatoon2_tags
+        self.__update_chars(consts.splatoon2_chars)
 
     def __custom_chars(self):
-        consts.custom = True
-        consts.melee = False
         chars = None
         try:
             with open(consts.custom_list_file, "r") as f:
@@ -677,7 +683,7 @@ class MeleeUploader(BaseWidget):
         prefix = ""
         mtype = ""
         suffix = ""
-        if consts.melee:
+        if consts.game == "melee":
             try:
                 self.__p1chars = self._p1char.value
                 self.__p2chars = self._p2char.value
@@ -721,7 +727,7 @@ class MeleeUploader(BaseWidget):
         mtype = ""
         suffix = ""
         prefix = ""
-        if consts.melee:
+        if consts.game == "melee":
             try:
                 self.__p1chars = self._p1char.value
                 self.__p2chars = self._p2char.value

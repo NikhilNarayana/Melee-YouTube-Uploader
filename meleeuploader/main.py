@@ -38,7 +38,7 @@ def main():
 
 
 def ult():
-    consts.melee = False
+    consts.game = "ult"
     main()
 
 

@@ -8,6 +8,7 @@ __version__ = pkg_resources.require("MeleeUploader")[0].version
 firstrun = True
 stop_thread = False
 melee = True
+game = "melee"
 custom = False
 stopUpdates = False
 submitted = True
@@ -38,15 +39,20 @@ rowRange = "Data!A1:G1"
 
 credit = "Uploaded with Melee-YouTube-Uploader (https://github.com/NikhilNarayana/Melee-YouTube-Uploader) by Nikhil Narayana"
 
-
 melee_tags = ("Melee", "Super Smash Brothers Melee", "Smash Brothers",
               "Super Smash Bros. Melee", "meleeuploader", "SSBM", "ssbm")
 ult_tags = ("Ultimate", "Super Smash Brothers Ultimate", "Smash Brothers",
             "Super Smash Bros. Ultimate", "smashuploader", "SSBU", "ssbu")
+s64_tags = ("Smash 64", "64", "Super Smash Brothers", "Super Smash Bros.",
+            "Smash Brothers", "smashuploader", "SSB", "SSB64", "ssb", "ssb64")
+rivals_tags = ("Rivals of Aether", "RoA", "roa", "Rivals", "smashuploader")
+splatoon2_tags = ("Splatoon 2", "Splat 2", "smashuploader")
+tags = melee_tags
 
 minchars = {
     'Jigglypuff': "Puff",
-    'Captain Falcon': "Falcon",
+    'Captain Falcon': "C. Falcon",
+    'C. Falcon': "Falcon",
     'Ice Climbers': "Icies",
     'Pikachu': "Pika",
     'Doctor Mario': "Dr. Mario",
@@ -70,7 +76,8 @@ minchars = {
     'Bayonetta': "Bayo",
     'King K. Rool': "K. Rool",
     'Piranha Plant': "Plant",
-    'Banjo & Kazooie': "Banjo"
+    'Banjo & Kazooie': "Banjo",
+    'Terry Bogard': "Terry",
 }
 
 ult_chars = ('Mario', 'Donkey Kong', 'Link', 'Samus', 'Dark Samus', 'Yoshi',
@@ -88,13 +95,22 @@ ult_chars = ('Mario', 'Donkey Kong', 'Link', 'Samus', 'Dark Samus', 'Yoshi',
              'Shulk', 'Bowser Jr.', 'Duck Hunt', 'Ryu', 'Ken', 'Cloud',
              'Corrin', 'Bayonetta', 'Inkling', 'Ridley', 'Simon', 'Richter',
              'King K. Rool', 'Isabelle', 'Incineroar', 'Piranha Plant',
-             'Joker', 'Hero','Banjo & Kazooie')
+             'Joker', 'Hero','Banjo & Kazooie', 'Terry Bogard')
 
 melee_chars = ('Fox', 'Falco', 'Marth', 'Sheik', 'Jigglypuff', 'Peach',
                'Captain Falcon', 'Ice Climbers', 'Pikachu', 'Samus',
                'Dr. Mario', 'Yoshi', 'Luigi', 'Ganondorf', 'Mario',
                'Young Link', 'Donkey Kong', 'Link', 'Mr. Game & Watch',
                'Mewtwo', 'Roy', 'Zelda', 'Ness', 'Pichu', 'Bowser', 'Kirby')
+
+s64_chars = ('Pikachu', 'Kirby', 'Captain Falcon', 'Fox', 'Yoshi', 'Jigglypuff',
+             'Mario', 'Samus', 'Donkey Kong', 'Ness', 'Link', 'Luigi')
+
+rivals_chars = ('Zetterburn', 'Orcane', 'Wrastor', 'Kragg', 'Forsburn', 'Maypul',
+                'Absa', 'Etalus', 'Ranno', 'Clairen', 'Sylvanos', 'Elliana',
+                'Ori and Sein', 'Shovel Knight')
+
+splatoon2_chars = ()
 
 min_match_types = {
     "Round ": "R",
@@ -113,13 +129,15 @@ min_match_types = {
 titleformat = (("Event - Round - P1 (Fox) vs P2 (Fox)", "{ename} - {round} - {p1} ({p1char}) vs {p2} ({p2char})"),
                ("Event - P1 (Fox) vs P2 (Fox) - Round", "{ename} - {p1} ({p1char}) vs {p2} ({p2char}) - {round}"),
                ("Event - Round - (Fox) P1 vs P2 (Fox)", "{ename} - {round} - ({p1char}) {p1} vs {p2} ({p2char})"),
-               ("Round - P1 (Fox) vs P2 (Fox) - Event", "{round} - {p1} ({p1char}) vs {p2} ({p2char}) - {ename}"),)
+               ("Round - P1 (Fox) vs P2 (Fox) - Event", "{round} - {p1} ({p1char}) vs {p2} ({p2char}) - {ename}"),
+               ("P1 (Fox) vs P2 (Fox) - Round - Event", "{p1} ({p1char}) vs {p2} ({p2char}) - {round} - {ename}"))
 
 titleformat_min = {
     "{ename} - {round} - {p1} ({p1char}) vs {p2} ({p2char})": "{ename} - {round} - {p1} vs {p2}",
     "{ename} - {p1} ({p1char}) vs {p2} ({p2char}) - {round}": "{ename} - {p1} vs {p2} - {round}",
     "{ename} - {round} - ({p1char}) {p1} vs {p2} ({p2char})": "{ename} - {round} - {p1} vs {p2}",
-    "{round} - {p1} ({p1char}) vs {p2} ({p2char}) - {ename}": "{round} - {p1} vs {p2} - {ename}"
+    "{round} - {p1} ({p1char}) vs {p2} ({p2char}) - {ename}": "{round} - {p1} vs {p2} - {ename}",
+    "{p1} ({p1char}) vs {p2} ({p2char}) - {round} - {ename}": "{p1} vs {p2} - {round} - {ename}"
 }
 
 match_types = ("Pools", "Round Robin", "Winners", "Losers", "Winners Finals",
