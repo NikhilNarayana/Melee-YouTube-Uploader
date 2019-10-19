@@ -34,14 +34,16 @@ I am always open to help setup the program or fix any techincal issues you may h
 * Save and load form values
 * Load old submissions from history
 * Save a queue to be uploaded later
-* Melee, Ultimate, and Custom Character Lists
-* Hook into Scoreboard Assistant, Stream Control<sup>*</sup>, OBS
+* Melee, Ultimate, Smash 64, Rivals of Aether, Splatoon<sup>*</sup> and Custom Character Lists
+* Hook into Scoreboard Assistant, Stream Control<sup>**</sup>, Streameta, and OBS
 * Automatic Updates
 
-<sup>*</sup>you must adjust your configuration to use specific key names listed [here](https://github.com/NikhilNarayana/Melee-YouTube-Uploader/releases/tag/v1.10)
+<sup>*</sup>There are no characters in the list, but this does set splatoon specific tags which are useful
+
+<sup>**</sup>you must adjust your configuration to use specific key names listed [here](https://github.com/NikhilNarayana/Melee-YouTube-Uploader/releases/tag/v1.10)
 
 ## How to Setup - Video Version: https://youtu.be/zrcf4t_qk5A
-1. Install [Python 3.7.3](https://www.python.org/downloads/release/python-373/) for your OS with the PATH added and make sure there are no other versions of Python 3.
+1. Install [Python 3.7.3](https://www.python.org/downloads/release/python-373/) for your OS with the PATH added and make sure there are no other versions of Python 3. **You must install Python 3.7.3 or lower, it will not work with future versions**
 2. Install the program by typing `pip3 install -I meleeuploader` into Command Prompt/Terminal. If you want untested features you can download the repo and install with `pip3 install -I /path/to/repo`
 3. Start the program by running `meleeuploader` for the Melee character list or `smashuploader` for the Ultimate character list in Command Prompt/Terminal.
 4. Select the YouTube profile you would like to use for the first authentication request and then any google account for the second authentication request. If the second one fails, close your web browser and then run the command to open the program again.
@@ -66,7 +68,7 @@ In the future I will not be including YouTube API credentials with this project.
 #### Windows
 If you want to launch the application easily, you can find the exe by hitting the Windows key and typing `meleeuploader`, if that doesn't show the option to run the command then you can probably find the exe at `C:\Users\[Your Username]\AppData\Local\Programs\Python\Python37\Scripts\`. Pinning the exe to the taskbar allows quick access to the program.
 
-If you would like to have no console window on your screen, you will need to find out where your pythonw.exe file is (it should be in the same place your python.exe) and create a shortcut to it. Then open the shortcut properties window and edit the target to include `-m meleeuploader` for melee or `-m meleeuploader ult` for ultimate at the end. This can then be pinned to your taskbar for easy access. This method does not allow authenticating yourself so you will have to fall back to CMD/Terminal for that part.
+If you would like to have no console window on your screen, you will need to find out where your pythonw.exe file is (it should be in the same place your python.exe) and create a shortcut to it. Then open the shortcut properties window and edit the target to include `-m meleeuploader` for Melee, `-m meleeuploader ult` for Ultimate, `-m meleeuploader 64` for 64, `-m meleeuploader rivals` for Rivals, or `-m meleeuploader splatoon` for Splatoon at the end. This can then be pinned to your taskbar for easy access. This method does not allow authenticating yourself so you will have to fall back to CMD/Terminal for that part.
 
 #### Mac and Unix
 `meleeuploader &` if you want to hide the terminal window. There are probably ways to launch the program quicker, but I don't use macOS/Unix for uploading usually.
@@ -95,11 +97,12 @@ Melee characters are currently ordered by tier list placing, according to the 20
 Ultimate characters are currently ordered by the default character select screen without echo stacking.  
 If you don't add any characters for either player, both players will not have characters in the title.  
 Characters that are selected will be in the order they are shown in the list, not the selected order (unfortunate issue with the GUI framework).  
-You can swap the character list using the menu bar or load the preferred character list by using `meleeuploader` for Melee and `smashuploader` for Ultimate.  
+You can swap the character list using the menu bar or load the preferred character list by using `meleeuploader` for Melee, `smashuploader` for Ultimate, `s64uploader` for Smash 64, `rivalsuploader` for Rivals, and `splatoonuploader` for Splatoon.
 There is also the option to load your own character list, instructions can be found at the bottom.
 
 #### YouTube PlaylistID
 The URL of the playlist after creation can be put here, the program will trim it to just the part it needs. The URL should look like `https://www.youtube.com/playlist?list=PLSCJwgNAP2cXdlHlwbZr38JDHuuc8vx_s`, if the address has a string with `PL` at the start, it should work.
+
 If you need to generate a playlist you can also that here by typing in a playlist name. Make sure it doesn't contain "PL" anywhere in the name otherwise it will fail.
 
 #### Bracket Link
