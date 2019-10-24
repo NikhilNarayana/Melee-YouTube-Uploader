@@ -703,8 +703,8 @@ class MeleeUploader(BaseWidget):
             except Exception as e:
                 print(e)
         try:
-            self._p1.value = data.get('player1', "")
-            self._p2.value = data.get('player2', "")
+            self._p1.value = data.get('player1', self._p1.value)
+            self._p2.value = data.get('player2', self._p2.value)
         except Exception as e:
             print(e)
         try:
@@ -751,8 +751,8 @@ class MeleeUploader(BaseWidget):
             except Exception as e:
                 print(e)
         try:
-            self._p1.value = data.get('p1_name', "")
-            self._p2.value = data.get('p2_name', "")
+            self._p1.value = data.get('p1_name', self._p1.value)
+            self._p2.value = data.get('p2_name', self._p2.value)
         except Exception as e:
             print(e)
         try:
@@ -793,8 +793,8 @@ class MeleeUploader(BaseWidget):
         except Exception as e:
             print(e)
         try:
-            self._p1.value = data.get('teams', [])[0].get('players', [])[0].get('person', {}).get('name')
-            self._p2.value = data.get('teams', [])[1].get('players', [])[0].get('person', {}).get('name')
+            self._p1.value = data.get('teams', [])[0].get('players', [])[0].get('person', {}).get('name', self._p1.value)
+            self._p2.value = data.get('teams', [])[1].get('players', [])[0].get('person', {}).get('name', self._p2.value)
         except Exception as e:
             print(e)
         try:
