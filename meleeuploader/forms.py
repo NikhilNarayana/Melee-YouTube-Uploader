@@ -702,11 +702,8 @@ class MeleeUploader(BaseWidget):
                 self._p2char.load_form(dict(selected=self.__p2chars))
             except Exception as e:
                 print(e)
-        try:
-            self._p1.value = data.get('player1', self._p1.value)
-            self._p2.value = data.get('player2', self._p2.value)
-        except Exception as e:
-            print(e)
+        self._p1.value = data.get('player1', self._p1.value)
+        self._p2.value = data.get('player2', self._p2.value)
         try:
             for t in consts.match_types:
                 if t.lower() in data.get('match', "").lower():
@@ -720,9 +717,9 @@ class MeleeUploader(BaseWidget):
                         sections = data.get('match', "").split(t)
                         prefix = sections[0].strip()
                         suffix = sections[1].strip()
-            self._mtype.value = mtype
-            self._mprefix.value = prefix
-            self._msuffix.value = suffix
+            self._mtype.value = mtype or self._mtype.value
+            self._mprefix.value = prefix or self._mprefix.value
+            self._msuffix.value = suffix or self._msuffix.value
         except Exception as e:
             print(e)
 
@@ -767,9 +764,9 @@ class MeleeUploader(BaseWidget):
                     mtype = t
                     prefix = ""
                     suffix = ""
-            self._mtype.value = mtype
-            self._mprefix.value = prefix
-            self._msuffix.value = suffix
+            self._mtype.value = mtype or self._mtype.value
+            self._mprefix.value = prefix or self._mprefix.value
+            self._msuffix.value = suffix or self._msuffix.value
         except Exception as e:
             print(e)
 
@@ -804,9 +801,9 @@ class MeleeUploader(BaseWidget):
                     sections = data.get('rounds', [])[0].get('round', {}).get('name', "").split(t)
                     prefix = sections[0].strip()
                     suffix = sections[1].strip()
-            self._mtype.value = mtype
-            self._mprefix.value = prefix
-            self._msuffix.value = suffix
+            self._mtype.value = mtype or self._mtype.value
+            self._mprefix.value = prefix or self._mprefix.value
+            self._msuffix.value = suffix or self._msuffix.value
         except Exception as e:
             print(e)
 
