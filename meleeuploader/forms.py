@@ -688,20 +688,19 @@ class MeleeUploader(BaseWidget):
         prefix = ""
         mtype = ""
         suffix = ""
-        if consts.game == "melee":
-            try:
-                self.__p1chars = self._p1char.value
-                self.__p2chars = self._p2char.value
-                p1char = " ".join(data.get('image1', "").split(" ")[:-1])
-                p2char = " ".join(data.get('image2', "").split(" ")[:-1])
-                if p1char not in self.__p1chars:
-                    self.__p1chars.append(p1char)
-                if p2char not in self.__p2chars:
-                    self.__p2chars.append(p2char)
-                self._p1char.load_form(dict(selected=self.__p1chars))
-                self._p2char.load_form(dict(selected=self.__p2chars))
-            except Exception as e:
-                print(e)
+        try:
+            self.__p1chars = self._p1char.value
+            self.__p2chars = self._p2char.value
+            p1char = " ".join(data.get('image1', "").split(" ")[:-1])
+            p2char = " ".join(data.get('image2', "").split(" ")[:-1])
+            if p1char not in self.__p1chars:
+                self.__p1chars.append(p1char)
+            if p2char not in self.__p2chars:
+                self.__p2chars.append(p2char)
+            self._p1char.load_form(dict(selected=self.__p1chars))
+            self._p2char.load_form(dict(selected=self.__p2chars))
+        except Exception as e:
+            print(e)
         self._p1.value = data.get('player1', self._p1.value)
         self._p2.value = data.get('player2', self._p2.value)
         try:
