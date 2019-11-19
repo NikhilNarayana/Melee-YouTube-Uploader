@@ -729,24 +729,23 @@ class MeleeUploader(BaseWidget):
         mtype = ""
         suffix = ""
         prefix = ""
-        if consts.game == "melee":
-            try:
-                self.__p1chars = self._p1char.value
-                self.__p2chars = self._p2char.value
-                p1char = data.get('p1_char', "")
-                p2char = data.get('p2_char', "")
-                if p1char == "Doctor Mario":
-                    p1char = "Dr. Mario"
-                if p2char == "Doctor Mario":
-                    p2char = "Dr. Mario"
-                if p1char not in self.__p1chars:
-                    self.__p1chars.append(p1char)
-                if p2char not in self.__p2chars:
-                    self.__p2chars.append(p2char)
-                self._p1char.load_form(dict(selected=self.__p1chars))
-                self._p2char.load_form(dict(selected=self.__p2chars))
-            except Exception as e:
-                print(e)
+        try:
+            self.__p1chars = self._p1char.value
+            self.__p2chars = self._p2char.value
+            p1char = data.get('p1_char', "")
+            p2char = data.get('p2_char', "")
+            if p1char == "Doctor Mario":
+                p1char = "Dr. Mario"
+            if p2char == "Doctor Mario":
+                p2char = "Dr. Mario"
+            if p1char not in self.__p1chars:
+                self.__p1chars.append(p1char)
+            if p2char not in self.__p2chars:
+                self.__p2chars.append(p2char)
+            self._p1char.load_form(dict(selected=self.__p1chars))
+            self._p2char.load_form(dict(selected=self.__p2chars))
+        except Exception as e:
+            print(e)
         try:
             self._p1.value = data.get('p1_name', self._p1.value)
             self._p2.value = data.get('p2_name', self._p2.value)
