@@ -24,7 +24,7 @@ I am always open to help setup the program or fix any techincal issues you may h
 ## Current Feature Set:
 * Upload videos
 * Manual or automatic file selection
-* Queue and dequeue Videos to upload
+* Queue and dequeue Videos to upload (Queue items can be modified)
 * Add many relevant YouTube tags
 * Make playlists
 * Add to a YouTube playlist
@@ -126,6 +126,8 @@ By loading the history window from the menubar, you can double click any row in 
 Queue was built so I could upload VODs after an event because the venue didn't have the bandwidth to support streaming and uploading simultaneously. 
 
 Queue refers to the list of upcoming uploads in the status tab. By selecting `Toggle Uploads` you can toggle the uploading function, but continue to add entries to the queue. Once you have finished adding all the VODs you want to upload, selecting `Save Queue` will write the entire queue to your disk to be loaded later on. Finally, using `Load Queue` will load the entire queue file and start uploading immediately.
+
+Items in the queue can also be modified by double clicking the queue item in the queue list and then changing one of the cells in the right column of the window that appears.
 
 ### Scoreboard Assistant Websocket - Never retype anything
 SA Websocket was built so I could avoid retyping information that I put into Scoreboard Assistant.

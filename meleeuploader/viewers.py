@@ -9,9 +9,9 @@ from pyforms_lite.controls import ControlButton, ControlList
 class OptionsViewer(BaseWidget):
     def __init__(self, pos, options):
         super(OptionsViewer, self).__init__(f"Options #{pos}")
+        self.pos = pos
         self.options = options
         self._oview = ControlList()
-        self._oview.readonly = True
         self._oview.horizontal_headers = ["Key", "Value"]
         self.formset = ["_oview"]
         if pos or consts.stop_thread:
@@ -19,6 +19,14 @@ class OptionsViewer(BaseWidget):
             self._ignorebutton.value = self.__ignore_job
             self.formset = ["_oview", "=", "_ignorebutton"]
         self.__update_o_view()
+        self._oview.data_changed_event = self.__update_data
+    
+    def __update_data(self, row, col, item):
+        if col == 1:
+            var_name = self._oview.get_value(0, row)
+            self.options.__dict__[var_name] = item
+            self.parent._MeleeUploader__update_qview(self.pos, self.options)
+            print(f"{var_name} in queue item {self.pos} was updated to {item}")
 
     def __ignore_job(self):
         self.options.ignore = False if self.options.ignore else True

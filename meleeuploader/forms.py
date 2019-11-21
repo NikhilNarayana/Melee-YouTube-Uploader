@@ -342,8 +342,6 @@ class MeleeUploader(BaseWidget):
             shutil.copyfile(consts.youtube_file, os.path.join(consts.smash_folder, f"{title}.json"))
             if consts.youtube:
                 os.remove(consts.youtube_file)
-            if consts.sheets:
-                os.remove(consts.spreadsheet_file)
             sys.exit(0)
 
     def __reset_match(self, menu=True, isadir=False):
@@ -512,6 +510,12 @@ class MeleeUploader(BaseWidget):
     def __add_to_qview(self, options):
         self._qview += (options.p1, options.p2, " ".join((options.mprefix, options.mtype, options.msuffix)))
         self._queue.put(options)
+        self._qview.resize_rows_contents()
+    
+    def __update_qview(self, row, options):
+        self._qview.set_value(0, row, options.p1)
+        self._qview.set_value(1, row, options.p2)
+        self._qview.set_value(2, row, " ".join((options.mprefix, options.mtype, options.msuffix)))
         self._qview.resize_rows_contents()
 
     def __save_queue(self):
