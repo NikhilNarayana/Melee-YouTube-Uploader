@@ -24,6 +24,8 @@ class OptionsViewer(BaseWidget):
     def __update_data(self, row, col, item):
         if col == 1:
             var_name = self._oview.get_value(0, row)
+            if "char" in var_name:
+                item = item.split("/")
             self.options.__dict__[var_name] = item
             self.parent._MeleeUploader__update_qview(self.pos, self.options)
             print(f"{var_name} in queue item {self.pos} was updated to {item}")
