@@ -708,21 +708,23 @@ class MeleeUploader(BaseWidget):
         self._p1.value = data.get('player1', self._p1.value)
         self._p2.value = data.get('player2', self._p2.value)
         try:
-            for t in consts.match_types:
-                if t.lower() in data.get('match', "").lower():
-                    mtype = t
-                    prefix = ""
-                    suffix = ""
-                    if not data.get('match', "").find(t):
-                        sections = data.get('match', "").split(t)
-                        suffix = sections[1].strip()
-                    else:
-                        sections = data.get('match', "").split(t)
-                        prefix = sections[0].strip()
-                        suffix = sections[1].strip()
-            self._mtype.value = mtype or self._mtype.value
-            self._mprefix.value = prefix or self._mprefix.value
-            self._msuffix.value = suffix or self._msuffix.value
+            match = data.get('match', "")
+            if match:
+                for t in consts.match_types:
+                    if t.lower() in match.lower():
+                        mtype = t
+                        prefix = ""
+                        suffix = ""
+                        if not match.find(t):
+                            sections = match.split(t)
+                            suffix = sections[1].strip()
+                        else:
+                            sections = match.split(t)
+                            prefix = sections[0].strip()
+                            suffix = sections[1].strip()
+                self._mtype.value = mtype
+                self._mprefix.value = prefix
+                self._msuffix.value = suffix
         except Exception as e:
             print(e)
 
@@ -755,20 +757,22 @@ class MeleeUploader(BaseWidget):
         except Exception as e:
             print(e)
         try:
-            for t in consts.match_types:
-                if t.lower() in data.get('event_round', "").lower():
-                    mtype = t
-                    suffix = ""
-                    sections = data.get('event_round', "").split(t)
-                    suffix = sections[1].strip()
-                    prefix = data.get('event_bracket', "")
-                elif t.lower() in data.get('event_bracket', "").lower():
-                    mtype = t
-                    prefix = ""
-                    suffix = ""
-            self._mtype.value = mtype or self._mtype.value
-            self._mprefix.value = prefix or self._mprefix.value
-            self._msuffix.value = suffix or self._msuffix.value
+            match = data.get('event_round', "")
+            if match:
+                for t in consts.match_types:
+                    if t.lower() in match.lower():
+                        mtype = t
+                        suffix = ""
+                        sections = match.split(t)
+                        suffix = sections[1].strip()
+                        prefix = data.get('event_bracket', "")
+                    elif t.lower() in data.get('event_bracket', "").lower():
+                        mtype = t
+                        prefix = ""
+                        suffix = ""
+                self._mtype.value = mtype
+                self._mprefix.value = prefix
+                self._msuffix.value = suffix
         except Exception as e:
             print(e)
 
@@ -797,15 +801,17 @@ class MeleeUploader(BaseWidget):
         except Exception as e:
             print(e)
         try:
-            for t in consts.match_types:
-                if t.lower() in data.get('rounds', [])[0].get('round', {}).get('name', "").lower():
-                    mtype = t
-                    sections = data.get('rounds', [])[0].get('round', {}).get('name', "").split(t)
-                    prefix = sections[0].strip()
-                    suffix = sections[1].strip()
-            self._mtype.value = mtype or self._mtype.value
-            self._mprefix.value = prefix or self._mprefix.value
-            self._msuffix.value = suffix or self._msuffix.value
+            match = data.get('rounds', [])[0].get('round', {}).get('name', "")
+            if match:
+                for t in consts.match_types:
+                    if t.lower() in match.lower():
+                        mtype = t
+                        sections = match.split(t)
+                        prefix = sections[0].strip()
+                        suffix = sections[1].strip()
+                self._mtype.value = mtype
+                self._mprefix.value = prefix
+                self._msuffix.value = suffix
         except Exception as e:
             print(e)
 
