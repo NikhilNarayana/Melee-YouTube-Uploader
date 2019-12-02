@@ -2,6 +2,7 @@
 
 import os
 import pkg_resources
+from fuzzyset import FuzzySet
 
 __version__ = pkg_resources.require("MeleeUploader")[0].version
 
@@ -12,6 +13,7 @@ game = "melee"
 custom = False
 stopUpdates = False
 submitted = True
+fuzzySet = FuzzySet()
 
 youtube = None
 sheets = None

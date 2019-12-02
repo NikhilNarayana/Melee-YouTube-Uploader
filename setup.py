@@ -4,7 +4,7 @@ from codecs import open
 from os import path
 
 here = path.abspath(path.dirname(__file__))
-version = '1.17.1'
+version = '1.17.2'
 
 long_des = ""
 with open(path.join(here, 'README.md')) as f:
@@ -33,6 +33,7 @@ setup(
     packages=["meleeuploader"],
     install_requires=[
         'CacheControl',
+        'fuzzyset',
         'google-api-python-client',
         'oauth2client',
         'obs-websocket-py',
