@@ -125,7 +125,9 @@ By loading the history window from the menubar, you can double click any row in 
 ### Queue - Saving uploads for later
 Queue was built so I could upload VODs after an event because the venue didn't have the bandwidth to support streaming and uploading simultaneously. 
 
-Queue refers to the list of upcoming uploads in the status tab. By selecting `Toggle Uploads` you can toggle the uploading function, but continue to add entries to the queue. Once you have finished adding all the VODs you want to upload, selecting `Save Queue` will write the entire queue to your disk to be loaded later on. Finally, using `Load Queue` will load the entire queue file and start uploading immediately.
+Queue refers to the list of upcoming uploads in the status tab. By selecting `Toggle Uploads` you can toggle the uploading function, but continue to add entries to the queue. Once you have finished adding all the VODs you want to upload, selecting `Save Queue` will write the entire queue to your disk to be loaded later on. Finally, using `Load Queue` will load the entire queue file and start uploading immediately. 
+
+You can also load the queue on startup by running `<uploader command> -q`. This will instantly load whatever is in the queue and start uploading. If you don't want to start uploading then you should use the usual method.
 
 Items in the queue can also be modified by double clicking the queue item in the queue list and then changing one of the cells in the right column of the window that appears.
 
