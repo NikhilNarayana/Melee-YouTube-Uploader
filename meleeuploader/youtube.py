@@ -82,7 +82,8 @@ def upload_service(insert_request):
                     print("Waiting 10 minutes before retrying to avoid the limit")
                     sleep(600)
                 else:
-                    print("")
+                    print(e)
+                    return False, None
             except retry_exceptions as e:
                 print(f"A retriable error occurred: {e}")
 
