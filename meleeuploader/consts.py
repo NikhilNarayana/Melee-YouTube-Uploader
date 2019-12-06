@@ -12,6 +12,7 @@ game = "melee"
 custom = False
 stopUpdates = False
 submitted = True
+startQueue = False
 
 youtube = None
 sheets = None

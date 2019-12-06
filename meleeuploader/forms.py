@@ -175,6 +175,7 @@ class MeleeUploader(BaseWidget):
         # Queue
         self._queue = Queue()
         self._queueref = []
+        consts.startQueue = True if "-q" in sys.argv else False
 
         # Event Values
         self._privacy = ControlCombo("Video Privacy")
@@ -273,7 +274,10 @@ class MeleeUploader(BaseWidget):
         )
 
         # Get latest values from form_values.txt
-        self.__load_form()
+        if consts.startQueue:
+            self.__load_queue()
+        else:
+            self.__load_form()
 
     def __button_action(self, data=None):
         """Button action event"""
@@ -543,7 +547,7 @@ class MeleeUploader(BaseWidget):
                 print("Saved Queue, you can now close the program")
 
     def __load_queue(self):
-        if self._queueref:
+        if self._queueref and not consts.startQueue:
             resp = self.question("Would you like to add to the existing queue?\nItems will be added to the front of the queue.")
             if resp == "yes":
                 try:
@@ -569,15 +573,22 @@ class MeleeUploader(BaseWidget):
             except Exception:
                 print("You need to save a queue before loading a queue")
                 return
-
-        resp = self.question("Do you want to start uploading?")
-        if resp == "yes":
+        if not consts.startQueue:
+            resp = self.question("Do you want to start uploading?")
+            if resp == "yes":
+                thr = threading.Thread(target=self.__worker)
+                thr.daemon = True
+                consts.firstrun = False
+                consts.stop_thread = False
+                thr.start()
+            consts.loadedQueue = True
+        else:
             thr = threading.Thread(target=self.__worker)
             thr.daemon = True
             consts.firstrun = False
             consts.stop_thread = False
             thr.start()
-        consts.loadedQueue = True
+            consts.loadedQueue = True
 
     def __save_form(self, options=[]):
         row = [None] * (len(self._form_fields) + 1)
