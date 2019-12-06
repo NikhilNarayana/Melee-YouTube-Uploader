@@ -20,7 +20,6 @@ from .viewers import *
 import requests
 import websocket
 import pyforms_lite
-from fuzzyset import FuzzySet
 from argparse import Namespace
 from PyQt5 import QtCore, QtGui
 from pyforms_lite import BaseWidget
@@ -677,7 +676,6 @@ class MeleeUploader(BaseWidget):
             print("A custom list file as been created for you to modify, it can be found at " + consts.custom_list_file)
 
     def __update_chars(self, chars):
-        consts.fuzzySet = FuzzySet()
         p1 = self._p1char.value
         p2 = self._p2char.value
         self._p1char.clear()
@@ -685,15 +683,9 @@ class MeleeUploader(BaseWidget):
         for char in chars:
             self._p1char += (char, False)
             self._p2char += (char, False)
-            consts.fuzzySet.add(char)
-        # for char in consts.minchars:
-        #     consts.FuzzySet.add()
         self._p1char.load_form(dict(selected=p1))
         self._p2char.load_form(dict(selected=p2))
 
-    def __match_char_name(self, name):
-        return consts.fuzzySet.get(name)[0][1]
-    
     def __sa_update(self, data):
         if consts.stopUpdates and not consts.submitted:
             return
@@ -703,8 +695,8 @@ class MeleeUploader(BaseWidget):
         try:
             self.__p1chars = self._p1char.value
             self.__p2chars = self._p2char.value
-            p1char = self.__match_char_name(data.get('image1', ""))
-            p2char = self.__match_char_name(data.get('image2', ""))
+            p1char = " ".join(data.get('image1', "").split(" ")[:-1])
+            p2char = " ".join(data.get('image2', "").split(" ")[:-1])
             if p1char not in self.__p1chars:
                 self.__p1chars.append(p1char)
             if p2char not in self.__p2chars:
@@ -745,8 +737,12 @@ class MeleeUploader(BaseWidget):
         try:
             self.__p1chars = self._p1char.value
             self.__p2chars = self._p2char.value
-            p1char = self.__match_char_name(data.get('p1_char', ""))
-            p2char = self.__match_char_name(data.get('p2_char', ""))
+            p1char = data.get('p1_char', "")
+            p2char = data.get('p2_char', "")
+            if p1char == "Doctor Mario":
+                p1char = "Dr. Mario"
+            if p2char == "Doctor Mario":
+                p2char = "Dr. Mario"
             if p1char not in self.__p1chars:
                 self.__p1chars.append(p1char)
             if p2char not in self.__p2chars:
@@ -789,8 +785,8 @@ class MeleeUploader(BaseWidget):
         try:
             self.__p1chars = self._p1char.value
             self.__p2chars = self._p2char.value
-            p1char = self.__match_char_name(data.get('teams', [])[0].get('players', [])[0].get('character', {}).get('name'))
-            p2char = self.__match_char_name(data.get('teams', [])[1].get('players', [])[0].get('character', {}).get('name'))
+            p1char = data.get('teams', [])[0].get('players', [])[0].get('character', {}).get('name')
+            p2char = data.get('teams', [])[1].get('players', [])[0].get('character', {}).get('name')
             if p1char not in self.__p1chars:
                 self.__p1chars.append(p1char)
             if p2char not in self.__p2chars:
