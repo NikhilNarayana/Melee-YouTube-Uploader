@@ -399,7 +399,7 @@ class MeleeUploader(BaseWidget):
                     with open(consts.form_values, 'w') as f:
                         f.write(json.dumps(row))
                 self._queueref.pop(0)
-            self._qview -= 0
+                self._qview -= 0
             self._queue.task_done()
         print("Stopping Upload Service")
 
@@ -521,6 +521,10 @@ class MeleeUploader(BaseWidget):
         self._qview.set_value(1, row, options.p2)
         self._qview.set_value(2, row, " ".join((options.mprefix, options.mtype, options.msuffix)))
         self._qview.resize_rows_contents()
+    
+    def __delete_from_queue_view(self, job_num):
+        self._queueref[job_num].ignore = False if self.options.ignore else True
+        self._qview -= job_num
 
     def __save_queue(self):
         if os.path.exists(consts.queue_values):
@@ -581,6 +585,8 @@ class MeleeUploader(BaseWidget):
                 consts.firstrun = False
                 consts.stop_thread = False
                 thr.start()
+            else:
+                consts.stop_thread = True
             consts.loadedQueue = True
         else:
             thr = threading.Thread(target=self.__worker)

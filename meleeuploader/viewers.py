@@ -15,9 +15,9 @@ class OptionsViewer(BaseWidget):
         self._oview.horizontal_headers = ["Key", "Value"]
         self.formset = ["_oview"]
         if pos or consts.stop_thread:
-            self._ignorebutton = ControlButton("Toggle Ignore")
-            self._ignorebutton.value = self.__ignore_job
-            self.formset = ["_oview", "=", "_ignorebutton"]
+            self._deletebutton = ControlButton("Remove from Queue")
+            self._deletebutton.value = self.__delete_job
+            self.formset = ["_oview", "=", "_deletebutton"]
         self.__update_o_view()
         self._oview.data_changed_event = self.__update_data
     
@@ -30,10 +30,9 @@ class OptionsViewer(BaseWidget):
             self.parent._MeleeUploader__update_qview(self.pos, self.options)
             print(f"{var_name} in queue item {self.pos} was updated to {item}")
 
-    def __ignore_job(self):
-        self.options.ignore = False if self.options.ignore else True
-        print(f"Ignore set to {self.options.ignore}")
-        self.__update_o_view()
+    def __delete_job(self):
+        self._oview.readonly = True
+        self.parent._MeleeUploader__delete_from_queue_view(self.pos)
 
     def __update_o_view(self):
         self._oview.clear()

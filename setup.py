@@ -4,7 +4,7 @@ from codecs import open
 from os import path
 
 here = path.abspath(path.dirname(__file__))
-version = '1.17.3'
+version = '1.18.0'
 
 long_des = ""
 with open(path.join(here, 'README.md')) as f:
@@ -28,7 +28,7 @@ setup(
         "Natural Language :: English",
     ],
     entry_points=dict(console_scripts=['meleeuploader = meleeuploader.main:main', 'smashuploader = meleeuploader.main:ult', 's64uploader = meleeuploader.main:s64', 'rivalsuploader = meleeuploader.main:rivals', 'splatoonuploader = meleeuploader.main:splatoon']),
-    python_requires='>= 3.6.0, <3.7.4',
+    python_requires='>= 3.7.0, < 3.7.4',
     version=version,
     packages=["meleeuploader"],
     install_requires=[
