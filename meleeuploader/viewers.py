@@ -32,6 +32,7 @@ class OptionsViewer(BaseWidget):
 
     def __delete_job(self):
         self._oview.readonly = True
+        self.close()
         self.parent._MeleeUploader__delete_from_queue_view(self.pos)
 
     def __update_o_view(self):

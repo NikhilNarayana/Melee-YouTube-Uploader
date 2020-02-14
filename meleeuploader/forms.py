@@ -523,8 +523,9 @@ class MeleeUploader(BaseWidget):
         self._qview.resize_rows_contents()
     
     def __delete_from_queue_view(self, job_num):
-        self._queueref[job_num].ignore = False if self.options.ignore else True
-        self._qview -= job_num
+        if not self._queueref[job_num].ignore:
+            self._queueref[job_num].ignore = True
+            self._qview -= job_num
 
     def __save_queue(self):
         if os.path.exists(consts.queue_values):
