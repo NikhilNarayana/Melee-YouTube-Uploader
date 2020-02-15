@@ -683,10 +683,11 @@ class MeleeUploader(BaseWidget):
         self.__update_chars(consts.splatoon2_chars)
 
     def __custom_chars(self):
-        chars = None
+        chars = []
         try:
             with open(consts.custom_list_file, "r") as f:
-                chars = [x.strip() for x in f.read().split(",")]
+                if os.path.getsize(consts.custom_list_file) > 0:
+                    chars = [x.strip() for x in f.read().split(",")]
             self.__update_chars(chars)
         except Exception:
             with open(consts.custom_list_file, "a") as f:
