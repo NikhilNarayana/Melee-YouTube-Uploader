@@ -13,6 +13,8 @@ from decimal import Decimal
 
 from . import consts
 
+from google_auth_oauthlib.flow import InstalledAppFlow
+
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload
@@ -103,6 +105,27 @@ def upload_service(insert_request):
                     return False, None
 
 
+def test_get_service(scope, service, secret=None):
+    CLIENT_SECRETS_FILE = get_secrets(PREFIXES, SUFFIXES) if not secret else secret
+
+    if not CLIENT_SECRETS_FILE:
+        return None
+    
+    flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRETS_FILE, scopes=scope)
+
+    storage = Storage(os.path.join(consts.root, f".{consts.abbrv}-oauth2-{service}.json"))
+    credentials = storage.get()
+
+    if credentials is None or credentials.invalid:
+        credentials = flow.run_local_server(host='localhost',
+            port=8080,
+            authorization_prompt_message='Please visit this URL: {url}',
+            success_message='The auth flow is complete; you may close this window.',
+            open_browser=True)
+        storage.put(credentials)
+    
+    return credentials
+
 def get_service(scope, service, secret=None):
     CLIENT_SECRETS_FILE = get_secrets(PREFIXES, SUFFIXES) if not secret else secret
 
@@ -127,7 +150,13 @@ def get_youtube_service():
     if not credentials:
         return None
 
-    return build("youtube", "v3", http=credentials.authorize(httplib2.Http()))
+    http = httplib2.Http()
+    try:
+        http.redirect_codes = set(http.redirect_codes) - {308} # https://github.com/googleapis/google-api-python-client/issues/803
+    except:
+        pass
+
+    return build("youtube", "v3", http=credentials.authorize(http))
 
 
 def get_partner_service():
@@ -138,7 +167,13 @@ def get_partner_service():
     if not credentials:
         return None
 
-    return build("youtubePartner", "v1", http=credentials.authorize(httplib2.Http()))
+    http = httplib2.Http()
+    try:
+        http.redirect_codes = set(http.redirect_codes) - {308} # https://github.com/googleapis/google-api-python-client/issues/803
+    except:
+        pass
+
+    return build("youtubePartner", "v1", http=credentials.authorize(http))
 
 
 def get_spreadsheet_service():
@@ -149,7 +184,13 @@ def get_spreadsheet_service():
 
     discoveryUrl = ('https://sheets.googleapis.com/$discovery/rest?version=v4')
 
-    return build('sheets', 'v4', http=credentials.authorize(httplib2.Http()), discoveryServiceUrl=discoveryUrl)
+    http = httplib2.Http()
+    try:
+        http.redirect_codes = set(http.redirect_codes) - {308} # https://github.com/googleapis/google-api-python-client/issues/803
+    except:
+        pass
+
+    return build('sheets', 'v4', http=credentials.authorize(http), discoveryServiceUrl=discoveryUrl)
 
 
 def add_to_playlist(pID, vID):

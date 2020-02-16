@@ -4,7 +4,7 @@ from codecs import open
 from os import path
 
 here = path.abspath(path.dirname(__file__))
-version = '1.18.2'
+version = '1.18.3'
 
 long_des = ""
 with open(path.join(here, 'README.md')) as f:
@@ -34,6 +34,7 @@ setup(
     install_requires=[
         'CacheControl',
         'google-api-python-client',
+        'google_auth_oauthlib',
         'oauth2client',
         'obs-websocket-py',
         'Pyforms-Lite',
