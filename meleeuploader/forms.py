@@ -174,7 +174,7 @@ class MeleeUploader(BaseWidget):
 
         # Queue
         self._queue = Queue()
-        self._queueref = []
+        self._queueref = [] # out of order access to all the items in _queue with mutation
         consts.startQueue = True if "-q" in sys.argv else False
 
         # Event Values
@@ -525,6 +525,7 @@ class MeleeUploader(BaseWidget):
     def __delete_from_queue_view(self, job_num):
         if not self._queueref[job_num].ignore:
             self._queueref[job_num].ignore = True
+            self._queueref.pop(job_num)
             self._qview -= job_num
 
     def __save_queue(self):

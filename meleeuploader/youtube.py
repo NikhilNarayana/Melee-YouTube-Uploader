@@ -106,6 +106,10 @@ def upload_service(insert_request):
 
 
 def test_get_service(scope, service, secret=None):
+    """
+    WIP
+    Based on the newer google_auth_oauthlib module
+    """
     CLIENT_SECRETS_FILE = get_secrets(PREFIXES, SUFFIXES) if not secret else secret
 
     if not CLIENT_SECRETS_FILE:
