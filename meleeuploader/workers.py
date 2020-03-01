@@ -14,9 +14,11 @@ class SAWorker(QObject):
     sig = pyqtSignal(object)
     data = None
 
-    def __init__(self, addr):
+    def __init__(self, host, port):
         super().__init__()
-        self.addr = addr
+        self. host = host
+        self.port = port
+        self.addr = f"ws://{self.host}:{self.port}"
 
     def startws(self):
         self.ws = websocket.WebSocketApp(self.addr, on_message=self.get_update)

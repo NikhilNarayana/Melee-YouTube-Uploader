@@ -41,10 +41,10 @@ rowRange = "Data!A1:G1"
 credit = "Uploaded with Melee-YouTube-Uploader (https://github.com/NikhilNarayana/Melee-YouTube-Uploader) by Nikhil Narayana"
 
 melee_tags = ("Melee", "Super Smash Brothers Melee", "Smash Brothers",
-              "Super Smash Bros. Melee", "meleeuploader", "SSBM", "ssbm")
+              "Super Smash Bros. Melee", "meleeuploader", "smashuploader" "SSBM", "ssbm")
 ult_tags = ("Ultimate", "Super Smash Brothers Ultimate", "Smash Brothers",
             "Super Smash Bros. Ultimate", "smashuploader", "SSBU", "ssbu")
-s64_tags = ("Smash 64", "64", "Super Smash Brothers", "Super Smash Bros.",
+s64_tags = ("Smash 64", "64", "Super Smash Brothers", "Super Smash Bros.", "s64",
             "Smash Brothers", "smashuploader", "SSB", "SSB64", "ssb", "ssb64")
 rivals_tags = ("Rivals of Aether", "RoA", "roa", "Rivals", "smashuploader")
 splatoon2_tags = ("Splatoon 2", "Splat 2", "smashuploader")
@@ -141,6 +141,6 @@ titleformat_min = {
     "{p1} ({p1char}) vs {p2} ({p2char}) - {round} - {ename}": "{p1} vs {p2} - {round} - {ename}"
 }
 
-match_types = ("Pools", "Round Robin", "Winners", "Losers", "Winners Finals",
+match_types = ("Pools", "Round Robin", "Finals", "Winners", "Losers", "Winners Finals",
                "Losers Finals", "Grand Finals", "Money Match", "Crew Battle",
                "Ladder", "Friendlies", "Thug Finals")

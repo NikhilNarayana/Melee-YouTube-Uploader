@@ -154,10 +154,7 @@ class MeleeUploader(BaseWidget):
         except Exception as e:
             print(e)
 
-        if consts.game == "melee":
-            super(MeleeUploader, self).__init__(f"Melee YouTube Uploader - {consts.__version__}")
-        else:
-            super(MeleeUploader, self).__init__(f"Smash YouTube Uploader - {consts.__version__}")
+        super(MeleeUploader, self).__init__(f"Melee YouTube Uploader - {consts.__version__}")
 
         # Redirct print output
         sys.stdout = workers.WriteWorker(textWritten=self.write_print)
@@ -203,7 +200,7 @@ class MeleeUploader(BaseWidget):
         self._output = ControlTextArea()
         self._output.readonly = True
         self._qview = ControlList("Queue", select_entire_row=True)
-        self._qview.cell_double_clicked_event = self.__show_o_view
+        self._qview.cell_double_clicked_event = self.__show_oview
         self._qview.readonly = True
         self._qview.horizontal_headers = ["Player 1", "Player 2", "Round"]
 
@@ -226,7 +223,7 @@ class MeleeUploader(BaseWidget):
             {'Settings': [{'YouTube Log Out': self.__reset_cred}, {'Toggle OBS Hook': self.__show_obs_form}, {'Toggle SA Hook': self.__show_sa_form}, {'Toggle SC Hook': self.__show_sc_form}, {'Toggle Streameta Hook': self.__show_sm_form}, {'About': self.__about_info}],
                 'Save/Clear': [{'Save Form': self.__save_form}, {'Clear Match Values': self.__reset_match}, {'Clear Event Values': self.__reset_event}, {'Clear All': self.__reset_forms}],
                 'Queue': [{'Toggle Uploads': utils.toggle_worker}, {'Save Queue': self.__save_queue}, {'Load Queue': self.__load_queue}],
-                'History': [{'Show History': self.__show_h_view}],
+                'History': [{'Show History': self.__show_hview}],
                 'Characters': [{'Melee': self.__melee_chars}, {'Ultimate': self.__ultimate_chars}, {'64': self.__64_chars}, {'Rivals': self.__rivals_chars}, {'Splatoon': self.__splatoon_chars}, {'Custom': self.__custom_chars}]}]
 
         # Add ControlCombo values
@@ -252,8 +249,8 @@ class MeleeUploader(BaseWidget):
         self.__p2chars = []
 
         # Set character list
-        game_chars = {"64": self.__64_chars, "melee": self.__melee_chars, "ult": self.__ultimate_chars, "rivals": self.__rivals_chars, "splatoon": self.__splatoon_chars}
-        game_chars[consts.game]()
+        self.game_chars = {"64": self.__64_chars, "melee": self.__melee_chars, "ult": self.__ultimate_chars, "rivals": self.__rivals_chars, "splatoon": self.__splatoon_chars, "custom": self.__custom_chars}
+        self.game_chars[consts.game]()
 
         # Stream Control
         self._sc = None
@@ -386,7 +383,7 @@ class MeleeUploader(BaseWidget):
             if not options.ignore:
                 options.then = datetime.now()
                 if utils.pre_upload(options):
-                    row = [None] * 20
+                    row = [None] * (len(self._form_fields) + 1)
                     row[0] = deepcopy(options.ename)
                     row[1] = deepcopy(options.pID)
                     row[7] = deepcopy(options.bracket)
@@ -396,6 +393,7 @@ class MeleeUploader(BaseWidget):
                     row[15] = deepcopy(options.descrip)
                     row[16] = deepcopy(options.ename_min)
                     row[17] = deepcopy(options.titleformat)
+                    row.append(deepcopy(consts.game))
                     with open(consts.form_values, 'w') as f:
                         f.write(json.dumps(row))
                 self._queueref.pop(0)
@@ -450,7 +448,7 @@ class MeleeUploader(BaseWidget):
     def __hook_sa(self, host, port):
         self._sawin.close()
         self.warning("Please make sure Scoreboard Assistant is open", title="MeleeUploader")
-        self._sa = workers.SAWorker(f"ws://{host}:{port}")
+        self._sa = workers.SAWorker(host, port)
         self._sat = QtCore.QThread()
         self._sa.moveToThread(self._sat)
         self._sa.sig.connect(self.__sa_update)
@@ -501,12 +499,12 @@ class MeleeUploader(BaseWidget):
         except Exception as e:
             print(e)
 
-    def __show_o_view(self, row, column):
+    def __show_oview(self, row, column):
         win = OptionsViewer(row, self._queueref[row])
         win.parent = self
         win.show()
 
-    def __show_h_view(self):
+    def __show_hview(self):
         self._hwin = HistoryViewer(self.__history)
         self._hwin.parent = self
         self._hwin.show()
@@ -523,10 +521,9 @@ class MeleeUploader(BaseWidget):
         self._qview.resize_rows_contents()
     
     def __delete_from_queue_view(self, job_num):
-        if not self._queueref[job_num].ignore:
-            self._queueref[job_num].ignore = True
-            self._queueref.pop(job_num)
-            self._qview -= job_num
+        job = self._queueref.pop(job_num)
+        job.ignore = True
+        self._qview -= job_num
 
     def __save_queue(self):
         if os.path.exists(consts.queue_values):
@@ -546,7 +543,7 @@ class MeleeUploader(BaseWidget):
                         f.write(pickle.dumps(queueref))
                     print("Saved Queue, you can now close the program")
                 else:
-                    self.alert("Not saving queue")
+                    self.alert("Not saving queue", title="MeleeUploader")
         else:
             with open(consts.queue_values, "wb") as f:
                 f.write(pickle.dumps(self._queueref))
@@ -580,7 +577,7 @@ class MeleeUploader(BaseWidget):
                 print("You need to save a queue before loading a queue")
                 return
         if not consts.startQueue:
-            resp = self.question("Do you want to start uploading?")
+            resp = self.question("Do you want to start uploading?", title="MeleeUploader")
             if resp == "yes":
                 thr = threading.Thread(target=self.__worker)
                 thr.daemon = True
@@ -626,14 +623,16 @@ class MeleeUploader(BaseWidget):
             row[17] = deepcopy(options.titleformat)
             row[18] = deepcopy(self._scf.value)
             row[19] = deepcopy(self._smf.value)
+            row.append(consts.game)
         else:
             f = self._pID.value.find("PL")
-            if f == -1:
+            if f == -1 and self._pID.value != "":
                 self._pID.value = utils.create_playlist(self._pID.value)
             else:
                 self._pID.value = self._pID.value[f:f + 34]
             for i, var in zip(range(len(self._form_fields) + 1), self._form_fields):
                 row[i] = deepcopy(var.value)
+            row.append(consts.game)
         with open(consts.form_values, 'w') as f:
                 f.write(json.dumps(row))
         return row
@@ -650,6 +649,10 @@ class MeleeUploader(BaseWidget):
             try:
                 with open(consts.form_values, "r") as f:
                     values = json.loads(f.read())
+                    if values[-1] != consts.game and any(values[-1] == game for game in self.game_chars.keys()):
+                        ret = self.question(f"Last game used was {values[-1]}, would you like to switch to it?")
+                        if ret == "yes":
+                            self.game_chars[values[-1]]()
                     for val, var in zip(values, self._form_fields):
                         if isinstance(val, (list, dict)):
                             var.load_form(dict(selected=val))
@@ -690,10 +693,13 @@ class MeleeUploader(BaseWidget):
                 if os.path.getsize(consts.custom_list_file) > 0:
                     chars = [x.strip() for x in f.read().split(",")]
             self.__update_chars(chars)
+            consts.game = "custom"
+            consts.tags = ""
         except Exception:
             with open(consts.custom_list_file, "a") as f:
                 pass
-            print("A custom list file as been created for you to modify, it can be found at " + consts.custom_list_file)
+            print(f"A custom list file as been created for you to modify, it can be found at {consts.custom_list_file}")
+            self.alert(f"A custom list file as been created for you to modify, it can be found at {consts.custom_list_file}", title="MeleeUploader")
 
     def __update_chars(self, chars):
         p1 = self._p1char.value
