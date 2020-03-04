@@ -57,9 +57,11 @@ In the future I will not be including YouTube API credentials with this project.
 3. Once the project is created, select the project.
 4. Hit the `Enable APIs and Services` button and enable the YouTube Data API V3 and the Google Sheets API.
 5. Once the APIs are enabled it will tell you to create credentials and there will be a button to press.
-6. Follow the steps laid out in the credential creation wizard and make sure to select `Other UI` for `Where will you be calling the API from?` and `User Data` for `What data will you be accessing?`.
-7. Once you have downloaded your credentails remember to rename them `client_secrets.json` (if you don't see the `.json` when renaming the file just use `client_secrets`) and put the file in `C:\Users\[Your Username]\` or, if you are on macOS or Unix, whatever `echo ~` returns in terminal. macOS users can also just do `open ~` to open a Finder window at that directory.
-8. If you already created YouTube Account credentials for the program, open the program and select `Settings -> Remove YouTube Credentials`
+6. Google will ask you to setup an Oauth consent screen. Set the consent screen to internal and then only add an application name. Hit save to exit that page and then click `Credentials` on the left tab.
+7. Hit `Create Credentials` -> `OAuth client ID`, select other from the options given, and then type any name you want. Hit save.
+8. Select the name of your new credentials in the `OAuth 2.0 Client IDs` section. Then select `Download JSON` at the top.
+9. Once you have downloaded your credentails remember to rename them `client_secrets.json` (if you don't see the `.json` when renaming the file just use `client_secrets`) and put the file in `C:\Users\[Your Username]\` or, if you are on macOS or Unix, whatever `echo ~` returns in terminal. macOS users can also just do `open ~` to open a Finder window at that directory.
+10. If you already created YouTube Account credentials for the program, open the program and select `Settings -> Remove YouTube Credentials`
 
 ### Additional Setup Options
 #### Windows
