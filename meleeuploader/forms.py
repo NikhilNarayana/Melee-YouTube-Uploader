@@ -734,7 +734,7 @@ class MeleeUploader(BaseWidget):
         self._p1.value = data.get('player1', self._p1.value)
         self._p2.value = data.get('player2', self._p2.value)
         try:
-            match = data.get('match', "")
+            match = data.get('match', None)
             if match:
                 for t in consts.match_types:
                     if t.lower() in match.lower():
@@ -744,6 +744,8 @@ class MeleeUploader(BaseWidget):
                         if not match.find(t):
                             sections = match.split(t)
                             suffix = sections[1].strip()
+                        if match.find(t) == -1 and match.find(t.lower()) >= 0:
+                            pass
                         else:
                             sections = match.split(t)
                             prefix = sections[0].strip()
@@ -786,13 +788,13 @@ class MeleeUploader(BaseWidget):
             match = data.get('event_round', "")
             if match:
                 for t in consts.match_types:
-                    if t.lower() in match.lower():
+                    if t.lower() in match.lower() and match.find(t) != -1:
                         mtype = t
                         suffix = ""
                         sections = match.split(t)
                         suffix = sections[1].strip()
                         prefix = data.get('event_bracket', "")
-                    elif t.lower() in data.get('event_bracket', "").lower():
+                    elif t.lower() in data.get('event_bracket', "").lower() and data.get('event_bracket', "").find(t) != -1:
                         mtype = t
                         prefix = ""
                         suffix = ""
@@ -830,7 +832,7 @@ class MeleeUploader(BaseWidget):
             match = data.get('rounds', [])[0].get('round', {}).get('name', "")
             if match:
                 for t in consts.match_types:
-                    if t.lower() in match.lower():
+                    if t.lower() in match.lower() and match.find(t) != -1:
                         mtype = t
                         sections = match.split(t)
                         prefix = sections[0].strip()
