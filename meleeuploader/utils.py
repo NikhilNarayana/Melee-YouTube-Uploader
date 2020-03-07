@@ -12,16 +12,16 @@ import requests
 
 
 def pre_upload(opts):
-    if opts.mtype == "Grand Finals" and any(x.lower() in opts.msuffix.lower() for x in ("Set 2", "Reset")):
+    if opts.mmid == "Grand Finals" and any(x.lower() in opts.msuffix.lower() for x in ("Set 2", "Reset")):
         opts.msuffix = ""
     opts.p1 = opts.p1.split("[L]")[0].strip()
     opts.p2 = opts.p2.split("[L]")[0].strip()
     if opts.mprefix and opts.msuffix:
-        opts.mtype = " ".join((opts.mprefix, opts.mtype, opts.msuffix))
+        opts.mtype = " ".join((opts.mprefix, opts.mmid, opts.msuffix))
     elif opts.mprefix:
-        opts.mtype = " ".join((opts.mprefix, opts.mtype))
+        opts.mtype = " ".join((opts.mprefix, opts.mmid))
     elif opts.msuffix:
-        opts.mtype = " ".join((opts.mtype, opts.msuffix))
+        opts.mtype = " ".join((opts.mmid, opts.msuffix))
     chars_exist = all(x for x in [opts.p1char, opts.p2char])
     title = make_title(opts, chars_exist)
     if len(title) > 100:
