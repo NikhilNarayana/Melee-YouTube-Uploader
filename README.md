@@ -3,8 +3,6 @@ A YouTube Uploader for my Melee recordings
 
 A modified version of FRC-YouTube-Uploader for Super Smash Bros. Melee and Super Smash Bros. Ultimate.
 
-Already public/non-sensitive data is collected on Google Sheets [here](https://docs.google.com/spreadsheets/d/1TavrlG3uiLLJUwrx6UB0CCyjbiWElYE8sCev6fWclaw/edit#gid=0), this is to help figure out if certain highly specific features are being used.
-
 
 **IMPORTANT NOTE**
 

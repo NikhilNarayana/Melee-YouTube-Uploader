@@ -28,14 +28,12 @@ queue_values = os.path.join(root, ".smash_queue_values.txt")
 log_file = os.path.join(root, ".smash_log.txt")
 custom_list_file = os.path.join(root, ".smash_custom_list.txt")
 youtube_file = os.path.join(root, ".smash-oauth2-youtube.json")
-spreadsheet_file = os.path.join(root, ".smash-oauth2-spreadsheet.json")
 partner_file = os.path.join(root, ".smash-oauth2-partner.json")
 
 abbrv = "smash"
 short_name = "meleeuploader"
 long_name = "Melee YouTube Uploader"
 
-spreadsheetID = "1TavrlG3uiLLJUwrx6UB0CCyjbiWElYE8sCev6fWclaw"
 rowRange = "Data!A1:G1"
 
 credit = "Uploaded with Melee-YouTube-Uploader (https://github.com/NikhilNarayana/Melee-YouTube-Uploader) by Nikhil Narayana"

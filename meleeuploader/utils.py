@@ -74,27 +74,6 @@ def pre_upload(opts):
             except Exception as e:
                 print("Failed to add to playlist")
                 print(e)
-        if consts.sheets:
-            totalTime = datetime.now() - opts.then
-            values = [[
-                str(datetime.now()),
-                str(totalTime), f"https://www.youtube.com/watch?v={vid}",
-                opts.ename,
-                opts.titleformat,
-                title,
-                str(consts.loadedQueue)
-            ]]
-            sheetbody = {"values": values}
-            try:
-                consts.sheets.spreadsheets().values().append(
-                    spreadsheetId=consts.spreadsheetID,
-                    range=consts.rowRange,
-                    valueInputOption="USER_ENTERED",
-                    body=sheetbody).execute()
-                print("Added data to spreadsheet")
-            except Exception as e:
-                print("Failed to write to spreadsheet")
-                print(e)
         print("DONE\n")
     else:
         print(vid)

@@ -22,10 +22,6 @@ def main():
         print("There was an issue with getting Google Credentials")
         sys.exit(1)
     try:
-        consts.sheets = yt.get_spreadsheet_service()
-    except Exception as e:
-        print(e)
-    try:
         if os.path.isfile(consts.partner_file):
             consts.partner = yt.get_partner_service()
     except Exception as e:
