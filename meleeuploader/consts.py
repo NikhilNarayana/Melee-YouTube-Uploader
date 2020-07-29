@@ -94,7 +94,8 @@ ult_chars = ('Mario', 'Donkey Kong', 'Link', 'Samus', 'Dark Samus', 'Yoshi',
              'Shulk', 'Bowser Jr.', 'Duck Hunt', 'Ryu', 'Ken', 'Cloud',
              'Corrin', 'Bayonetta', 'Inkling', 'Ridley', 'Simon', 'Richter',
              'King K. Rool', 'Isabelle', 'Incineroar', 'Piranha Plant',
-             'Joker', 'Hero', 'Banjo & Kazooie', 'Terry Bogard', 'Byleth')
+             'Joker', 'Hero', 'Banjo & Kazooie', 'Terry Bogard', 'Byleth',
+             'Min Min',)
 
 melee_chars = ('Fox', 'Falco', 'Marth', 'Sheik', 'Jigglypuff', 'Peach',
                'Captain Falcon', 'Ice Climbers', 'Pikachu', 'Samus',
@@ -107,7 +108,7 @@ s64_chars = ('Pikachu', 'Kirby', 'Captain Falcon', 'Fox', 'Yoshi', 'Jigglypuff',
 
 rivals_chars = ('Zetterburn', 'Orcane', 'Wrastor', 'Kragg', 'Forsburn', 'Maypul',
                 'Absa', 'Etalus', 'Ranno', 'Clairen', 'Sylvanos', 'Elliana',
-                'Ori and Sein', 'Shovel Knight')
+                'Ori and Sein', 'Shovel Knight',)
 
 splatoon2_chars = ()
 
