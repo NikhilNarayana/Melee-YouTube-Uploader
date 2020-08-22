@@ -159,9 +159,6 @@ class MeleeUploader(BaseWidget):
         # Redirct print output
         sys.stdout = workers.WriteWorker(textWritten=self.write_print)
 
-        # Redirect error output to window, console, and file
-        sys.stderr = workers.WriteWorker(textWritten=self.write_err)
-
         # Websocket
         self._sa = None
         self._obs = None
@@ -454,19 +451,17 @@ class MeleeUploader(BaseWidget):
         self._sa.sig.connect(self.__sa_update)
         self._sat.started.connect(self._sa.startws)
         self._sat.start()
-        print("Hooked into SA")
 
     def __hook_obs(self, host, port, stopUpdates):
         consts.stopUpdates = stopUpdates
         self._obswin.close()
-        self.warning("Please make sure OBS is open and the Websocket server is enabled with the default settings and no password", title="MeleeUploader")
+        self.warning("Please make sure OBS is open and the Websocket server is enabled", title="MeleeUploader")
         self._obs = workers.OBSWorker(host, port)
         self._obst = QtCore.QThread()
         self._obs.moveToThread(self._obst)
         self._obs.sig.connect(self.__handle_obs)
         self._obst.started.connect(self._obs.startobs)
         self._obst.start()
-        print("Hooked into OBS")
 
     def __handle_obs(self):
         if not consts.stopUpdates:

@@ -21,8 +21,12 @@ class SAWorker(QObject):
         self.addr = f"ws://{self.host}:{self.port}"
 
     def startws(self):
-        self.ws = websocket.WebSocketApp(self.addr, on_message=self.get_update)
-        self.ws.run_forever()
+        try:
+            self.ws = websocket.WebSocketApp(self.addr, on_message=self.get_update)
+            self.ws.run_forever()
+            print("Hooked into Scoreboard Assistant")
+        except:
+            print("Failed to hook into Scoreboard Assistant")
 
     def closews(self):
         self.ws.close()
@@ -48,9 +52,13 @@ class OBSWorker(QObject):
         self.port = port
 
     def startobs(self):
-        self.obs = obsws(self.host, self.port)
-        self.obs.register(self.submit, events.RecordingStopped)
-        self.obs.connect()
+        try:
+            self.obs = obsws(self.host, self.port)
+            self.obs.register(self.submit, events.RecordingStopped)
+            self.obs.connect()
+            print("Hooked into OBS")
+        except:
+            print("Failed to connect to OBS")
 
     def closeobs(self):
         self.obs.disconnect()
