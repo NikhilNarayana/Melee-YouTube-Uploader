@@ -13,6 +13,7 @@ custom = False
 stopUpdates = False
 submitted = True
 startQueue = False
+saveOnSubmit = False
 
 youtube = None
 sheets = None

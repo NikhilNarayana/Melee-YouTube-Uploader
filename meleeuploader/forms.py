@@ -219,7 +219,7 @@ class MeleeUploader(BaseWidget):
         self.mainmenu = [
             {'Settings': [{'YouTube Log Out': self.__reset_cred}, {'Toggle OBS Hook': self.__show_obs_form}, {'Toggle SA Hook': self.__show_sa_form}, {'Toggle SC Hook': self.__show_sc_form}, {'Toggle Streameta Hook': self.__show_sm_form}, {'About': self.__about_info}],
                 'Save/Clear': [{'Save Form': self.__save_form}, {'Clear Match Values': self.__reset_match}, {'Clear Event Values': self.__reset_event}, {'Clear All': self.__reset_forms}],
-                'Queue': [{'Toggle Uploads': utils.toggle_worker}, {'Save Queue': self.__save_queue}, {'Load Queue': self.__load_queue}],
+                'Queue': [{'Toggle Uploads': utils.toggle_worker}, {'Save Queue': self.__save_queue}, {'Load Queue': self.__load_queue}, {'Toggle Save on Submit': self.__save_on_submit}],
                 'History': [{'Show History': self.__show_hview}],
                 'Characters': [{'Melee': self.__melee_chars}, {'Ultimate': self.__ultimate_chars}, {'64': self.__64_chars}, {'Rivals': self.__rivals_chars}, {'Splatoon': self.__splatoon_chars}, {'Custom': self.__custom_chars}]}]
 
@@ -320,6 +320,8 @@ class MeleeUploader(BaseWidget):
             thr.daemon = True
             thr.start()
             consts.firstrun = False
+        if consts.saveOnSubmit:
+            self.__save_queue(True)
 
     def write_print(self, text):
         self._output.value += text
@@ -520,8 +522,8 @@ class MeleeUploader(BaseWidget):
         job.ignore = True
         self._qview -= job_num
 
-    def __save_queue(self):
-        if os.path.exists(consts.queue_values):
+    def __save_queue(self, silent=False):
+        if os.path.exists(consts.queue_values) and not silent:
             resp = self.question(f"A queue already exists would you like to overwrite it?\nIt was last modified on {datetime.utcfromtimestamp(int(os.path.getmtime(consts.queue_values))).strftime('%Y-%m-%d')}")
             if resp == "yes":
                 with open(consts.queue_values, "wb") as f:
@@ -590,6 +592,10 @@ class MeleeUploader(BaseWidget):
             thr.start()
             consts.loadedQueue = True
 
+    def __save_on_submit(self) :
+        consts.saveOnSubmit = not consts.saveOnSubmit
+        print(f"Save Queue on Submit is turned {'on' if consts.saveOnSubmit else 'off'}.")
+    
     def __save_form(self, options=[]):
         row = [None] * (len(self._form_fields) + 1)
         if options:
