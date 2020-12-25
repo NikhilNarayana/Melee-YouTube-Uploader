@@ -154,3 +154,35 @@ def create_playlist(name):
     ).execute()
 
     return ret['id'] or ret
+
+def get_playlist_video_views(playlist_link):
+    if not consts.youtube:
+        consts.youtube = yt.get_youtube_service()
+
+    f = playlist_link.find("PL")
+    if f == -1:
+        print(f"{playlist_link} is not a valid playlist_link")
+        return
+    pID = playlist_link[f:f + 34]
+    ret = consts.youtube.playlistItems().list(
+        part="snippet",
+        maxResults="25",
+        playlistId=pID
+    ).execute()
+
+    vIDs = []
+    for item in ret['items']:
+        vIDs.append(item['snippet']['resourceId']['videoId'])
+    
+    ret = consts.youtube.videos().list(
+        part="snippet,statistics",
+        id=",".join(vIDs)
+    ).execute()['items']
+    
+    views = {}
+    for vID, item in zip(vIDs, ret):
+        if (vID == item['id']):
+            views[vID] = {"title": item["snippet"]["title"], "viewCount": item["statistics"]["viewCount"]}
+            f"{item['snippet']['title']};https://www.youtube.com/watch?v={vID};{item['statistics']['viewCount']}"
+    
+    return views
