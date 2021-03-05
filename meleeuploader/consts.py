@@ -96,7 +96,7 @@ ult_chars = ('Mario', 'Donkey Kong', 'Link', 'Samus', 'Dark Samus', 'Yoshi',
              'Corrin', 'Bayonetta', 'Inkling', 'Ridley', 'Simon', 'Richter',
              'King K. Rool', 'Isabelle', 'Incineroar', 'Piranha Plant',
              'Joker', 'Hero', 'Banjo & Kazooie', 'Terry Bogard', 'Byleth',
-             'Min Min', 'Steve', 'Sephiroth',)
+             'Min Min', 'Steve', 'Sephiroth', 'Pyra', 'Mythra')
 
 melee_chars = ('Fox', 'Falco', 'Marth', 'Sheik', 'Jigglypuff', 'Peach',
                'Captain Falcon', 'Ice Climbers', 'Pikachu', 'Samus',
