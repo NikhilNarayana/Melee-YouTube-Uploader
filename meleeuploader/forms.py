@@ -395,6 +395,8 @@ class MeleeUploader(BaseWidget):
                     row.append(deepcopy(consts.game))
                     with open(consts.form_values, 'w') as f:
                         f.write(json.dumps(row))
+                    if consts.saveOnSubmit:
+                        self.__save_queue(True)
                 self._queueref.pop(0)
                 self._qview -= 0
             self._queue.task_done()
