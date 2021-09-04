@@ -203,8 +203,8 @@ class MeleeUploader(BaseWidget):
         self._qview.horizontal_headers = ["Player 1", "Player 2", "Round"]
 
         # Button
-        self._button = ControlButton('Submit')
-        self._button.value = self.__button_action
+        self._submit_button = ControlButton('Submit')
+        self._submit_button.value = self.__on_submit
 
         # Title Formats
         for f in consts.titleformat:
@@ -214,11 +214,11 @@ class MeleeUploader(BaseWidget):
         self.formset = [{"-Match": ["_file", (' ', "_mprefix", "_mtype", "_msuffix", ' '), (' ', "_p1sponsor", "_p1", ' '), (' ', "_p1char", ' '), (' ', "_p2sponsor", "_p2", ' '), (' ', "_p2char", ' ')],
                          "-Status-": ["_output", "=", "_qview"],
                          "Event-": ["_privacy", "_titleformat", ("_ename", "_ename_min"), "_pID", "_bracket", "_tags", "_description"]},
-                        (' ', '_button', ' ')]
+                        (' ', '_submit_button', ' ')]
 
         # Main Menu Layout
         self.mainmenu = [
-            {'Settings': [{'YouTube Log Out': self.__reset_cred}, {'Toggle OBS Hook': self.__show_obs_form}, {'Toggle SA Hook': self.__show_sa_form}, {'Toggle SC Hook': self.__show_sc_form}, {'Toggle Streameta Hook': self.__show_sm_form}, {'About': self.__about_info}],
+            {'Settings': [{'YouTube Log Out': self.__reset_yt_cred}, {'Toggle OBS Hook': self.__show_obs_form}, {'Toggle SA Hook': self.__show_sa_form}, {'Toggle SC Hook': self.__show_sc_form}, {'Toggle Streameta Hook': self.__show_sm_form}, {'About': self.__about_info}],
                 'Save/Clear': [{'Save Form': self.__save_form}, {'Clear Match Values': self.__reset_match}, {'Clear Event Values': self.__reset_event}, {'Clear All': self.__reset_forms}],
                 'Queue': [{'Toggle Uploads': utils.toggle_worker}, {'Save Queue': self.__save_queue}, {'Load Queue': self.__load_queue}, {'Toggle Save on Submit': self.__save_on_submit}],
                 'History': [{'Show History': self.__show_hview}],
@@ -275,7 +275,7 @@ class MeleeUploader(BaseWidget):
         else:
             self.__load_form()
 
-    def __button_action(self, data=None):
+    def __on_submit(self, data=None):
         """Button action event"""
         consts.submitted = True
         if any(not x for x in (self._ename.value, self._p1.value, self._p2.value, self._file.value)):
@@ -337,7 +337,7 @@ class MeleeUploader(BaseWidget):
         with open(consts.log_file, "a") as f:
             f.write(text)
 
-    def __reset_cred(self):
+    def __reset_yt_cred(self):
         title = consts.youtube.channels().list(part='snippet', mine=True).execute().get('items', [])[0].get('snippet', {}).get('title')
         resp = self.question(f"You are currently logged into {title}\nWould you like to log out?", title="MeleeUploader")
         if resp == "yes":
@@ -471,7 +471,7 @@ class MeleeUploader(BaseWidget):
 
     def __handle_obs(self):
         if not consts.stopUpdates:
-            self.__button_action()
+            self.__on_submit()
         else:
             consts.submitted = False
 
