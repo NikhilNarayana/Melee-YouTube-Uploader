@@ -142,7 +142,8 @@ class MeleeUploader(BaseWidget):
             latest_version = requests.get('https://pypi.org/pypi/MeleeUploader/json').json().get('info', {}).get('version')
             if sv(latest_version) > sv(consts.__version__):  # prevents messages when developing
                 if "linux" in sys.platform:
-                    self.info(f"Current Version: {consts.__version__}\nVersion {latest_version} is available.\nUse sudo pip3 install -U meleeuploader=={latest_version} in terminal to update to the newest verison", title="MeleeUploader")
+                    self.info(
+                        f"Current Version: {consts.__version__}\nVersion {latest_version} is available.\nUse sudo pip3 install -U meleeuploader=={latest_version} in terminal to update to the newest verison", title="MeleeUploader")
                 else:
                     resp = self.question(f"Current Version: {consts.__version__}\nVersion {latest_version} is available. Would you like to update?", title="MeleeUploader")
                     if resp == "yes":
@@ -168,7 +169,7 @@ class MeleeUploader(BaseWidget):
 
         # Queue
         self._queue = Queue()
-        self._queueref = [] # out of order access to all the items in _queue with mutation
+        self._queueref = []  # out of order access to all the items in _queue with mutation
         consts.startQueue = True if "-q" in sys.argv else False
 
         # Event Values
@@ -221,7 +222,7 @@ class MeleeUploader(BaseWidget):
                 'Save/Clear': [{'Save Form': self.__save_form}, {'Clear Match Values': self.__reset_match}, {'Clear Event Values': self.__reset_event}, {'Clear All': self.__reset_forms}],
                 'Queue': [{'Toggle Uploads': utils.toggle_worker}, {'Save Queue': self.__save_queue}, {'Load Queue': self.__load_queue}, {'Toggle Save on Submit': self.__save_on_submit}],
                 'History': [{'Show History': self.__show_hview}],
-                'Characters': [{'Melee': self.__melee_chars}, {'Ultimate': self.__ultimate_chars}, {'64': self.__64_chars}, {'Rivals': self.__rivals_chars}, {'Splatoon': self.__splatoon_chars}, {'Custom': self.__custom_chars}]}]
+                'Characters': [{'Melee': self.__melee_chars}, {'Ultimate': self.__ultimate_chars}, {'64': self.__64_chars}, {'Rivals': self.__rivals_chars}, {'Splatoon': self.__splatoon_chars}, {"Strive": self.__strive_chars}, {'Custom': self.__custom_chars}]}]
 
         # Add ControlCombo values
         for t in consts.match_types:
@@ -246,7 +247,8 @@ class MeleeUploader(BaseWidget):
         self.__p2chars = []
 
         # Set character list
-        self.game_chars = {"64": self.__64_chars, "melee": self.__melee_chars, "ult": self.__ultimate_chars, "rivals": self.__rivals_chars, "splatoon": self.__splatoon_chars, "custom": self.__custom_chars}
+        self.game_chars = {"64": self.__64_chars, "melee": self.__melee_chars, "ult": self.__ultimate_chars,
+                           "rivals": self.__rivals_chars, "splatoon": self.__splatoon_chars, "strive": self.__strive_chars, "custom": self.__custom_chars}
         self.game_chars[consts.game]()
 
         # Stream Control
@@ -512,13 +514,13 @@ class MeleeUploader(BaseWidget):
         self._qview += (options.p1, options.p2, " ".join((options.mprefix, options.mmid, options.msuffix)))
         self._queue.put(options)
         self._qview.resize_rows_contents()
-    
+
     def __update_qview(self, row, options):
         self._qview.set_value(0, row, options.p1)
         self._qview.set_value(1, row, options.p2)
         self._qview.set_value(2, row, " ".join((options.mprefix, options.mmid, options.msuffix)))
         self._qview.resize_rows_contents()
-    
+
     def __delete_from_queue_view(self, job_num):
         job = self._queueref.pop(job_num)
         job.ignore = True
@@ -526,7 +528,8 @@ class MeleeUploader(BaseWidget):
 
     def __save_queue(self, silent=False):
         if os.path.exists(consts.queue_values) and not silent:
-            resp = self.question(f"A queue already exists would you like to overwrite it?\nIt was last modified on {datetime.utcfromtimestamp(int(os.path.getmtime(consts.queue_values))).strftime('%Y-%m-%d')}")
+            resp = self.question(
+                f"A queue already exists would you like to overwrite it?\nIt was last modified on {datetime.utcfromtimestamp(int(os.path.getmtime(consts.queue_values))).strftime('%Y-%m-%d')}")
             if resp == "yes":
                 with open(consts.queue_values, "wb") as f:
                     f.write(pickle.dumps(self._queueref))
@@ -594,10 +597,10 @@ class MeleeUploader(BaseWidget):
             thr.start()
             consts.loadedQueue = True
 
-    def __save_on_submit(self) :
+    def __save_on_submit(self):
         consts.saveOnSubmit = not consts.saveOnSubmit
         print(f"Save Queue on Submit is turned {'on' if consts.saveOnSubmit else 'off'}.")
-    
+
     def __save_form(self, options=[]):
         row = [None] * (len(self._form_fields) + 1)
         if options:
@@ -637,7 +640,7 @@ class MeleeUploader(BaseWidget):
                 row[i] = deepcopy(var.value)
             row.append(consts.game)
         with open(consts.form_values, 'w') as f:
-                f.write(json.dumps(row))
+            f.write(json.dumps(row))
         return row
 
     def __load_form(self, history=[]):
@@ -673,12 +676,12 @@ class MeleeUploader(BaseWidget):
         consts.game = "ultimate"
         consts.tags = consts.ult_tags
         self.__update_chars(consts.ult_chars)
-    
+
     def __64_chars(self):
         consts.game = "64"
         consts.tags = consts.s64_tags
         self.__update_chars(consts.s64_chars)
-    
+
     def __rivals_chars(self):
         consts.game = "rivals"
         consts.tags = consts.rivals_tags
@@ -688,6 +691,11 @@ class MeleeUploader(BaseWidget):
         consts.game = "splatoon"
         consts.tags = consts.splatoon2_tags
         self.__update_chars(consts.splatoon2_chars)
+
+    def __strive_chars(self):
+        consts.game = "strive"
+        consts.tags = consts.strive_tags
+        self.__update_chars(consts.strive_chars)
 
     def __custom_chars(self):
         chars = []

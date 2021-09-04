@@ -47,6 +47,7 @@ s64_tags = ("Smash 64", "64", "Super Smash Brothers", "Super Smash Bros.", "s64"
             "Smash Brothers", "smashuploader", "SSB", "SSB64", "ssb", "ssb64")
 rivals_tags = ("Rivals of Aether", "RoA", "roa", "Rivals", "smashuploader")
 splatoon2_tags = ("Splatoon 2", "Splat 2", "smashuploader")
+strive_tags = ("Guilty Gear Strive", "GG Strive", "Strive", "smashuploader")
 tags = melee_tags
 
 minchars = {
@@ -113,6 +114,9 @@ rivals_chars = ('Zetterburn', 'Orcane', 'Wrastor', 'Kragg', 'Forsburn', 'Maypul'
 
 splatoon2_chars = ()
 
+strive_chars = ('Sol', 'Ky', 'May', 'Axl', 'Chipp', 'Potemkin', 'Faust', 'Millia', 'Zato',
+                'Ramlethal', 'Leo', 'Nagoriyuki', 'Giovanna', 'Anji', 'I-No', 'Goldlewis', 'Jack-O\'')
+
 min_match_types = {
     "Round ": "R",
     "Round Robin": "RR",
@@ -128,9 +132,12 @@ min_match_types = {
 }
 
 titleformat = (("Event - Round - P1 (Fox) vs P2 (Fox)", "{ename} - {round} - {p1} ({p1char}) vs {p2} ({p2char})"),
-               ("Event - P1 (Fox) vs P2 (Fox) - Round", "{ename} - {p1} ({p1char}) vs {p2} ({p2char}) - {round}"),
-               ("Event - Round - (Fox) P1 vs P2 (Fox)", "{ename} - {round} - ({p1char}) {p1} vs {p2} ({p2char})"),
-               ("Round - P1 (Fox) vs P2 (Fox) - Event", "{round} - {p1} ({p1char}) vs {p2} ({p2char}) - {ename}"),
+               ("Event - P1 (Fox) vs P2 (Fox) - Round",
+                "{ename} - {p1} ({p1char}) vs {p2} ({p2char}) - {round}"),
+               ("Event - Round - (Fox) P1 vs P2 (Fox)",
+                "{ename} - {round} - ({p1char}) {p1} vs {p2} ({p2char})"),
+               ("Round - P1 (Fox) vs P2 (Fox) - Event",
+                "{round} - {p1} ({p1char}) vs {p2} ({p2char}) - {ename}"),
                ("P1 (Fox) vs P2 (Fox) - Round - Event", "{p1} ({p1char}) vs {p2} ({p2char}) - {round} - {ename}"))
 
 titleformat_min = {
