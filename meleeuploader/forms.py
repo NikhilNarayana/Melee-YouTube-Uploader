@@ -50,26 +50,27 @@ class SAHostPortInput(BaseWidget):
 class OBSHostPortInput(BaseWidget):
     def __init__(self):
         super(OBSHostPortInput, self).__init__("OBS Websocket")
-        self._host = ControlText("Host IP")
-        self._port = ControlText("Host Port")
+        self._host = ControlText("OBS IP")
+        self._port = ControlText("OBS Port")
+        self._password = ControlText("OBS Password")
         self._host.value = "localhost"
         self._port.value = "4444"
         self._label = ControlLabel("When I stop recording I want the program to")
         self._sub = ControlButton("Submit")
         self._stop = ControlButton("Stop Updates")
-        self.formset = ["_host", "_port", "_label", ("_sub", "_stop")]
+        self.formset = ["_host", "_port", "_password", "_label", ("_sub", "_stop")]
         self._sub.value = self.__sub_action
         self._stop.value = self.__stop_action
 
     def __sub_action(self):
         if self._host.value and self._port.value:
-            self.parent._MeleeUploader__hook_obs(self._host.value, self._port.value, False)
+            self.parent._MeleeUploader__hook_obs(self._host.value, self._port.value, self._password.value, False)
         else:
             self.warning("You must input a host IP and port number")
 
     def __stop_action(self):
         if self._host.value and self._port.value:
-            self.parent._MeleeUploader__hook_obs(self._host.value, self._port.value, True)
+            self.parent._MeleeUploader__hook_obs(self._host.value, self._port.value, self._password.value, True)
         else:
             self.warning("You must input a host IP and port number")
 
@@ -458,11 +459,11 @@ class MeleeUploader(BaseWidget):
         self._sat.started.connect(self._sa.startws)
         self._sat.start()
 
-    def __hook_obs(self, host, port, stopUpdates):
+    def __hook_obs(self, host, port, password, stopUpdates):
         consts.stopUpdates = stopUpdates
         self._obswin.close()
         self.warning("Please make sure OBS is open and the Websocket server is enabled", title="MeleeUploader")
-        self._obs = workers.OBSWorker(host, port)
+        self._obs = workers.OBSWorker(host, port, password)
         self._obst = QtCore.QThread()
         self._obs.moveToThread(self._obst)
         self._obs.sig.connect(self.__handle_obs)

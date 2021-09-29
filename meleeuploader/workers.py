@@ -46,14 +46,15 @@ class SAWorker(QObject):
 class OBSWorker(QObject):
     sig = pyqtSignal()
 
-    def __init__(self, host, port):
+    def __init__(self, host, port, password):
         super().__init__()
         self.host = host
         self.port = port
+        self.password = password
 
     def startobs(self):
         try:
-            self.obs = obsws(self.host, self.port)
+            self.obs = obsws(self.host, self.port, self.password)
             self.obs.register(self.submit, events.RecordingStopped)
             self.obs.connect()
             print("Hooked into OBS")
