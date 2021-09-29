@@ -6,7 +6,7 @@ from time import sleep
 
 import requests
 import websocket
-from obswebsocket import obsws, events
+from .obswebsocket import obsws, events
 from PyQt5.QtCore import QThread, QObject, pyqtSignal, pyqtSlot
 
 
