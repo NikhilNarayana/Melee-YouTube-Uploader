@@ -182,6 +182,8 @@ class MeleeUploader(BaseWidget):
         self._bracket = ControlText("Bracket Link")
         self._tags = ControlText("Tags")
         self._description = ControlTextArea("Description")
+        self._timestamp_start = None
+        self._timestamps = []
 
         # Match Values
         self._file = ControlFile("File")
@@ -207,12 +209,15 @@ class MeleeUploader(BaseWidget):
         self._submit_button = ControlButton('Submit')
         self._submit_button.value = self.__on_submit
 
+        self._timestamp_button = ControlButton('Record Timestamp')
+        self._timestamp_button.value = self.__on_timestamp
+
         # Title Formats
         for f in consts.titleformat:
             self._titleformat += f
 
         # Form Layout
-        self.formset = [{"-Match": ["_file", (' ', "_mprefix", "_mtype", "_msuffix", ' '), (' ', "_p1sponsor", "_p1", ' '), (' ', "_p1char", ' '), (' ', "_p2sponsor", "_p2", ' '), (' ', "_p2char", ' ')],
+        self.formset = [{"-Match": ["_file", (' ', "_mprefix", "_mtype", "_msuffix", ' '), (' ', "_p1sponsor", "_p1", ' '), (' ', "_p1char", ' '), (' ', "_p2sponsor", "_p2", ' '), (' ', "_p2char", ' '), (' ', "_timestamp_button", ' ')],
                          "-Status-": ["_output", "=", "_qview"],
                          "Event-": ["_privacy", "_titleformat", ("_ename", "_ename_min"), "_pID", "_bracket", "_tags", "_description"]},
                         (' ', '_submit_button', ' ')]
@@ -309,6 +314,8 @@ class MeleeUploader(BaseWidget):
         options.mprefix = self._mprefix.value
         options.privacy = self._privacy.value
         options.descrip = self._description.value
+        options.timestamps = "\n".join(self._timestamps)
+        self._timestamps = []
         options.titleformat = self._titleformat.value
         if self._p1sponsor.value:
             options.p1 = " | ".join((self._p1sponsor.value, options.p1))
@@ -325,6 +332,21 @@ class MeleeUploader(BaseWidget):
             consts.firstrun = False
         if consts.saveOnSubmit:
             self.__save_queue(True)
+
+    def __on_timestamp(self):
+        if self._timestamp_start is None:
+            print("Timestamp is not recorded because OBS is not recording")
+            return
+        if len(self._timestamps) == 0:
+            self._timestamps.append("Timestamps:")
+            self._timestamps.append("0:00:00 - Intro")
+        tdelta = str(datetime.now() - self._timestamp_start).split(".")[0]
+        timestamp_format = consts.timestamp_format[self._titleformat.value]
+        if all(x for x in [self._p1char.value, self._p2char.value]):
+            timestamp_info = timestamp_format.format(p1=self._p1.value, p2=self._p2.value, p1char='/'.join(self._p1char.value), p2char='/'.join(self._p2char.value))
+            self._timestamps.append(f"{tdelta} - {timestamp_info}")
+        else:
+            self._timestamps.append(f"{tdelta} - {self._p1.value} vs {self._p2.value}")
 
     def write_print(self, text):
         self._output.value += text
@@ -470,11 +492,15 @@ class MeleeUploader(BaseWidget):
         self._obst.started.connect(self._obs.startobs)
         self._obst.start()
 
-    def __handle_obs(self):
-        if not consts.stopUpdates:
-            self.__on_submit()
+    def __handle_obs(self, recording):
+        if recording:
+            self._timestamp_start = datetime.now()
         else:
-            consts.submitted = False
+            self._timestamp_start = None
+            if not consts.stopUpdates:
+                self.__on_submit()
+            else:
+                consts.submitted = False
 
     def __hook_sc(self, f):
         self._scwin.close()

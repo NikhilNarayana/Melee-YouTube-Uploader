@@ -148,6 +148,14 @@ titleformat_min = {
     "{p1} ({p1char}) vs {p2} ({p2char}) - {round} - {ename}": "{p1} vs {p2} - {round} - {ename}"
 }
 
+timestamp_format = {
+    "{ename} - {round} - {p1} ({p1char}) vs {p2} ({p2char})": "{p1} ({p1char}) vs {p2} ({p2char})",
+    "{ename} - {p1} ({p1char}) vs {p2} ({p2char}) - {round}": "{p1} ({p1char}) vs {p2} ({p2char})",
+    "{ename} - {round} - ({p1char}) {p1} vs {p2} ({p2char})": "({p1char}) {p1} vs {p2} ({p2char})",
+    "{round} - {p1} ({p1char}) vs {p2} ({p2char}) - {ename}": "{p1} ({p1char}) vs {p2} ({p2char})",
+    "{p1} ({p1char}) vs {p2} ({p2char}) - {round} - {ename}": "{p1} ({p1char}) vs {p2} ({p2char})"
+}
+
 match_types = ("Pools", "Round Robin", "Finals", "Winners", "Losers", "Winners Finals",
                "Losers Finals", "Grand Finals", "Money Match", "Crew Battle",
                "Ladder", "Friendlies", "Thug Finals")

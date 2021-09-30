@@ -1,14 +1,9 @@
 #!/usr/bin/env python3
 
-import os
-import sys
 import pickle
-from datetime import datetime
 
 from . import consts
 from . import youtube as yt
-
-import requests
 
 
 def pre_upload(opts):
@@ -47,9 +42,10 @@ def pre_upload(opts):
                             return False
     print(f"Uploading {title}")
     if opts.descrip:
-        descrip = f"Bracket: {opts.bracket}\n\n{opts.descrip}\n\n{consts.credit}" if opts.bracket else f"{opts.descrip}\n\n{consts.credit}"
+        descrip = f"Bracket: {opts.bracket}\n\n{opts.descrip}\n\n{opts.timestamps}\n\n{consts.credit}" if opts.bracket else f"{opts.descrip}\n\n{opts.timestamps}\n\n{consts.credit}"
     else:
-        descrip = f"Bracket: {opts.bracket}\n\n{consts.credit}" if opts.bracket else consts.credit
+        descrip = f"Bracket: {opts.bracket}\n\n{opts.timestamps}\n\n{consts.credit}" if opts.bracket else f"{opts.timestamps}\n\n{consts.credit}"
+
     tags = list(consts.tags)
     if consts.custom:
         tags = []

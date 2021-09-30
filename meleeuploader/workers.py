@@ -6,7 +6,7 @@ from time import sleep
 
 import requests
 import websocket
-from .obswebsocket import obsws, events
+from .obswebsocket import obsws, events, requests as obsrequests
 from PyQt5.QtCore import QThread, QObject, pyqtSignal, pyqtSlot
 
 
@@ -44,7 +44,7 @@ class SAWorker(QObject):
 
 
 class OBSWorker(QObject):
-    sig = pyqtSignal()
+    sig = pyqtSignal(bool)
 
     def __init__(self, host, port, password):
         super().__init__()
@@ -55,7 +55,8 @@ class OBSWorker(QObject):
     def startobs(self):
         try:
             self.obs = obsws(self.host, self.port, self.password)
-            self.obs.register(self.submit, events.RecordingStopped)
+            self.obs.register(self.recordingStart, events.RecordingStarted)
+            self.obs.register(self.recordingStop, events.RecordingStopped)
             self.obs.connect()
             print("Hooked into OBS")
         except:
@@ -63,10 +64,14 @@ class OBSWorker(QObject):
 
     def closeobs(self):
         self.obs.disconnect()
+    
+    @pyqtSlot()
+    def recordingStart(self, data=None):
+        self.sig.emit(True)
 
     @pyqtSlot()
-    def submit(self, data=None):
-        self.sig.emit()
+    def recordingStop(self, data=None):
+        self.sig.emit(False)
 
 
 class SCWorker(QObject):
