@@ -4,7 +4,7 @@ from codecs import open
 from os import path
 
 here = path.abspath(path.dirname(__file__))
-version = '1.18.15'
+version = '1.19.0'
 
 long_des = ""
 with open(path.join(here, 'README.md')) as f:
@@ -30,13 +30,12 @@ setup(
     entry_points=dict(console_scripts=['meleeuploader = meleeuploader.main:main', 'smashuploader = meleeuploader.main:ult', 's64uploader = meleeuploader.main:s64', 'rivalsuploader = meleeuploader.main:rivals', 'splatoonuploader = meleeuploader.main:splatoon']),
     python_requires='>= 3.7.0',
     version=version,
-    packages=["meleeuploader"],
+    packages=["meleeuploader", "meleeuploader.obswebsocket"],
     install_requires=[
         'CacheControl',
         'google-api-python-client',
         'google_auth_oauthlib',
         'oauth2client',
-        'obs-websocket-py',
         'Pyforms-Lite',
         "urllib3==1.23",
     ],
