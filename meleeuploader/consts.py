@@ -99,11 +99,11 @@ ult_chars = ('Mario', 'Donkey Kong', 'Link', 'Samus', 'Dark Samus', 'Yoshi',
              'Joker', 'Hero', 'Banjo & Kazooie', 'Terry Bogard', 'Byleth',
              'Min Min', 'Steve', 'Sephiroth', 'Pyra', 'Mythra', 'Kazuya')
 
-melee_chars = ('Fox', 'Falco', 'Marth', 'Sheik', 'Jigglypuff', 'Peach',
-               'Captain Falcon', 'Ice Climbers', 'Pikachu', 'Samus',
-               'Dr. Mario', 'Yoshi', 'Luigi', 'Ganondorf', 'Mario',
-               'Young Link', 'Donkey Kong', 'Link', 'Mr. Game & Watch',
-               'Mewtwo', 'Roy', 'Zelda', 'Ness', 'Pichu', 'Bowser', 'Kirby')
+melee_chars = ('Fox', 'Marth', 'Jigglypuff', 'Falco', 'Sheik', 'Captain Falcon',
+               'Peach', 'Ice Climbers', 'Pikachu', 'Yoshi',
+               'Samus', 'Luigi', 'Dr. Mario', 'Ganondorf', 'Mario',
+               'Donkey Kong', 'Young Link', 'Link', 'Mr. Game & Watch',
+               'Mewtwo', 'Roy', 'Pichu', 'Ness', 'Zelda', 'Kirby', 'Bowser')
 
 s64_chars = ('Pikachu', 'Kirby', 'Captain Falcon', 'Fox', 'Yoshi', 'Jigglypuff',
              'Mario', 'Samus', 'Donkey Kong', 'Ness', 'Link', 'Luigi')
