@@ -6,7 +6,7 @@ A modified version of FRC-YouTube-Uploader for Video Game Tournaments.
 
 **IMPORTANT NOTE**
 
-This application **DOES NOT** support enabling monetization at the moment. I highly suggest you upload videos as unlisted and set monetization settings before making them public or monitor your uploads and update monetization settings as they are uploaded (you can adjust the settings while the files are being uploaded without breaking anything). If you see the YouTube ContentID API in your Google Developer Console and are willing to help me test updates to fix the issue DM me on twitter at @xMetonym.
+This application **DOES NOT/CANNOT** support enabling monetization due to YouTube's API restrictions. I highly suggest you upload videos as unlisted and set monetization settings before making them public or monitor your uploads and update monetization settings as they are uploaded (you can adjust the settings while the files are being uploaded without breaking anything).
 
 ## To Do
 * Automate creation of thumbnails
