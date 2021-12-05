@@ -228,7 +228,7 @@ class MeleeUploader(BaseWidget):
                 'Save/Clear': [{'Save Form': self.__save_form}, {'Clear Match Values': self.__reset_match}, {'Clear Event Values': self.__reset_event}, {'Clear All': self.__reset_forms}],
                 'Queue': [{'Toggle Uploads': utils.toggle_worker}, {'Save Queue': self.__save_queue}, {'Load Queue': self.__load_queue}, {'Toggle Save on Submit': self.__save_on_submit}],
                 'History': [{'Show History': self.__show_hview}],
-                'Characters': [{'Melee': self.__melee_chars}, {'Ultimate': self.__ultimate_chars}, {'64': self.__64_chars}, {'Rivals': self.__rivals_chars}, {'Splatoon': self.__splatoon_chars}, {"Strive": self.__strive_chars}, {'Custom': self.__custom_chars}]}]
+                'Characters': [{'Melee': self.__melee_chars}, {'Ultimate': self.__ultimate_chars}, {'64': self.__64_chars}, {'Rivals': self.__rivals_chars}, {'Splatoon': self.__splatoon_chars}, {"Strive": self.__strive_chars}, {"NASB": self.__nasb_chars}, {'Custom': self.__custom_chars}]}]
 
         # Add ControlCombo values
         for t in consts.match_types:
@@ -723,6 +723,11 @@ class MeleeUploader(BaseWidget):
         consts.game = "strive"
         consts.tags = consts.strive_tags
         self.__update_chars(consts.strive_chars)
+    
+    def __nasb_chars(self):
+        consts.game = "nasb"
+        consts.tags = consts.nasb_tags
+        self.__update_chars(consts.nasb_chars)
 
     def __custom_chars(self):
         chars = []

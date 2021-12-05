@@ -48,6 +48,7 @@ s64_tags = ("Smash 64", "64", "Super Smash Brothers", "Super Smash Bros.", "s64"
 rivals_tags = ("Rivals of Aether", "RoA", "roa", "Rivals", "smashuploader")
 splatoon2_tags = ("Splatoon 2", "Splat 2", "smashuploader")
 strive_tags = ("Guilty Gear Strive", "GG Strive", "Strive", "smashuploader")
+nasb_tags = ("NASB", "All Star Brawl", "Nick All Star Brawl", "smashuploader")
 tags = melee_tags
 
 minchars = {
@@ -79,6 +80,14 @@ minchars = {
     'Piranha Plant': "Plant",
     'Banjo & Kazooie': "Banjo",
     'Terry Bogard': "Terry",
+    'SpongeBob SquarePants': "SpongeBob",
+    'Powdered Toast Man': "Toast Man",
+    'Leonardo': "Leo",
+    'Michaelangelo': "Mikey",
+    'Lincoln Loud': "Lincoln",
+    'Lucy Loud': "Lucy",
+    'Danny Phantom': "Danny",
+    'April O\'Neil': "April",
 }
 
 ult_chars = ('Mario', 'Donkey Kong', 'Link', 'Samus', 'Dark Samus', 'Yoshi',
@@ -115,7 +124,11 @@ rivals_chars = ('Zetterburn', 'Orcane', 'Wrastor', 'Kragg', 'Forsburn', 'Maypul'
 splatoon2_chars = ()
 
 strive_chars = ('Sol', 'Ky', 'May', 'Axl', 'Chipp', 'Potemkin', 'Faust', 'Millia', 'Zato',
-                'Ramlethal', 'Leo', 'Nagoriyuki', 'Giovanna', 'Anji', 'I-No', 'Goldlewis', 'Jack-O\'')
+                'Ramlethal', 'Leo', 'Nagoriyuki', 'Giovanna', 'Anji', 'I-No', 'Goldlewis', 'Jack-O\'',)
+
+nasb_chars = ('Aang', 'Oblina', 'Leonardo', 'SpongeBob SquarePants', 'April O\'Neil', 'Lucy Loud', 'Ren & Stimpy',
+              'Powdered Toast Man', 'Reptar', 'Michaelangelo', 'Zim', 'Korra', 'Lincoln Loud', 'Danny Phantom',
+              'CatDog', 'Toph', 'Helga', 'Nigel', 'Sandy', 'Patrick',)
 
 min_match_types = {
     "Round ": "R",
