@@ -79,14 +79,47 @@ class OBSHostPortInput(BaseWidget):
             self.warning("You must input a host IP and port number")
 
 
-class SCFileInput(BaseWidget):
-    def __init__(self, f=""):
-        super(SCFileInput, self).__init__("Stream Control")
+class SCSetup(BaseWidget):
+    def __init__(self, mappings={}):
+        super(SCSetup, self).__init__("Stream Control")
+        self._mappings = mappings
         self._file = ControlFile("File")
-        self.formset = ["_file", "_button"]
-        self._button = ControlButton("Submit")
 
-        self._file.value = f.value
+        self._label = ControlLabel("Uploader Inputs to streamcontrol.json mappings\n")
+        self._p1 = ControlText("P1 Name")
+        self._p2 = ControlText("P2 Name")
+        self._p1_sponsor = ControlText("P1 Sponsor")
+        self._p2_sponsor = ControlText("P2 Sponsor")
+        self._p1_char = ControlText("P1 Character")
+        self._p2_char = ControlText("P2 Character")
+        self._mtype = ControlText("Match Type")
+        self._mprefix = ControlText("Match Prefix")
+
+        self._button = ControlButton("Submit")
+        self.formset = [
+            "_file",
+            "_label",
+            "_p1",
+            "_p2",
+            "_p1_sponsor",
+            "_p2_sponsor",
+            "_p1_char",
+            "_p2_char",
+            "_mtype",
+            "_mprefix",
+            (" ", "_button", " "),
+        ]
+
+        self._p1.value = self._mappings.get("p1_name", "")
+        self._p2.value = self._mappings.get("p2_name", "")
+        self._p1_sponsor.value = self._mappings.get("p1_sponsor", "")
+        self._p2_sponsor.value = self._mappings.get("p2_sponsor", "")
+        self._p1_char.value = self._mappings.get("p1_char", "")
+        self._p2_char.value = self._mappings.get("p2_char", "")
+        self._mtype.value = self._mappings.get("mtype", "")
+        self._mprefix.value = self._mappings.get("mprefix", "")
+
+        self._file.value = self._mappings.get("file", "")
 
         self._file.form.lineEdit.setPlaceholderText("Find your streamcontrol.json")
 
@@ -94,7 +127,18 @@ class SCFileInput(BaseWidget):
 
     def __button_action(self, data=None):
         if self._file.value:
-            self.parent._MeleeUploader__hook_sc(self._file.value)
+            self._mappings["file"] = self._file.value
+            self._mappings["p1_name"] = self._p1.value
+            self._mappings["p2_name"] = self._p2.value
+            self._mappings["p1_sponsor"] = self._p1_sponsor.value
+            self._mappings["p2_sponsor"] = self._p2_sponsor.value
+            self._mappings["p1_char"] = self._p1_char.value
+            self._mappings["p2_char"] = self._p2_char.value
+            self._mappings["mtype"] = self._mtype.value
+            self._mappings["msuffix"] = self._mprefix.value
+            with open(consts.sc_form_values_file, "w") as f:
+                json.dump(data, f)
+            self.parent._MeleeUploader__hook_sc(self._file.value, self._mappings)
         else:
             self.warning("You must select a file")
 
@@ -226,8 +270,8 @@ class MeleeUploader(BaseWidget):
         self._file = ControlFile("File")
         self._p1 = ControlText()
         self._p2 = ControlText()
-        self._p1sponsor = ControlText("P1")
-        self._p2sponsor = ControlText("P2")
+        self._p1_sponsor = ControlText("P1")
+        self._p2_sponsor = ControlText("P2")
         self._p1char = ControlCheckBoxList("P1 Characters")
         self._p2char = ControlCheckBoxList("P2 Characters")
         self._mtype = ControlCombo()
@@ -259,9 +303,9 @@ class MeleeUploader(BaseWidget):
                 "-Match": [
                     "_file",
                     (" ", "_mprefix", "_mtype", "_msuffix", " "),
-                    (" ", "_p1sponsor", "_p1", " "),
+                    (" ", "_p1_sponsor", "_p1", " "),
                     (" ", "_p1char", " "),
-                    (" ", "_p2sponsor", "_p2", " "),
+                    (" ", "_p2_sponsor", "_p2", " "),
                     (" ", "_p2char", " "),
                     (" ", "_timestamp_button", " "),
                 ],
@@ -324,8 +368,8 @@ class MeleeUploader(BaseWidget):
 
         # Set placeholder text
         self._ename_min.form.lineEdit.setPlaceholderText("Shortened Event Name")
-        self._p1sponsor.form.lineEdit.setPlaceholderText("Sponsor Tag")
-        self._p2sponsor.form.lineEdit.setPlaceholderText("Sponsor Tag")
+        self._p1_sponsor.form.lineEdit.setPlaceholderText("Sponsor Tag")
+        self._p2_sponsor.form.lineEdit.setPlaceholderText("Sponsor Tag")
         self._p1.form.lineEdit.setPlaceholderText("P1 Tag")
         self._p2.form.lineEdit.setPlaceholderText("P2 Tag")
         self._mprefix.form.lineEdit.setPlaceholderText("Round Prefix")
@@ -354,8 +398,17 @@ class MeleeUploader(BaseWidget):
 
         # Stream Control
         self._sc = None
-        self._scf = ControlText()
-        self._scf.value = ""
+        self.__sc_mapping = {  # defaults are based on Recursion's setup
+            "file": "",
+            "p1_name": "p1_name",
+            "p2_name": "p2_name",
+            "p1_char": "p1_char",
+            "p2_char": "p2_char",
+            "p1_sponsor": "p1_sponsor",
+            "p2_sponsor": "p2_sponsor",
+            "mtype": "event_round",
+            "mprefix": "event_bracket",
+        }
 
         # Streameta
         self._sm = None
@@ -376,13 +429,12 @@ class MeleeUploader(BaseWidget):
             "tags": self._tags,
             "msuffix": self._msuffix,
             "mprefix": self._mprefix,
-            "p1sponsor": self._p1sponsor,
-            "p2sponsor": self._p2sponsor,
+            "p1sponsor": self._p1_sponsor,
+            "p2sponsor": self._p2_sponsor,
             "privacy": self._privacy,
             "description": self._description,
             "ename_min": self._ename_min,
             "title_format": self._title_format,
-            "stream_control_json": self._scf,
             "streameta_url": self._smf,
         }
 
@@ -445,10 +497,10 @@ class MeleeUploader(BaseWidget):
         options.timestamps = "\n".join(self._timestamps)
         self._timestamps = []
         options.title_format = self._title_format.value
-        if self._p1sponsor.value:
-            options.p1 = " | ".join((self._p1sponsor.value, options.p1))
-        if self._p2sponsor.value:
-            options.p2 = " | ".join((self._p2sponsor.value, options.p2))
+        if self._p1_sponsor.value:
+            options.p1 = " | ".join((self._p1_sponsor.value, options.p1))
+        if self._p2_sponsor.value:
+            options.p2 = " | ".join((self._p2_sponsor.value, options.p2))
         options.ignore = False
         self.__reset_match(False, isadir)
         self.__add_to_qview(options)
@@ -520,8 +572,8 @@ class MeleeUploader(BaseWidget):
         self._p2char.load_form(dict(selected=[]))
         self._p1.value = ""
         self._p2.value = ""
-        self._p1sponsor.value = ""
-        self._p2sponsor.value = ""
+        self._p1_sponsor.value = ""
+        self._p2_sponsor.value = ""
         self._msuffix.value = ""
         if menu:
             isadir = os.path.isdir(self._file.value)
@@ -603,7 +655,12 @@ class MeleeUploader(BaseWidget):
             self._sct.quit()
             self._sc = None
         else:
-            self._scwin = SCFileInput(self._scf)
+            try:
+                with open(consts.sc_form_values_file, "r") as f:
+                    self.__sc_mapping = json.load(f)
+            except Exception:
+                pass
+            self._scwin = SCSetup(self.__sc_mapping)
             self._scwin.parent = self
             self._scwin.show()
 
@@ -654,10 +711,10 @@ class MeleeUploader(BaseWidget):
             else:
                 consts.submitted = False
 
-    def __hook_sc(self, f):
+    def __hook_sc(self, mappings):
+        self.__sc_mapping = mappings
         self._scwin.close()
-        self._scf.value = f
-        self._sc = workers.SCWorker(f)
+        self._sc = workers.SCWorker(mappings.get("file", ""))
         self._sct = QtCore.QThread()
         self._sc.moveToThread(self._sct)
         self._sc.sig.connect(self.__sc_update)
@@ -819,7 +876,6 @@ class MeleeUploader(BaseWidget):
             data["description"] = deepcopy(options.descrip)
             data["ename_min"] = deepcopy(options.ename_min)
             data["title_format"] = deepcopy(options.title_format)
-            data["stream_control_json"] = deepcopy(self._scf.value)
             data["streameta_url"] = deepcopy(self._smf.value)
         else:
             f = self._pID.value.find("PL")
@@ -982,12 +1038,10 @@ class MeleeUploader(BaseWidget):
         try:
             self.__p1chars = self._p1char.value
             self.__p2chars = self._p2char.value
-            p1char = data.get("p1_char", "")
-            p2char = data.get("p2_char", "")
-            if p1char == "Doctor Mario":
-                p1char = "Dr. Mario"
-            if p2char == "Doctor Mario":
-                p2char = "Dr. Mario"
+            sc_p1_char = data.get(self.__sc_mapping["p1_char"], "")
+            sc_p2_char = data.get(self.__sc_mapping["p2_char"], "")
+            p1char = consts.sc_map_chars.get(sc_p1_char, sc_p1_char)
+            p2char = consts.sc_map_chars.get(sc_p2_char, sc_p2_char)
             if p1char not in self.__p1chars:
                 self.__p1chars.append(p1char)
             if p2char not in self.__p2chars:
@@ -997,12 +1051,21 @@ class MeleeUploader(BaseWidget):
         except Exception as e:
             print(e)
         try:
-            self._p1.value = data.get("p1_name", self._p1.value)
-            self._p2.value = data.get("p2_name", self._p2.value)
+            self._p1.value = data.get(self.__sc_mapping["p1_name"], self._p1.value)
+            self._p2.value = data.get(self.__sc_mapping["p2_name"], self._p2.value)
         except Exception as e:
             print(e)
         try:
-            match = data.get("event_round", "")
+            self._p1_sponsor.value = data.get(
+                self.__sc_mapping["p1_sponsor"], self._p1_sponsor.value
+            )
+            self._p2_sponsor.value = data.get(
+                self.__sc_mapping["p2_sponsor"], self._p2_sponsor.value
+            )
+        except Exception as e:
+            print(e)
+        try:
+            match = data.get(self.__sc_mapping["mtype"], "")
             if match:
                 for t in consts.match_types:
                     if t.lower() in match.lower() and match.find(t) != -1:
@@ -1010,10 +1073,10 @@ class MeleeUploader(BaseWidget):
                         suffix = ""
                         sections = match.split(t)
                         suffix = sections[1].strip()
-                        prefix = data.get("event_bracket", "")
+                        prefix = data.get(self.__sc_mapping["mprefix"], "")
                     elif (
-                        t.lower() in data.get("event_bracket", "").lower()
-                        and data.get("event_bracket", "").find(t) != -1
+                        t.lower() in data.get(self.__sc_mapping["mprefix"], "").lower()
+                        and data.get(self.__sc_mapping["mprefix"], "").find(t) != -1
                     ):
                         mtype = t
                         prefix = ""

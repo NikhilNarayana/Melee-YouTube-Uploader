@@ -141,7 +141,7 @@ The program will pull from the `Player 1`, `Player 2`, and `Match` fields. The `
 There is also support for character selection if you use stock icons from this [link](https://drive.google.com/file/d/1L8M-4FUDcQo-2cuh1Ak_VabJSQlWz8B_/view?usp=sharing).
 
 ### StreamControl and Streameta Integration
-This integration is similar to the SA websocket but is done by polling a file or HTTP endpoint respectively. The SC integration is designed around Recursion's setup so it won't work easily for everyone.
+This integration is similar to the SA websocket but is done by polling a file or HTTP endpoint respectively. The SC integration is flexible, just map your `streamcontrol.json` to the fields in the uploader.
 
 ### OBS Websocket - Never submit manually
 This is a peculiar feature that I built with only myself in mind. There are no plans to expand what I've set it up to do.

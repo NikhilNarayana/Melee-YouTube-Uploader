@@ -26,6 +26,7 @@ os.makedirs(yt_accounts_folder, exist_ok=True)
 
 form_values_file = os.path.join(smash_folder, "form_values.json")
 queue_values_file = os.path.join(smash_folder, "queue_values.bin")
+sc_form_values_file = os.path.join(smash_folder, "sc_form_values.json")
 log_file = os.path.join(smash_folder, "smash_log.txt")
 custom_list_file = os.path.join(smash_folder, "smash_custom_list.txt")
 youtube_oauth_file = os.path.join(smash_folder, "smash-oauth2-youtube.json")
@@ -103,6 +104,7 @@ min_chars = {
     "Piranha Plant": "Plant",
     "Banjo & Kazooie": "Banjo",
     "Terry Bogard": "Terry",
+    "Pyra/Mythra": "Pythra",
     "SpongeBob SquarePants": "SpongeBob",
     "Powdered Toast Man": "Toast Man",
     "Leonardo": "Leo",
@@ -111,6 +113,19 @@ min_chars = {
     "Lucy Loud": "Lucy",
     "Danny Phantom": "Danny",
     "April O'Neil": "April",
+}
+
+sc_map_chars = {
+    "Doctor Mario": "Dr. Mario",
+    "Dr Mario": "Dr. Mario",
+    "Alex": "Steve",
+    "BanjoKazooie": "Banjo & Kazooie",
+    "Bowser Jr": "Bowser Jr.",
+    "King K Rool": "King K. Rool",
+    "Pokemon Trainer Boy": "Pokemon Trainer",
+    "Pokemon Trainer Girl": "Pokemon Trainer",
+    "RosalinaLuma": "Rosalina & Luma",
+    "Mr GameWatch": "Mr. Game & Watch",
 }
 
 ult_chars = (
@@ -200,8 +215,7 @@ ult_chars = (
     "Min Min",
     "Steve",
     "Sephiroth",
-    "Pyra",
-    "Mythra",
+    "Pyra/Mythra",
     "Kazuya",
     "Sora",
 )
