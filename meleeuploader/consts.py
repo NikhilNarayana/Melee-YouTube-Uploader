@@ -301,6 +301,7 @@ strive_chars = (
     "I-No",
     "Goldlewis",
     "Jack-O'",
+    "Happy Chaos",
 )
 
 nasb_chars = (
