@@ -98,7 +98,7 @@ def minify_chars(pchars):
 def make_title(opts, chars_exist, min_ename=False):
     if min_ename:
         return (
-            opts.titleformat.format(
+            opts.title_format.format(
                 ename=opts.ename_min,
                 round=opts.mtype,
                 p1=opts.p1,
@@ -107,13 +107,13 @@ def make_title(opts, chars_exist, min_ename=False):
                 p2char="/".join(opts.p2char),
             )
             if chars_exist
-            else consts.title_format_min[opts.titleformat].format(
+            else consts.title_format_min[opts.title_format].format(
                 ename=opts.ename_min, round=opts.mtype, p1=opts.p1, p2=opts.p2
             )
         )
     else:
         return (
-            opts.titleformat.format(
+            opts.title_format.format(
                 ename=opts.ename,
                 round=opts.mtype,
                 p1=opts.p1,
@@ -122,7 +122,7 @@ def make_title(opts, chars_exist, min_ename=False):
                 p2char="/".join(opts.p2char),
             )
             if chars_exist
-            else consts.title_format_min[opts.titleformat].format(
+            else consts.title_format_min[opts.title_format].format(
                 ename=opts.ename, round=opts.mtype, p1=opts.p1, p2=opts.p2
             )
         )

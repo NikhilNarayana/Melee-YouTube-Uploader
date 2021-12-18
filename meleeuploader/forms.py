@@ -212,7 +212,7 @@ class MeleeUploader(BaseWidget):
 
         # Event Values
         self._privacy = ControlCombo("Video Privacy")
-        self._titleformat = ControlCombo("Title Format")
+        self._title_format = ControlCombo("Title Format")
         self._ename = ControlText("Event Name")
         self._ename_min = ControlText()
         self._pID = ControlText("Playlist ID")
@@ -251,7 +251,7 @@ class MeleeUploader(BaseWidget):
 
         # Title Formats
         for f in consts.title_format:
-            self._titleformat += f
+            self._title_format += f
 
         # Form Layout
         self.formset = [
@@ -268,7 +268,7 @@ class MeleeUploader(BaseWidget):
                 "-Status-": ["_output", "=", "_qview"],
                 "Event-": [
                     "_privacy",
-                    "_titleformat",
+                    "_title_format",
                     ("_ename", "_ename_min"),
                     "_pID",
                     "_bracket",
@@ -362,29 +362,29 @@ class MeleeUploader(BaseWidget):
         self._smf = ControlText()
         self._smf.value = ""
 
-        # Define the existing form fields
-        self._form_fields = (
-            self._ename,
-            self._pID,
-            self._mtype,
-            self._p1,
-            self._p2,
-            self._p1char,
-            self._p2char,
-            self._bracket,
-            self._file,
-            self._tags,
-            self._msuffix,
-            self._mprefix,
-            self._p1sponsor,
-            self._p2sponsor,
-            self._privacy,
-            self._description,
-            self._ename_min,
-            self._titleformat,
-            self._scf,
-            self._smf,
-        )
+        # Define the mapping of the form values json to form fields
+        self._form_fields = {
+            "ename": self._ename,
+            "pID": self._pID,
+            "mtype": self._mtype,
+            "p1": self._p1,
+            "p2": self._p2,
+            "p1char": self._p1char,
+            "p2char": self._p2char,
+            "bracket": self._bracket,
+            "file": self._file,
+            "tags": self._tags,
+            "msuffix": self._msuffix,
+            "mprefix": self._mprefix,
+            "p1sponsor": self._p1sponsor,
+            "p2sponsor": self._p2sponsor,
+            "privacy": self._privacy,
+            "description": self._description,
+            "ename_min": self._ename_min,
+            "title_format": self._title_format,
+            "stream_control_json": self._scf,
+            "streameta_url": self._smf,
+        }
 
         # Get latest values from form_values.txt
         if consts.start_queue:
@@ -444,7 +444,7 @@ class MeleeUploader(BaseWidget):
         options.descrip = self._description.value
         options.timestamps = "\n".join(self._timestamps)
         self._timestamps = []
-        options.titleformat = self._titleformat.value
+        options.title_format = self._title_format.value
         if self._p1sponsor.value:
             options.p1 = " | ".join((self._p1sponsor.value, options.p1))
         if self._p2sponsor.value:
@@ -469,7 +469,7 @@ class MeleeUploader(BaseWidget):
             self._timestamps.append("Timestamps:")
             self._timestamps.append("0:00:00 - Intro")
         tdelta = str(datetime.now() - self._timestamp_start).split(".")[0]
-        timestamp_format = consts.timestamp_format[self._titleformat.value]
+        timestamp_format = consts.timestamp_format[self._title_format.value]
         if all(x for x in [self._p1char.value, self._p2char.value]):
             timestamp_info = timestamp_format.format(
                 p1=self._p1.value,
@@ -535,7 +535,7 @@ class MeleeUploader(BaseWidget):
 
     def __reset_event(self):
         self._privacy.value = "public"
-        self._titleformat.value = (
+        self._title_format.value = (
             "{ename} - {round} - {p1} ({p1char}) vs {p2} ({p2char})"
         )
         self._ename.value = ""
@@ -555,19 +555,18 @@ class MeleeUploader(BaseWidget):
             if not options.ignore:
                 options.then = datetime.now()
                 if utils.pre_upload(options):
-                    row = [None] * (len(self._form_fields) + 1)
-                    row[0] = deepcopy(options.ename)
-                    row[1] = deepcopy(options.pID)
-                    row[7] = deepcopy(options.bracket)
-                    row[9] = deepcopy(options.tags)
-                    row[11] = deepcopy(options.mprefix)
-                    row[14] = deepcopy(options.privacy)
-                    row[15] = deepcopy(options.descrip)
-                    row[16] = deepcopy(options.ename_min)
-                    row[17] = deepcopy(options.titleformat)
-                    row.append(deepcopy(consts.game))
+                    data = {"game": deepcopy(consts.game)}
+                    data["ename"] = deepcopy(options.ename)
+                    data["pID"] = deepcopy(options.pID)
+                    data["bracket"] = deepcopy(options.bracket)
+                    data["tags"] = deepcopy(options.tags)
+                    data["mprefix"] = deepcopy(options.mprefix)
+                    data["privacy"] = deepcopy(options.privacy)
+                    data["description"] = deepcopy(options.descrip)
+                    data["ename_min"] = deepcopy(options.ename_min)
+                    data["title_format"] = deepcopy(options.title_format)
                     with open(consts.form_values_file, "w") as f:
-                        f.write(json.dumps(row))
+                        f.write(json.dumps(data))
                     if consts.save_on_submit:
                         self.__save_queue(True)
                 self._queueref.pop(0)
@@ -797,76 +796,72 @@ class MeleeUploader(BaseWidget):
         )
 
     def __save_form(self, options=[]):
-        row = [None] * (len(self._form_fields) + 1)
+        data = {"game": deepcopy(consts.game)}
         if options:
             f = options.pID.find("PL")
             if f == -1:
                 options.pID = utils.create_playlist(options.pID)
             else:
                 options.pID = options.pID[f : f + 34]
-            row[0] = deepcopy(options.ename)
-            row[1] = deepcopy(options.pID)
-            row[2] = deepcopy(options.mtype)
-            row[3] = deepcopy(options.p1)
-            row[4] = deepcopy(options.p2)
-            row[5] = deepcopy(options.p1char)
-            row[6] = deepcopy(options.p2char)
-            row[7] = deepcopy(options.bracket)
-            row[8] = deepcopy(options.file)
-            row[9] = deepcopy(options.tags)
-            row[10] = deepcopy(options.msuffix)
-            row[11] = deepcopy(options.mprefix)
-            row[12] = ""
-            row[13] = ""
-            row[14] = deepcopy(options.privacy)
-            row[15] = deepcopy(options.descrip)
-            row[16] = deepcopy(options.ename_min)
-            row[17] = deepcopy(options.titleformat)
-            row[18] = deepcopy(self._scf.value)
-            row[19] = deepcopy(self._smf.value)
-            row.append(consts.game)
+            data["ename"] = deepcopy(options.ename)
+            data["pID"] = deepcopy(options.pID)
+            data["mtype"] = deepcopy(options.mtype)
+            data["p1"] = deepcopy(options.p1)
+            data["p2"] = deepcopy(options.p2)
+            data["p1char"] = deepcopy(options.p1char)
+            data["p2char"] = deepcopy(options.p2char)
+            data["bracket"] = deepcopy(options.bracket)
+            data["file"] = deepcopy(options.file)
+            data["tags"] = deepcopy(options.tags)
+            data["msuffix"] = deepcopy(options.msuffix)
+            data["mprefix"] = deepcopy(options.mprefix)
+            data["privacy"] = deepcopy(options.privacy)
+            data["description"] = deepcopy(options.descrip)
+            data["ename_min"] = deepcopy(options.ename_min)
+            data["title_format"] = deepcopy(options.title_format)
+            data["stream_control_json"] = deepcopy(self._scf.value)
+            data["streameta_url"] = deepcopy(self._smf.value)
         else:
             f = self._pID.value.find("PL")
             if f == -1 and self._pID.value != "":
                 self._pID.value = utils.create_playlist(self._pID.value)
             else:
                 self._pID.value = self._pID.value[f : f + 34]
-            for i, var in zip(range(len(self._form_fields) + 1), self._form_fields):
-                row[i] = deepcopy(var.value)
-            row.append(consts.game)
+            for key, form in self._form_fields.items():
+                data[key] = deepcopy(form.value)
         with open(consts.form_values_file, "w") as f:
-            f.write(json.dumps(row))
-        return row
+            f.write(json.dumps(data))
+        return data
 
-    def __load_form(self, history=[]):
-        if history:
+    def __load_form(self, values=[]):
+        if values:
             self._hwin.close()
-            for val, var in zip(history, self._form_fields):
-                if isinstance(val, (list, dict)):
-                    var.load_form(dict(selected=val))
-                elif val:
-                    var.value = val
-        else:
-            try:
-                with open(consts.form_values_file, "r") as f:
-                    values = json.loads(f.read())
-                    if values[-1] != consts.game and any(
-                        values[-1] == game for game in self.game_chars.keys()
-                    ):
-                        ret = self.question(
-                            f"Last game used was {values[-1]}, would you like to switch to it?"
-                        )
-                        if ret == "yes":
-                            self.game_chars[values[-1]]()
-                    for val, var in zip(values, self._form_fields):
-                        if isinstance(val, (list, dict)):
-                            var.load_form(dict(selected=val))
-                        elif val:
-                            var.value = val
-            except (IOError, OSError, StopIteration, json.decoder.JSONDecodeError):
-                print(
-                    f"No {os.path.basename(consts.form_values_file)} to read from, continuing with default values"
-                )
+            for key, form in self._form_fields.items():
+                if isinstance(values[key], (list, dict)):
+                    form.load_form(dict(selected=values[key]))
+                elif values[key]:
+                    form.value = values[key]
+            return
+        try:
+            with open(consts.form_values_file, "r") as f:
+                values = json.loads(f.read())
+                if values["game"] != consts.game and any(
+                    values["game"] == game for game in self.game_chars.keys()
+                ):
+                    ret = self.question(
+                        f"Last game used was {values['game']}, would you like to switch to it?"
+                    )
+                    if ret == "yes":
+                        self.game_chars[values["game"]]()
+                for key, form in self._form_fields.items():
+                    if isinstance(values[key], (list, dict)):
+                        form.load_form(dict(selected=values[key]))
+                    elif values[key]:
+                        form.value = values[key]
+        except (IOError, OSError, StopIteration, json.decoder.JSONDecodeError):
+            print(
+                f"No {os.path.basename(consts.form_values_file)} to read from, continuing with default values"
+            )
 
     def __melee_chars(self):
         consts.game = "melee"

@@ -56,9 +56,11 @@ class HistoryViewer(BaseWidget):
 
         for options in self._history:
             self._qview += (
-                options[3],
-                options[4],
-                " ".join((options[11], options[2], options[10])),
+                options["p1"],
+                options["p2"],
+                " ".join(
+                    (options["mprefix"], options["mtype"], options["msuffix"])
+                ).strip(),
             )
 
     def __load_row(self, row, c):
