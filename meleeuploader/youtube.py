@@ -215,6 +215,7 @@ def get_secrets(prefixes, relative_paths):
     Taken from https://github.com/tokland/youtube-upload/blob/master/youtube_upload/main.py
     Get the first existing filename of relative_path seeking on prefixes directories.
     """
+    paths_attempted = []
     try:
         return os.path.join(sys._MEIPASS, relative_paths[-1])
     except Exception:
@@ -222,6 +223,9 @@ def get_secrets(prefixes, relative_paths):
             for relative_path in relative_paths:
                 path = os.path.join(prefix, relative_path)
                 if os.path.exists(path):
+                    print(f"found client_secrets.json at {path}")
                     return path
+                paths_attempted.append(path)
         else:
+            print(f"Unable to find client_secrets.json. Checked in the following locations: {paths_attempted}")
             return None
