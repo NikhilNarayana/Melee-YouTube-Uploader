@@ -363,7 +363,7 @@ class MeleeUploader(BaseWidget):
         # Add ControlCombo values
         for t in consts.match_types:
             self._mtype += t
-        for t in ("public", "unlisted", "private"):
+        for t in ("unlisted", "public", "private"):
             self._privacy += t
 
         # Set placeholder text
