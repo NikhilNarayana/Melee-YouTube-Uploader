@@ -105,7 +105,7 @@ def upload_service(insert_request):
                     return False, None
 
 
-def test_get_service(scope, service, secret=None):
+def test_get_service(scope, oauth_file, secret=None):
     """
     WIP
     Based on the newer google_auth_oauthlib module
@@ -117,7 +117,7 @@ def test_get_service(scope, service, secret=None):
     
     flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRETS_FILE, scopes=scope)
 
-    storage = Storage(os.path.join(consts.smash_folder, f".{consts.abbrv}-oauth2-{service}.json"))
+    storage = Storage(oauth_file)
     credentials = storage.get()
 
     if credentials is None or credentials.invalid:
@@ -130,7 +130,7 @@ def test_get_service(scope, service, secret=None):
     
     return credentials
 
-def get_service(scope, service, secret=None):
+def get_service(scope, oauth_file, secret=None):
     CLIENT_SECRETS_FILE = get_secrets(PREFIXES, SUFFIXES) if not secret else secret
 
     if not CLIENT_SECRETS_FILE:
@@ -139,7 +139,7 @@ def get_service(scope, service, secret=None):
     flow = flow_from_clientsecrets(CLIENT_SECRETS_FILE, scope=scope)
 
     flow.user_agent = consts.long_name
-    storage = Storage(os.path.join(consts.smash_folder, f".{consts.abbrv}-oauth2-{service}.json"))
+    storage = Storage(oauth_file)
     credentials = storage.get()
 
     if credentials is None or credentials.invalid:
@@ -149,7 +149,7 @@ def get_service(scope, service, secret=None):
 
 
 def get_youtube_service():
-    credentials = get_service(YOUTUBE_UPLOAD_SCOPE, "youtube")
+    credentials = get_service(YOUTUBE_UPLOAD_SCOPE, consts.youtube_oauth_file)
 
     if not credentials:
         return None

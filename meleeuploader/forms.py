@@ -130,7 +130,7 @@ class YouTubeSelector(BaseWidget):
 
     def _ok_action(self):
         account = self._youtubes.value
-        shutil.copyfile(os.path.join(consts.yt_accounts_folder, account), consts.youtube_file)
+        shutil.copyfile(os.path.join(consts.yt_accounts_folder, account), consts.youtube_oauth_file)
         QtCore.QCoreApplication.instance().quit()
 
     def _new_action(self):
@@ -171,7 +171,7 @@ class MeleeUploader(BaseWidget):
         # Queue
         self._queue = Queue()
         self._queueref = []  # out of order access to all the items in _queue with mutation
-        consts.startQueue = True if "-q" in sys.argv else False
+        consts.start_queue = True if "-q" in sys.argv else False
 
         # Event Values
         self._privacy = ControlCombo("Video Privacy")
@@ -213,7 +213,7 @@ class MeleeUploader(BaseWidget):
         self._timestamp_button.value = self.__on_timestamp
 
         # Title Formats
-        for f in consts.titleformat:
+        for f in consts.title_format:
             self._titleformat += f
 
         # Form Layout
@@ -276,7 +276,7 @@ class MeleeUploader(BaseWidget):
         )
 
         # Get latest values from form_values.txt
-        if consts.startQueue:
+        if consts.start_queue:
             self.__load_queue()
         else:
             self.__load_form()
@@ -325,12 +325,12 @@ class MeleeUploader(BaseWidget):
         self.__reset_match(False, isadir)
         self.__add_to_qview(options)
         self._queueref.append(options)
-        if consts.firstrun:
+        if consts.first_run:
             thr = threading.Thread(target=self.__worker)
             thr.daemon = True
             thr.start()
-            consts.firstrun = False
-        if consts.saveOnSubmit:
+            consts.first_run = False
+        if consts.save_on_submit:
             self.__save_queue(True)
 
     def __on_timestamp(self):
@@ -364,9 +364,9 @@ class MeleeUploader(BaseWidget):
         channel_name = consts.youtube.channels().list(part='snippet', mine=True).execute().get('items', [])[0].get('snippet', {}).get('title')
         resp = self.question(f"You are currently logged into {channel_name}\nWould you like to log out?", title="MeleeUploader")
         if resp == "yes":
-            shutil.copyfile(consts.youtube_file, os.path.join(consts.yt_accounts_folder, f"{channel_name}.json"))
+            shutil.copyfile(consts.youtube_oauth_file, os.path.join(consts.yt_accounts_folder, f"{channel_name}.json"))
             if consts.youtube:
-                os.remove(consts.youtube_file)
+                os.remove(consts.youtube_oauth_file)
             sys.exit(0)
 
     def __reset_match(self, menu=True, isadir=False):
@@ -418,9 +418,9 @@ class MeleeUploader(BaseWidget):
                     row[16] = deepcopy(options.ename_min)
                     row[17] = deepcopy(options.titleformat)
                     row.append(deepcopy(consts.game))
-                    with open(consts.form_values, 'w') as f:
+                    with open(consts.form_values_file, 'w') as f:
                         f.write(json.dumps(row))
-                    if consts.saveOnSubmit:
+                    if consts.save_on_submit:
                         self.__save_queue(True)
                 self._queueref.pop(0)
                 self._qview -= 0
@@ -482,7 +482,7 @@ class MeleeUploader(BaseWidget):
         self._sat.start()
 
     def __hook_obs(self, host, port, password, stopUpdates):
-        consts.stopUpdates = stopUpdates
+        consts.stop_updates = stopUpdates
         self._obswin.close()
         self.warning("Please make sure OBS is open and the Websocket server is enabled", title="MeleeUploader")
         self._obs = workers.OBSWorker(host, port, password)
@@ -497,7 +497,7 @@ class MeleeUploader(BaseWidget):
             self._timestamp_start = datetime.now()
         else:
             self._timestamp_start = None
-            if not consts.stopUpdates:
+            if not consts.stop_updates:
                 self.__on_submit()
             else:
                 consts.submitted = False
@@ -554,36 +554,36 @@ class MeleeUploader(BaseWidget):
         self._qview -= job_num
 
     def __save_queue(self, silent=False):
-        if os.path.exists(consts.queue_values) and not silent:
+        if os.path.exists(consts.queue_values_file) and not silent:
             resp = self.question(
-                f"A queue already exists would you like to overwrite it?\nIt was last modified on {datetime.utcfromtimestamp(int(os.path.getmtime(consts.queue_values))).strftime('%Y-%m-%d')}")
+                f"A queue already exists would you like to overwrite it?\nIt was last modified on {datetime.utcfromtimestamp(int(os.path.getmtime(consts.queue_values_file))).strftime('%Y-%m-%d')}")
             if resp == "yes":
-                with open(consts.queue_values, "wb") as f:
+                with open(consts.queue_values_file, "wb") as f:
                     f.write(pickle.dumps(self._queueref))
                 print("Saved Queue, you can now close the program")
             elif resp == "no":
                 resp = self.question("Would you like to add onto the end of that queue?")
                 if resp == "yes":
                     queueref = None
-                    with open(consts.queue_values, "rb") as f:
+                    with open(consts.queue_values_file, "rb") as f:
                         queueref = pickle.load(f)
                     queueref.extend(self._queueref)
-                    with open(consts.queue_values, "wb") as f:
+                    with open(consts.queue_values_file, "wb") as f:
                         f.write(pickle.dumps(queueref))
                     print("Saved Queue, you can now close the program")
                 else:
                     self.alert("Not saving queue", title="MeleeUploader")
         else:
-            with open(consts.queue_values, "wb") as f:
+            with open(consts.queue_values_file, "wb") as f:
                 f.write(pickle.dumps(self._queueref))
                 print("Saved Queue, you can now close the program")
 
     def __load_queue(self):
-        if self._queueref and not consts.startQueue:
+        if self._queueref and not consts.start_queue:
             resp = self.question("Would you like to add to the existing queue?\nItems will be added to the front of the queue.")
             if resp == "yes":
                 try:
-                    with open(consts.queue_values, "rb") as f:
+                    with open(consts.queue_values_file, "rb") as f:
                         queueref = pickle.load(f)
                     queueref.extend(self._queueref)
                     self._queueref = queueref
@@ -597,7 +597,7 @@ class MeleeUploader(BaseWidget):
                     return
         else:
             try:
-                with open(consts.queue_values, "rb") as f:
+                with open(consts.queue_values_file, "rb") as f:
                     self._queueref = pickle.load(f)
                 for options in self._queueref:
                     self.__add_to_qview(options)
@@ -605,28 +605,28 @@ class MeleeUploader(BaseWidget):
             except Exception:
                 print("You need to save a queue before loading a queue")
                 return
-        if not consts.startQueue:
+        if not consts.start_queue:
             resp = self.question("Do you want to start uploading?", title="MeleeUploader")
             if resp == "yes":
                 thr = threading.Thread(target=self.__worker)
                 thr.daemon = True
-                consts.firstrun = False
+                consts.first_run = False
                 consts.stop_thread = False
                 thr.start()
             else:
                 consts.stop_thread = True
-            consts.loadedQueue = True
+            consts.loaded_queue = True
         else:
             thr = threading.Thread(target=self.__worker)
             thr.daemon = True
-            consts.firstrun = False
+            consts.first_run = False
             consts.stop_thread = False
             thr.start()
-            consts.loadedQueue = True
+            consts.loaded_queue = True
 
     def __save_on_submit(self):
-        consts.saveOnSubmit = not consts.saveOnSubmit
-        print(f"Save Queue on Submit is turned {'on' if consts.saveOnSubmit else 'off'}.")
+        consts.save_on_submit = not consts.save_on_submit
+        print(f"Save Queue on Submit is turned {'on' if consts.save_on_submit else 'off'}.")
 
     def __save_form(self, options=[]):
         row = [None] * (len(self._form_fields) + 1)
@@ -666,7 +666,7 @@ class MeleeUploader(BaseWidget):
             for i, var in zip(range(len(self._form_fields) + 1), self._form_fields):
                 row[i] = deepcopy(var.value)
             row.append(consts.game)
-        with open(consts.form_values, 'w') as f:
+        with open(consts.form_values_file, 'w') as f:
             f.write(json.dumps(row))
         return row
 
@@ -680,7 +680,7 @@ class MeleeUploader(BaseWidget):
                     var.value = val
         else:
             try:
-                with open(consts.form_values, "r") as f:
+                with open(consts.form_values_file, "r") as f:
                     values = json.loads(f.read())
                     if values[-1] != consts.game and any(values[-1] == game for game in self.game_chars.keys()):
                         ret = self.question(f"Last game used was {values[-1]}, would you like to switch to it?")
@@ -692,7 +692,7 @@ class MeleeUploader(BaseWidget):
                         elif val:
                             var.value = val
             except (IOError, OSError, StopIteration, json.decoder.JSONDecodeError):
-                print(f"No {consts.abbrv}_form_values.json to read from, continuing with default values")
+                print(f"No {os.path.basename(consts.form_values_file)} to read from, continuing with default values")
 
     def __melee_chars(self):
         consts.game = "melee"
@@ -717,7 +717,7 @@ class MeleeUploader(BaseWidget):
     def __splatoon_chars(self):
         consts.game = "splatoon"
         consts.tags = consts.splatoon2_tags
-        self.__update_chars(consts.splatoon2_chars)
+        self.__update_chars(consts.splat_chars)
 
     def __strive_chars(self):
         consts.game = "strive"
@@ -756,7 +756,7 @@ class MeleeUploader(BaseWidget):
         self._p2char.load_form(dict(selected=p2))
 
     def __sa_update(self, data):
-        if consts.stopUpdates and not consts.submitted:
+        if consts.stop_updates and not consts.submitted:
             return
         prefix = ""
         mtype = ""
@@ -800,7 +800,7 @@ class MeleeUploader(BaseWidget):
             print(e)
 
     def __sc_update(self, data):
-        if consts.stopUpdates and not consts.submitted:
+        if consts.stop_updates and not consts.submitted:
             return
         mtype = ""
         suffix = ""
@@ -848,7 +848,7 @@ class MeleeUploader(BaseWidget):
             print(e)
 
     def __sm_update(self, data):
-        if consts.stopUpdates and not consts.submitted:
+        if consts.stop_updates and not consts.submitted:
             return
         mtype = ""
         suffix = ""

@@ -5,37 +5,35 @@ import pkg_resources
 
 __version__ = pkg_resources.require("MeleeUploader")[0].version
 
-firstrun = True
+first_run = True
 stop_thread = False
 melee = True
 game = "melee"
 custom = False
-stopUpdates = False
+stop_updates = False
 submitted = True
-startQueue = False
-saveOnSubmit = False
+start_queue = False
+save_on_submit = False
 
 youtube = None
 sheets = None
 partner = None
-loadedQueue = False
+loaded_queue = False
 
 smash_folder = os.path.join(os.path.expanduser("~"), ".smashuploader")
 yt_accounts_folder = os.path.join(smash_folder, "accounts")
-os.makedirs(smash_folder, exist_ok=True)
+os.makedirs(yt_accounts_folder, exist_ok=True)
 
-form_values = os.path.join(smash_folder, '.smash_form_values.json')
-queue_values = os.path.join(smash_folder, ".smash_queue_values.txt")
-log_file = os.path.join(smash_folder, ".smash_log.txt")
-custom_list_file = os.path.join(smash_folder, ".smash_custom_list.txt")
-youtube_file = os.path.join(smash_folder, ".smash-oauth2-youtube.json")
-partner_file = os.path.join(smash_folder, ".smash-oauth2-partner.json")
+form_values_file = os.path.join(smash_folder, 'form_values.json')
+queue_values_file = os.path.join(smash_folder, "queue_values.bin")
+log_file = os.path.join(smash_folder, "smash_log.txt")
+custom_list_file = os.path.join(smash_folder, "smash_custom_list.txt")
+youtube_oauth_file = os.path.join(smash_folder, "smash-oauth2-youtube.json")
+partner_oauth_file = os.path.join(smash_folder, "smash-oauth2-partner.json")
 
 abbrv = "smash"
 short_name = "meleeuploader"
 long_name = "Melee YouTube Uploader"
-
-rowRange = "Data!A1:G1"
 
 credit = "Uploaded with Melee-YouTube-Uploader (https://github.com/NikhilNarayana/Melee-YouTube-Uploader) by Nikhil Narayana"
 
@@ -51,7 +49,7 @@ strive_tags = ("Guilty Gear Strive", "GG Strive", "Strive", "smashuploader")
 nasb_tags = ("NASB", "All Star Brawl", "Nick All Star Brawl", "smashuploader")
 tags = melee_tags
 
-minchars = {
+min_chars = {
     'Jigglypuff': "Puff",
     'Captain Falcon': "C. Falcon",
     'C. Falcon': "Falcon",
@@ -121,7 +119,7 @@ rivals_chars = ('Zetterburn', 'Orcane', 'Wrastor', 'Kragg', 'Forsburn', 'Maypul'
                 'Absa', 'Etalus', 'Ranno', 'Clairen', 'Sylvanos', 'Elliana',
                 'Ori and Sein', 'Shovel Knight',)
 
-splatoon2_chars = ()
+splat_chars = ()
 
 strive_chars = ('Sol', 'Ky', 'May', 'Axl', 'Chipp', 'Potemkin', 'Faust', 'Millia', 'Zato',
                 'Ramlethal', 'Leo', 'Nagoriyuki', 'Giovanna', 'Anji', 'I-No', 'Goldlewis', 'Jack-O\'',)
@@ -144,7 +142,7 @@ min_match_types = {
     "Quarters": "QF"
 }
 
-titleformat = (("Event - Round - P1 (Fox) vs P2 (Fox)", "{ename} - {round} - {p1} ({p1char}) vs {p2} ({p2char})"),
+title_format = (("Event - Round - P1 (Fox) vs P2 (Fox)", "{ename} - {round} - {p1} ({p1char}) vs {p2} ({p2char})"),
                ("Event - P1 (Fox) vs P2 (Fox) - Round",
                 "{ename} - {p1} ({p1char}) vs {p2} ({p2char}) - {round}"),
                ("Event - Round - (Fox) P1 vs P2 (Fox)",
@@ -153,7 +151,7 @@ titleformat = (("Event - Round - P1 (Fox) vs P2 (Fox)", "{ename} - {round} - {p1
                 "{round} - {p1} ({p1char}) vs {p2} ({p2char}) - {ename}"),
                ("P1 (Fox) vs P2 (Fox) - Round - Event", "{p1} ({p1char}) vs {p2} ({p2char}) - {round} - {ename}"))
 
-titleformat_min = {
+title_format_min = {
     "{ename} - {round} - {p1} ({p1char}) vs {p2} ({p2char})": "{ename} - {round} - {p1} vs {p2}",
     "{ename} - {p1} ({p1char}) vs {p2} ({p2char}) - {round}": "{ename} - {p1} vs {p2} - {round}",
     "{ename} - {round} - ({p1char}) {p1} vs {p2} ({p2char})": "{ename} - {round} - {p1} vs {p2}",

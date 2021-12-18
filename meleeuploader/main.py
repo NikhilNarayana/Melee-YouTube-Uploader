@@ -12,7 +12,7 @@ import pyforms_lite
 
 def main():
     try:
-        if os.path.isfile(consts.youtube_file) or not len(os.listdir(consts.yt_accounts_folder)):
+        if os.path.isfile(consts.youtube_oauth_file) or not len(os.listdir(consts.yt_accounts_folder)):
             consts.youtube = yt.get_youtube_service()
         elif len(os.listdir(consts.yt_accounts_folder)):
             pyforms_lite.start_app(forms.YouTubeSelector, geometry=(200, 200, 1, 1))
@@ -22,7 +22,7 @@ def main():
         print("There was an issue with getting Google Credentials")
         sys.exit(1)
     try:
-        if os.path.isfile(consts.partner_file):
+        if os.path.isfile(consts.partner_oauth_file):
             consts.partner = yt.get_partner_service()
     except Exception as e:
         print(e)

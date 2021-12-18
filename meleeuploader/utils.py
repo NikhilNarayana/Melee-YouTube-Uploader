@@ -78,8 +78,8 @@ def pre_upload(opts):
 
 def minify_chars(pchars):
     for i in range(len(pchars)):
-        if pchars[i] in consts.minchars:
-            pchars[i] = consts.minchars[pchars[i]]
+        if pchars[i] in consts.min_chars:
+            pchars[i] = consts.min_chars[pchars[i]]
     if all(x in pchars for x in ("Fox", "Falco")):
         pchars.remove("Fox")
         pchars.remove("Falco")
@@ -89,9 +89,9 @@ def minify_chars(pchars):
 
 def make_title(opts, chars_exist, min_ename=False):
     if min_ename:
-        return opts.titleformat.format(ename=opts.ename_min, round=opts.mtype, p1=opts.p1, p2=opts.p2, p1char='/'.join(opts.p1char), p2char='/'.join(opts.p2char)) if chars_exist else consts.titleformat_min[opts.titleformat].format(ename=opts.ename_min, round=opts.mtype, p1=opts.p1, p2=opts.p2)
+        return opts.titleformat.format(ename=opts.ename_min, round=opts.mtype, p1=opts.p1, p2=opts.p2, p1char='/'.join(opts.p1char), p2char='/'.join(opts.p2char)) if chars_exist else consts.title_format_min[opts.titleformat].format(ename=opts.ename_min, round=opts.mtype, p1=opts.p1, p2=opts.p2)
     else:
-        return opts.titleformat.format(ename=opts.ename, round=opts.mtype, p1=opts.p1, p2=opts.p2, p1char='/'.join(opts.p1char), p2char='/'.join(opts.p2char)) if chars_exist else consts.titleformat_min[opts.titleformat].format(ename=opts.ename, round=opts.mtype, p1=opts.p1, p2=opts.p2)
+        return opts.titleformat.format(ename=opts.ename, round=opts.mtype, p1=opts.p1, p2=opts.p2, p1char='/'.join(opts.p1char), p2char='/'.join(opts.p2char)) if chars_exist else consts.title_format_min[opts.titleformat].format(ename=opts.ename, round=opts.mtype, p1=opts.p1, p2=opts.p2)
 
 
 def minify_mtype(opts, middle=False):
@@ -117,22 +117,22 @@ def toggle_worker():
         if not consts.stop_thread:
             print("Stopping Uploads")
             consts.stop_thread = True
-            consts.firstrun = False
+            consts.first_run = False
         else:
             print("Ready to Upload")
             consts.stop_thread = False
-            consts.firstrun = True
+            consts.first_run = True
 
 
 def read_queue():
     queue = None
-    with open(consts.queue_values, "rb") as f:
+    with open(consts.queue_values_file, "rb") as f:
         queue = pickle.load(f)
     return queue
 
 
 def write_queue(val):
-    with open(consts.queue_values, "wb") as f:
+    with open(consts.queue_values_file, "wb") as f:
         f.write(pickle.dumps(val))
 
 
