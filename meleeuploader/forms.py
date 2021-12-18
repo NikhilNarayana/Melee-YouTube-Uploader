@@ -618,7 +618,7 @@ class MeleeUploader(BaseWidget):
                     data["ename_min"] = deepcopy(options.ename_min)
                     data["title_format"] = deepcopy(options.title_format)
                     with open(consts.form_values_file, "w") as f:
-                        f.write(json.dumps(data))
+                        json.dump(data, f)
                     if consts.save_on_submit:
                         self.__save_queue(True)
                 self._queueref.pop(0)
@@ -775,7 +775,7 @@ class MeleeUploader(BaseWidget):
             )
             if resp == "yes":
                 with open(consts.queue_values_file, "wb") as f:
-                    f.write(pickle.dumps(self._queueref))
+                    pickle.dump(self._queueref, f)
                 print("Saved Queue, you can now close the program")
             elif resp == "no":
                 resp = self.question(
@@ -787,13 +787,13 @@ class MeleeUploader(BaseWidget):
                         queueref = pickle.load(f)
                     queueref.extend(self._queueref)
                     with open(consts.queue_values_file, "wb") as f:
-                        f.write(pickle.dumps(queueref))
+                        pickle.dump(queueref, f)
                     print("Saved Queue, you can now close the program")
                 else:
                     self.alert("Not saving queue", title="MeleeUploader")
         else:
             with open(consts.queue_values_file, "wb") as f:
-                f.write(pickle.dumps(self._queueref))
+                pickle.dump(self._queueref, f)
                 print("Saved Queue, you can now close the program")
 
     def __load_queue(self):
@@ -886,7 +886,7 @@ class MeleeUploader(BaseWidget):
             for key, form in self._form_fields.items():
                 data[key] = deepcopy(form.value)
         with open(consts.form_values_file, "w") as f:
-            f.write(json.dumps(data))
+            json.dump(data, f)
         return data
 
     def __load_form(self, values=[]):
