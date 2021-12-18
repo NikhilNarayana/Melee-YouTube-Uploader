@@ -37,7 +37,7 @@ YOUTUBE_UPLOAD_SCOPE = "https://www.googleapis.com/auth/youtube.upload https://w
 YOUTUBE_PARTNER_SCOPE = "https://www.googleapis.com/auth/youtubepartner"
 SPREADSHEETS_SCOPE = "https://www.googleapis.com/auth/spreadsheets"
 
-PREFIXES = (consts.root, sys.prefix, os.path.join(sys.prefix, "local"), "/usr", os.path.join("/usr", "local"))
+PREFIXES = (consts.smash_folder, sys.prefix, os.path.join(sys.prefix, "local"), "/usr", os.path.join("/usr", "local"))
 SUFFIXES = ("client_secrets.json", ".client_secrets.json", f"share/{consts.short_name}/client_secrets.json")
 
 
@@ -117,7 +117,7 @@ def test_get_service(scope, service, secret=None):
     
     flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRETS_FILE, scopes=scope)
 
-    storage = Storage(os.path.join(consts.root, f".{consts.abbrv}-oauth2-{service}.json"))
+    storage = Storage(os.path.join(consts.smash_folder, f".{consts.abbrv}-oauth2-{service}.json"))
     credentials = storage.get()
 
     if credentials is None or credentials.invalid:
@@ -139,7 +139,7 @@ def get_service(scope, service, secret=None):
     flow = flow_from_clientsecrets(CLIENT_SECRETS_FILE, scope=scope)
 
     flow.user_agent = consts.long_name
-    storage = Storage(os.path.join(consts.root, f".{consts.abbrv}-oauth2-{service}.json"))
+    storage = Storage(os.path.join(consts.smash_folder, f".{consts.abbrv}-oauth2-{service}.json"))
     credentials = storage.get()
 
     if credentials is None or credentials.invalid:
@@ -164,7 +164,7 @@ def get_youtube_service():
 
 
 def get_partner_service():
-    CLIENT_SECRETS_FILE = get_secrets((consts.root,), ("client_secrets.json", ".client_secrets.json"))
+    CLIENT_SECRETS_FILE = get_secrets((consts.smash_folder,), ("client_secrets.json", ".client_secrets.json"))
 
     credentials = get_service(YOUTUBE_PARTNER_SCOPE + YOUTUBE_UPLOAD_SCOPE, "partner", CLIENT_SECRETS_FILE)
 
