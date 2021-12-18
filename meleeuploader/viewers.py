@@ -20,7 +20,7 @@ class OptionsViewer(BaseWidget):
             self.formset = ["_oview", "=", "_deletebutton"]
         self.__update_o_view()
         self._oview.data_changed_event = self.__update_data
-    
+
     def __update_data(self, row, col, item):
         if col == 1:
             var_name = self._oview.get_value(0, row)
@@ -55,7 +55,11 @@ class HistoryViewer(BaseWidget):
         self._qview.horizontal_headers = ["Player 1", "Player 2", "Match Type"]
 
         for options in self._history:
-            self._qview += (options[3], options[4], " ".join((options[11], options[2], options[10])))
+            self._qview += (
+                options[3],
+                options[4],
+                " ".join((options[11], options[2], options[10])),
+            )
 
     def __load_row(self, row, c):
         self.parent._MeleeUploader__load_form(self._history[row])

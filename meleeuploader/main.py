@@ -12,7 +12,9 @@ import pyforms_lite
 
 def main():
     try:
-        if os.path.isfile(consts.youtube_oauth_file) or not len(os.listdir(consts.yt_accounts_folder)):
+        if os.path.isfile(consts.youtube_oauth_file) or not len(
+            os.listdir(consts.yt_accounts_folder)
+        ):
             consts.youtube = yt.get_youtube_service()
         elif len(os.listdir(consts.yt_accounts_folder)):
             pyforms_lite.start_app(forms.YouTubeSelector, geometry=(200, 200, 1, 1))
@@ -32,20 +34,25 @@ def main():
         print("Error:", e)
         sys.exit(1)
 
+
 def s64():
     consts.game = "64"
     main()
 
+
 def melee():
     main()
+
 
 def ult():
     consts.game = "ult"
     main()
 
+
 def rivals():
     consts.game = "rivals"
     main()
+
 
 def splatoon():
     consts.game = "splatoon"

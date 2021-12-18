@@ -7,7 +7,9 @@ from . import youtube as yt
 
 
 def pre_upload(opts):
-    if opts.mmid == "Grand Finals" and any(x.lower() in opts.msuffix.lower() for x in ("Set 2", "Reset")):
+    if opts.mmid == "Grand Finals" and any(
+        x.lower() in opts.msuffix.lower() for x in ("Set 2", "Reset")
+    ):
         opts.msuffix = ""
     opts.p1 = opts.p1.split("[L]")[0].strip()
     opts.p2 = opts.p2.split("[L]")[0].strip()
@@ -35,32 +37,38 @@ def pre_upload(opts):
                         title = make_title(opts, False, True)
                         if len(title) > 100:
                             # I can only hope no one ever goes this far
-                            print("Title is greater than 100 characters after minifying all options")
+                            print(
+                                "Title is greater than 100 characters after minifying all options"
+                            )
                             print(title)
                             print(f"Title Length: {len(title)}")
                             print("Killing this upload now\n\n")
                             return False
     print(f"Uploading {title}")
     if opts.descrip:
-        descrip = f"Bracket: {opts.bracket}\n\n{opts.descrip}\n\n{opts.timestamps}\n\n{consts.credit}" if opts.bracket else f"{opts.descrip}\n\n{opts.timestamps}\n\n{consts.credit}"
+        descrip = (
+            f"Bracket: {opts.bracket}\n\n{opts.descrip}\n\n{opts.timestamps}\n\n{consts.credit}"
+            if opts.bracket
+            else f"{opts.descrip}\n\n{opts.timestamps}\n\n{consts.credit}"
+        )
     else:
-        descrip = f"Bracket: {opts.bracket}\n\n{opts.timestamps}\n\n{consts.credit}" if opts.bracket else f"{opts.timestamps}\n\n{consts.credit}"
+        descrip = (
+            f"Bracket: {opts.bracket}\n\n{opts.timestamps}\n\n{consts.credit}"
+            if opts.bracket
+            else f"{opts.timestamps}\n\n{consts.credit}"
+        )
 
     tags = list(consts.tags)
     if consts.custom:
         tags = []
-    tags.extend((*opts.p1char, *opts.p2char, opts.ename, opts.ename_min, opts.p1, opts.p2))
+    tags.extend(
+        (*opts.p1char, *opts.p2char, opts.ename, opts.ename_min, opts.p1, opts.p2)
+    )
     if opts.tags:
         tags.extend([x.strip() for x in opts.tags.split(",")])
     body = dict(
-        snippet=dict(
-            title=title,
-            description=descrip,
-            tags=tags,
-            categoryID=20
-        ),
-        status=dict(
-            privacyStatus=opts.privacy)
+        snippet=dict(title=title, description=descrip, tags=tags, categoryID=20),
+        status=dict(privacyStatus=opts.privacy),
     )
     ret, vid = yt.upload(consts.youtube, body, opts.file)
     if ret:
@@ -89,9 +97,35 @@ def minify_chars(pchars):
 
 def make_title(opts, chars_exist, min_ename=False):
     if min_ename:
-        return opts.titleformat.format(ename=opts.ename_min, round=opts.mtype, p1=opts.p1, p2=opts.p2, p1char='/'.join(opts.p1char), p2char='/'.join(opts.p2char)) if chars_exist else consts.title_format_min[opts.titleformat].format(ename=opts.ename_min, round=opts.mtype, p1=opts.p1, p2=opts.p2)
+        return (
+            opts.titleformat.format(
+                ename=opts.ename_min,
+                round=opts.mtype,
+                p1=opts.p1,
+                p2=opts.p2,
+                p1char="/".join(opts.p1char),
+                p2char="/".join(opts.p2char),
+            )
+            if chars_exist
+            else consts.title_format_min[opts.titleformat].format(
+                ename=opts.ename_min, round=opts.mtype, p1=opts.p1, p2=opts.p2
+            )
+        )
     else:
-        return opts.titleformat.format(ename=opts.ename, round=opts.mtype, p1=opts.p1, p2=opts.p2, p1char='/'.join(opts.p1char), p2char='/'.join(opts.p2char)) if chars_exist else consts.title_format_min[opts.titleformat].format(ename=opts.ename, round=opts.mtype, p1=opts.p1, p2=opts.p2)
+        return (
+            opts.titleformat.format(
+                ename=opts.ename,
+                round=opts.mtype,
+                p1=opts.p1,
+                p2=opts.p2,
+                p1char="/".join(opts.p1char),
+                p2char="/".join(opts.p2char),
+            )
+            if chars_exist
+            else consts.title_format_min[opts.titleformat].format(
+                ename=opts.ename, round=opts.mtype, p1=opts.p1, p2=opts.p2
+            )
+        )
 
 
 def minify_mtype(opts, middle=False):
@@ -114,14 +148,14 @@ def minify_mtype(opts, middle=False):
 
 
 def toggle_worker():
-        if not consts.stop_thread:
-            print("Stopping Uploads")
-            consts.stop_thread = True
-            consts.first_run = False
-        else:
-            print("Ready to Upload")
-            consts.stop_thread = False
-            consts.first_run = True
+    if not consts.stop_thread:
+        print("Stopping Uploads")
+        consts.stop_thread = True
+        consts.first_run = False
+    else:
+        print("Ready to Upload")
+        consts.stop_thread = False
+        consts.first_run = True
 
 
 def read_queue():
@@ -137,19 +171,17 @@ def write_queue(val):
 
 
 def create_playlist(name):
-    ret = consts.youtube.playlists().insert(
-        part='snippet,status',
-        body = {
-            "snippet": {
-                "title": name
-            },
-            "status": {
-                "privacyStatus": "public"
-            }
-        }
-    ).execute()
+    ret = (
+        consts.youtube.playlists()
+        .insert(
+            part="snippet,status",
+            body={"snippet": {"title": name}, "status": {"privacyStatus": "public"}},
+        )
+        .execute()
+    )
 
-    return ret['id'] or ret
+    return ret["id"] or ret
+
 
 def get_playlist_video_views(playlist_link):
     if not consts.youtube:
@@ -159,26 +191,30 @@ def get_playlist_video_views(playlist_link):
     if f == -1:
         print(f"{playlist_link} is not a valid playlist_link")
         return
-    pID = playlist_link[f:f + 34]
-    ret = consts.youtube.playlistItems().list(
-        part="snippet",
-        maxResults="25",
-        playlistId=pID
-    ).execute()
+    pID = playlist_link[f : f + 34]
+    ret = (
+        consts.youtube.playlistItems()
+        .list(part="snippet", maxResults="25", playlistId=pID)
+        .execute()
+    )
 
     vIDs = []
-    for item in ret['items']:
-        vIDs.append(item['snippet']['resourceId']['videoId'])
-    
-    ret = consts.youtube.videos().list(
-        part="snippet,statistics",
-        id=",".join(vIDs)
-    ).execute()['items']
-    
+    for item in ret["items"]:
+        vIDs.append(item["snippet"]["resourceId"]["videoId"])
+
+    ret = (
+        consts.youtube.videos()
+        .list(part="snippet,statistics", id=",".join(vIDs))
+        .execute()["items"]
+    )
+
     views = {}
     for vID, item in zip(vIDs, ret):
-        if (vID == item['id']):
-            views[vID] = {"title": item["snippet"]["title"], "viewCount": item["statistics"]["viewCount"]}
+        if vID == item["id"]:
+            views[vID] = {
+                "title": item["snippet"]["title"],
+                "viewCount": item["statistics"]["viewCount"],
+            }
             f"{item['snippet']['title']};https://www.youtube.com/watch?v={vID};{item['statistics']['viewCount']}"
-    
+
     return views

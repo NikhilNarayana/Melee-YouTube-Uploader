@@ -64,13 +64,17 @@ class OBSHostPortInput(BaseWidget):
 
     def __sub_action(self):
         if self._host.value and self._port.value:
-            self.parent._MeleeUploader__hook_obs(self._host.value, self._port.value, self._password.value, False)
+            self.parent._MeleeUploader__hook_obs(
+                self._host.value, self._port.value, self._password.value, False
+            )
         else:
             self.warning("You must input a host IP and port number")
 
     def __stop_action(self):
         if self._host.value and self._port.value:
-            self.parent._MeleeUploader__hook_obs(self._host.value, self._port.value, self._password.value, True)
+            self.parent._MeleeUploader__hook_obs(
+                self._host.value, self._port.value, self._password.value, True
+            )
         else:
             self.warning("You must input a host IP and port number")
 
@@ -80,7 +84,7 @@ class SCFileInput(BaseWidget):
         super(SCFileInput, self).__init__("Stream Control")
         self._file = ControlFile("File")
         self.formset = ["_file", "_button"]
-        self._button = ControlButton('Submit')
+        self._button = ControlButton("Submit")
 
         self._file.value = f.value
 
@@ -100,9 +104,11 @@ class SMurlInput(BaseWidget):
         super(SMurlInput, self).__init__("Streameta")
         self._url = ControlText("URL")
         self._url.value = url.value
-        self._url.form.lineEdit.setPlaceholderText("http://ns.streameta.com/api/?token=<token>")
+        self._url.form.lineEdit.setPlaceholderText(
+            "http://ns.streameta.com/api/?token=<token>"
+        )
 
-        self._button = ControlButton('Submit')
+        self._button = ControlButton("Submit")
         self._button.value = self.__button_action
 
     def __button_action(self, data=None):
@@ -130,7 +136,9 @@ class YouTubeSelector(BaseWidget):
 
     def _ok_action(self):
         account = self._youtubes.value
-        shutil.copyfile(os.path.join(consts.yt_accounts_folder, account), consts.youtube_oauth_file)
+        shutil.copyfile(
+            os.path.join(consts.yt_accounts_folder, account), consts.youtube_oauth_file
+        )
         QtCore.QCoreApplication.instance().quit()
 
     def _new_action(self):
@@ -140,23 +148,50 @@ class YouTubeSelector(BaseWidget):
 class MeleeUploader(BaseWidget):
     def __init__(self):
         try:  # check if the user can update the app
-            latest_version = requests.get('https://pypi.org/pypi/MeleeUploader/json').json().get('info', {}).get('version')
-            if sv(latest_version) > sv(consts.__version__):  # prevents messages when developing
+            latest_version = (
+                requests.get("https://pypi.org/pypi/MeleeUploader/json")
+                .json()
+                .get("info", {})
+                .get("version")
+            )
+            if sv(latest_version) > sv(
+                consts.__version__
+            ):  # prevents messages when developing
                 if "linux" in sys.platform:
                     self.info(
-                        f"Current Version: {consts.__version__}\nVersion {latest_version} is available.\nUse sudo pip3 install -U meleeuploader=={latest_version} in terminal to update to the newest verison", title="MeleeUploader")
+                        f"Current Version: {consts.__version__}\nVersion {latest_version} is available.\nUse sudo pip3 install -U meleeuploader=={latest_version} in terminal to update to the newest verison",
+                        title="MeleeUploader",
+                    )
                 else:
-                    resp = self.question(f"Current Version: {consts.__version__}\nVersion {latest_version} is available. Would you like to update?", title="MeleeUploader")
+                    resp = self.question(
+                        f"Current Version: {consts.__version__}\nVersion {latest_version} is available. Would you like to update?",
+                        title="MeleeUploader",
+                    )
                     if resp == "yes":
-                        ret = subprocess.call(('pip3', 'install', '-U', f'meleeuploader=={latest_version}'))
+                        ret = subprocess.call(
+                            (
+                                "pip3",
+                                "install",
+                                "-U",
+                                f"meleeuploader=={latest_version}",
+                            )
+                        )
                         if ret:
-                            self.info(f'The app failed to update\nType "pip3 install -U meleeuploader=={latest_version}" into CMD/Terminal to update', title="MeleeUploader")
+                            self.info(
+                                f'The app failed to update\nType "pip3 install -U meleeuploader=={latest_version}" into CMD/Terminal to update',
+                                title="MeleeUploader",
+                            )
                         else:
-                            self.info("You can now restart the app to use the new version", title="MeleeUploader")
+                            self.info(
+                                "You can now restart the app to use the new version",
+                                title="MeleeUploader",
+                            )
         except Exception as e:
             print(e)
 
-        super(MeleeUploader, self).__init__(f"Melee YouTube Uploader - {consts.__version__}")
+        super(MeleeUploader, self).__init__(
+            f"Melee YouTube Uploader - {consts.__version__}"
+        )
 
         # Redirct print output
         sys.stdout = workers.WriteWorker(textWritten=self.write_print)
@@ -170,7 +205,9 @@ class MeleeUploader(BaseWidget):
 
         # Queue
         self._queue = Queue()
-        self._queueref = []  # out of order access to all the items in _queue with mutation
+        self._queueref = (
+            []
+        )  # out of order access to all the items in _queue with mutation
         consts.start_queue = True if "-q" in sys.argv else False
 
         # Event Values
@@ -206,10 +243,10 @@ class MeleeUploader(BaseWidget):
         self._qview.horizontal_headers = ["Player 1", "Player 2", "Round"]
 
         # Button
-        self._submit_button = ControlButton('Submit')
+        self._submit_button = ControlButton("Submit")
         self._submit_button.value = self.__on_submit
 
-        self._timestamp_button = ControlButton('Record Timestamp')
+        self._timestamp_button = ControlButton("Record Timestamp")
         self._timestamp_button.value = self.__on_timestamp
 
         # Title Formats
@@ -217,18 +254,67 @@ class MeleeUploader(BaseWidget):
             self._titleformat += f
 
         # Form Layout
-        self.formset = [{"-Match": ["_file", (' ', "_mprefix", "_mtype", "_msuffix", ' '), (' ', "_p1sponsor", "_p1", ' '), (' ', "_p1char", ' '), (' ', "_p2sponsor", "_p2", ' '), (' ', "_p2char", ' '), (' ', "_timestamp_button", ' ')],
-                         "-Status-": ["_output", "=", "_qview"],
-                         "Event-": ["_privacy", "_titleformat", ("_ename", "_ename_min"), "_pID", "_bracket", "_tags", "_description"]},
-                        (' ', '_submit_button', ' ')]
+        self.formset = [
+            {
+                "-Match": [
+                    "_file",
+                    (" ", "_mprefix", "_mtype", "_msuffix", " "),
+                    (" ", "_p1sponsor", "_p1", " "),
+                    (" ", "_p1char", " "),
+                    (" ", "_p2sponsor", "_p2", " "),
+                    (" ", "_p2char", " "),
+                    (" ", "_timestamp_button", " "),
+                ],
+                "-Status-": ["_output", "=", "_qview"],
+                "Event-": [
+                    "_privacy",
+                    "_titleformat",
+                    ("_ename", "_ename_min"),
+                    "_pID",
+                    "_bracket",
+                    "_tags",
+                    "_description",
+                ],
+            },
+            (" ", "_submit_button", " "),
+        ]
 
         # Main Menu Layout
         self.mainmenu = [
-            {'Settings': [{'YouTube Log Out': self.__reset_yt_cred}, {'Toggle OBS Hook': self.__show_obs_form}, {'Toggle SA Hook': self.__show_sa_form}, {'Toggle SC Hook': self.__show_sc_form}, {'Toggle Streameta Hook': self.__show_sm_form}, {'About': self.__about_info}],
-                'Save/Clear': [{'Save Form': self.__save_form}, {'Clear Match Values': self.__reset_match}, {'Clear Event Values': self.__reset_event}, {'Clear All': self.__reset_forms}],
-                'Queue': [{'Toggle Uploads': utils.toggle_worker}, {'Save Queue': self.__save_queue}, {'Load Queue': self.__load_queue}, {'Toggle Save on Submit': self.__save_on_submit}],
-                'History': [{'Show History': self.__show_hview}],
-                'Characters': [{'Melee': self.__melee_chars}, {'Ultimate': self.__ultimate_chars}, {'64': self.__64_chars}, {'Rivals': self.__rivals_chars}, {'Splatoon': self.__splatoon_chars}, {"Strive": self.__strive_chars}, {"NASB": self.__nasb_chars}, {'Custom': self.__custom_chars}]}]
+            {
+                "Settings": [
+                    {"YouTube Log Out": self.__reset_yt_cred},
+                    {"Toggle OBS Hook": self.__show_obs_form},
+                    {"Toggle SA Hook": self.__show_sa_form},
+                    {"Toggle SC Hook": self.__show_sc_form},
+                    {"Toggle Streameta Hook": self.__show_sm_form},
+                    {"About": self.__about_info},
+                ],
+                "Save/Clear": [
+                    {"Save Form": self.__save_form},
+                    {"Clear Match Values": self.__reset_match},
+                    {"Clear Event Values": self.__reset_event},
+                    {"Clear All": self.__reset_forms},
+                ],
+                "Queue": [
+                    {"Toggle Uploads": utils.toggle_worker},
+                    {"Save Queue": self.__save_queue},
+                    {"Load Queue": self.__load_queue},
+                    {"Toggle Save on Submit": self.__save_on_submit},
+                ],
+                "History": [{"Show History": self.__show_hview}],
+                "Characters": [
+                    {"Melee": self.__melee_chars},
+                    {"Ultimate": self.__ultimate_chars},
+                    {"64": self.__64_chars},
+                    {"Rivals": self.__rivals_chars},
+                    {"Splatoon": self.__splatoon_chars},
+                    {"Strive": self.__strive_chars},
+                    {"NASB": self.__nasb_chars},
+                    {"Custom": self.__custom_chars},
+                ],
+            }
+        ]
 
         # Add ControlCombo values
         for t in consts.match_types:
@@ -246,15 +332,24 @@ class MeleeUploader(BaseWidget):
         self._msuffix.form.lineEdit.setPlaceholderText("Round Suffix")
         self._bracket.form.lineEdit.setPlaceholderText("Include https://")
         self._tags.form.lineEdit.setPlaceholderText("Separate with commas")
-        self._pID.form.lineEdit.setPlaceholderText("Accepts full YT link or a new playlist title")
+        self._pID.form.lineEdit.setPlaceholderText(
+            "Accepts full YT link or a new playlist title"
+        )
 
         # For pulling characters
         self.__p1chars = []
         self.__p2chars = []
 
         # Set character list
-        self.game_chars = {"64": self.__64_chars, "melee": self.__melee_chars, "ult": self.__ultimate_chars,
-                           "rivals": self.__rivals_chars, "splatoon": self.__splatoon_chars, "strive": self.__strive_chars, "custom": self.__custom_chars}
+        self.game_chars = {
+            "64": self.__64_chars,
+            "melee": self.__melee_chars,
+            "ult": self.__ultimate_chars,
+            "rivals": self.__rivals_chars,
+            "splatoon": self.__splatoon_chars,
+            "strive": self.__strive_chars,
+            "custom": self.__custom_chars,
+        }
         self.game_chars[consts.game]()
 
         # Stream Control
@@ -269,10 +364,26 @@ class MeleeUploader(BaseWidget):
 
         # Define the existing form fields
         self._form_fields = (
-            self._ename, self._pID, self._mtype, self._p1, self._p2, self._p1char,
-            self._p2char, self._bracket, self._file, self._tags, self._msuffix,
-            self._mprefix, self._p1sponsor, self._p2sponsor, self._privacy,
-            self._description, self._ename_min, self._titleformat, self._scf, self._smf
+            self._ename,
+            self._pID,
+            self._mtype,
+            self._p1,
+            self._p2,
+            self._p1char,
+            self._p2char,
+            self._bracket,
+            self._file,
+            self._tags,
+            self._msuffix,
+            self._mprefix,
+            self._p1sponsor,
+            self._p2sponsor,
+            self._privacy,
+            self._description,
+            self._ename_min,
+            self._titleformat,
+            self._scf,
+            self._smf,
         )
 
         # Get latest values from form_values.txt
@@ -284,8 +395,18 @@ class MeleeUploader(BaseWidget):
     def __on_submit(self, data=None):
         """Button action event"""
         consts.submitted = True
-        if any(not x for x in (self._ename.value, self._p1.value, self._p2.value, self._file.value)):
-            print("Missing one of the required fields (event name, player names, file name)")
+        if any(
+            not x
+            for x in (
+                self._ename.value,
+                self._p1.value,
+                self._p2.value,
+                self._file.value,
+            )
+        ):
+            print(
+                "Missing one of the required fields (event name, player names, file name)"
+            )
             return
         self.__p1chars = []
         self.__p2chars = []
@@ -306,7 +427,14 @@ class MeleeUploader(BaseWidget):
         options.bracket = self._bracket.value
         isadir = os.path.isdir(self._file.value)
         if isadir:
-            options.file = max([os.path.join(self._file.value, f) for f in os.listdir(self._file.value) if os.path.isfile(os.path.join(self._file.value, f))], key=os.path.getmtime)
+            options.file = max(
+                [
+                    os.path.join(self._file.value, f)
+                    for f in os.listdir(self._file.value)
+                    if os.path.isfile(os.path.join(self._file.value, f))
+                ],
+                key=os.path.getmtime,
+            )
         else:
             options.file = self._file.value
         options.tags = self._tags.value
@@ -343,7 +471,12 @@ class MeleeUploader(BaseWidget):
         tdelta = str(datetime.now() - self._timestamp_start).split(".")[0]
         timestamp_format = consts.timestamp_format[self._titleformat.value]
         if all(x for x in [self._p1char.value, self._p2char.value]):
-            timestamp_info = timestamp_format.format(p1=self._p1.value, p2=self._p2.value, p1char='/'.join(self._p1char.value), p2char='/'.join(self._p2char.value))
+            timestamp_info = timestamp_format.format(
+                p1=self._p1.value,
+                p2=self._p2.value,
+                p1char="/".join(self._p1char.value),
+                p2char="/".join(self._p2char.value),
+            )
             self._timestamps.append(f"{tdelta} - {timestamp_info}")
         else:
             self._timestamps.append(f"{tdelta} - {self._p1.value} vs {self._p2.value}")
@@ -352,19 +485,32 @@ class MeleeUploader(BaseWidget):
         self._output.value += text
         self._output._form.plainTextEdit.moveCursor(QtGui.QTextCursor.End)
         if sys.__stdout__:
-            print(text, file=sys.__stdout__, end='')
+            print(text, file=sys.__stdout__, end="")
 
     def write_err(self, text):
         if sys.__stdout__:
-            print(text, file=sys.__stdout__, end='')
+            print(text, file=sys.__stdout__, end="")
         with open(consts.log_file, "a") as f:
             f.write(text)
 
     def __reset_yt_cred(self):
-        channel_name = consts.youtube.channels().list(part='snippet', mine=True).execute().get('items', [])[0].get('snippet', {}).get('title')
-        resp = self.question(f"You are currently logged into {channel_name}\nWould you like to log out?", title="MeleeUploader")
+        channel_name = (
+            consts.youtube.channels()
+            .list(part="snippet", mine=True)
+            .execute()
+            .get("items", [])[0]
+            .get("snippet", {})
+            .get("title")
+        )
+        resp = self.question(
+            f"You are currently logged into {channel_name}\nWould you like to log out?",
+            title="MeleeUploader",
+        )
         if resp == "yes":
-            shutil.copyfile(consts.youtube_oauth_file, os.path.join(consts.yt_accounts_folder, f"{channel_name}.json"))
+            shutil.copyfile(
+                consts.youtube_oauth_file,
+                os.path.join(consts.yt_accounts_folder, f"{channel_name}.json"),
+            )
             if consts.youtube:
                 os.remove(consts.youtube_oauth_file)
             sys.exit(0)
@@ -389,7 +535,9 @@ class MeleeUploader(BaseWidget):
 
     def __reset_event(self):
         self._privacy.value = "public"
-        self._titleformat.value = "{ename} - {round} - {p1} ({p1char}) vs {p2} ({p2char})"
+        self._titleformat.value = (
+            "{ename} - {round} - {p1} ({p1char}) vs {p2} ({p2char})"
+        )
         self._ename.value = ""
         self._ename_min.value = ""
         self._pID.value = ""
@@ -418,7 +566,7 @@ class MeleeUploader(BaseWidget):
                     row[16] = deepcopy(options.ename_min)
                     row[17] = deepcopy(options.titleformat)
                     row.append(deepcopy(consts.game))
-                    with open(consts.form_values_file, 'w') as f:
+                    with open(consts.form_values_file, "w") as f:
                         f.write(json.dumps(row))
                     if consts.save_on_submit:
                         self.__save_queue(True)
@@ -473,7 +621,9 @@ class MeleeUploader(BaseWidget):
 
     def __hook_sa(self, host, port):
         self._sawin.close()
-        self.warning("Please make sure Scoreboard Assistant is open", title="MeleeUploader")
+        self.warning(
+            "Please make sure Scoreboard Assistant is open", title="MeleeUploader"
+        )
         self._sa = workers.SAWorker(host, port)
         self._sat = QtCore.QThread()
         self._sa.moveToThread(self._sat)
@@ -484,7 +634,10 @@ class MeleeUploader(BaseWidget):
     def __hook_obs(self, host, port, password, stopUpdates):
         consts.stop_updates = stopUpdates
         self._obswin.close()
-        self.warning("Please make sure OBS is open and the Websocket server is enabled", title="MeleeUploader")
+        self.warning(
+            "Please make sure OBS is open and the Websocket server is enabled",
+            title="MeleeUploader",
+        )
         self._obs = workers.OBSWorker(host, port, password)
         self._obst = QtCore.QThread()
         self._obs.moveToThread(self._obst)
@@ -538,14 +691,20 @@ class MeleeUploader(BaseWidget):
         self._hwin.show()
 
     def __add_to_qview(self, options):
-        self._qview += (options.p1, options.p2, " ".join((options.mprefix, options.mmid, options.msuffix)))
+        self._qview += (
+            options.p1,
+            options.p2,
+            " ".join((options.mprefix, options.mmid, options.msuffix)),
+        )
         self._queue.put(options)
         self._qview.resize_rows_contents()
 
     def __update_qview(self, row, options):
         self._qview.set_value(0, row, options.p1)
         self._qview.set_value(1, row, options.p2)
-        self._qview.set_value(2, row, " ".join((options.mprefix, options.mmid, options.msuffix)))
+        self._qview.set_value(
+            2, row, " ".join((options.mprefix, options.mmid, options.msuffix))
+        )
         self._qview.resize_rows_contents()
 
     def __delete_from_queue_view(self, job_num):
@@ -556,13 +715,16 @@ class MeleeUploader(BaseWidget):
     def __save_queue(self, silent=False):
         if os.path.exists(consts.queue_values_file) and not silent:
             resp = self.question(
-                f"A queue already exists would you like to overwrite it?\nIt was last modified on {datetime.utcfromtimestamp(int(os.path.getmtime(consts.queue_values_file))).strftime('%Y-%m-%d')}")
+                f"A queue already exists would you like to overwrite it?\nIt was last modified on {datetime.utcfromtimestamp(int(os.path.getmtime(consts.queue_values_file))).strftime('%Y-%m-%d')}"
+            )
             if resp == "yes":
                 with open(consts.queue_values_file, "wb") as f:
                     f.write(pickle.dumps(self._queueref))
                 print("Saved Queue, you can now close the program")
             elif resp == "no":
-                resp = self.question("Would you like to add onto the end of that queue?")
+                resp = self.question(
+                    "Would you like to add onto the end of that queue?"
+                )
                 if resp == "yes":
                     queueref = None
                     with open(consts.queue_values_file, "rb") as f:
@@ -580,7 +742,9 @@ class MeleeUploader(BaseWidget):
 
     def __load_queue(self):
         if self._queueref and not consts.start_queue:
-            resp = self.question("Would you like to add to the existing queue?\nItems will be added to the front of the queue.")
+            resp = self.question(
+                "Would you like to add to the existing queue?\nItems will be added to the front of the queue."
+            )
             if resp == "yes":
                 try:
                     with open(consts.queue_values_file, "rb") as f:
@@ -606,7 +770,9 @@ class MeleeUploader(BaseWidget):
                 print("You need to save a queue before loading a queue")
                 return
         if not consts.start_queue:
-            resp = self.question("Do you want to start uploading?", title="MeleeUploader")
+            resp = self.question(
+                "Do you want to start uploading?", title="MeleeUploader"
+            )
             if resp == "yes":
                 thr = threading.Thread(target=self.__worker)
                 thr.daemon = True
@@ -626,7 +792,9 @@ class MeleeUploader(BaseWidget):
 
     def __save_on_submit(self):
         consts.save_on_submit = not consts.save_on_submit
-        print(f"Save Queue on Submit is turned {'on' if consts.save_on_submit else 'off'}.")
+        print(
+            f"Save Queue on Submit is turned {'on' if consts.save_on_submit else 'off'}."
+        )
 
     def __save_form(self, options=[]):
         row = [None] * (len(self._form_fields) + 1)
@@ -635,7 +803,7 @@ class MeleeUploader(BaseWidget):
             if f == -1:
                 options.pID = utils.create_playlist(options.pID)
             else:
-                options.pID = options.pID[f:f + 34]
+                options.pID = options.pID[f : f + 34]
             row[0] = deepcopy(options.ename)
             row[1] = deepcopy(options.pID)
             row[2] = deepcopy(options.mtype)
@@ -662,11 +830,11 @@ class MeleeUploader(BaseWidget):
             if f == -1 and self._pID.value != "":
                 self._pID.value = utils.create_playlist(self._pID.value)
             else:
-                self._pID.value = self._pID.value[f:f + 34]
+                self._pID.value = self._pID.value[f : f + 34]
             for i, var in zip(range(len(self._form_fields) + 1), self._form_fields):
                 row[i] = deepcopy(var.value)
             row.append(consts.game)
-        with open(consts.form_values_file, 'w') as f:
+        with open(consts.form_values_file, "w") as f:
             f.write(json.dumps(row))
         return row
 
@@ -682,8 +850,12 @@ class MeleeUploader(BaseWidget):
             try:
                 with open(consts.form_values_file, "r") as f:
                     values = json.loads(f.read())
-                    if values[-1] != consts.game and any(values[-1] == game for game in self.game_chars.keys()):
-                        ret = self.question(f"Last game used was {values[-1]}, would you like to switch to it?")
+                    if values[-1] != consts.game and any(
+                        values[-1] == game for game in self.game_chars.keys()
+                    ):
+                        ret = self.question(
+                            f"Last game used was {values[-1]}, would you like to switch to it?"
+                        )
                         if ret == "yes":
                             self.game_chars[values[-1]]()
                     for val, var in zip(values, self._form_fields):
@@ -692,7 +864,9 @@ class MeleeUploader(BaseWidget):
                         elif val:
                             var.value = val
             except (IOError, OSError, StopIteration, json.decoder.JSONDecodeError):
-                print(f"No {os.path.basename(consts.form_values_file)} to read from, continuing with default values")
+                print(
+                    f"No {os.path.basename(consts.form_values_file)} to read from, continuing with default values"
+                )
 
     def __melee_chars(self):
         consts.game = "melee"
@@ -723,7 +897,7 @@ class MeleeUploader(BaseWidget):
         consts.game = "strive"
         consts.tags = consts.strive_tags
         self.__update_chars(consts.strive_chars)
-    
+
     def __nasb_chars(self):
         consts.game = "nasb"
         consts.tags = consts.nasb_tags
@@ -741,8 +915,13 @@ class MeleeUploader(BaseWidget):
         except Exception:
             with open(consts.custom_list_file, "a") as f:
                 pass
-            print(f"A custom list file as been created for you to modify, it can be found at {consts.custom_list_file}")
-            self.alert(f"A custom list file as been created for you to modify, it can be found at {consts.custom_list_file}", title="MeleeUploader")
+            print(
+                f"A custom list file as been created for you to modify, it can be found at {consts.custom_list_file}"
+            )
+            self.alert(
+                f"A custom list file as been created for you to modify, it can be found at {consts.custom_list_file}",
+                title="MeleeUploader",
+            )
 
     def __update_chars(self, chars):
         p1 = self._p1char.value
@@ -764,8 +943,8 @@ class MeleeUploader(BaseWidget):
         try:
             self.__p1chars = self._p1char.value
             self.__p2chars = self._p2char.value
-            p1char = " ".join(data.get('image1', "").split(" ")[:-1])
-            p2char = " ".join(data.get('image2', "").split(" ")[:-1])
+            p1char = " ".join(data.get("image1", "").split(" ")[:-1])
+            p2char = " ".join(data.get("image2", "").split(" ")[:-1])
             if p1char not in self.__p1chars:
                 self.__p1chars.append(p1char)
             if p2char not in self.__p2chars:
@@ -774,10 +953,10 @@ class MeleeUploader(BaseWidget):
             self._p2char.load_form(dict(selected=self.__p2chars))
         except Exception as e:
             print(e)
-        self._p1.value = data.get('player1', self._p1.value)
-        self._p2.value = data.get('player2', self._p2.value)
+        self._p1.value = data.get("player1", self._p1.value)
+        self._p2.value = data.get("player2", self._p2.value)
         try:
-            match = data.get('match', None)
+            match = data.get("match", None)
             if match:
                 for t in consts.match_types:
                     if t.lower() in match.lower():
@@ -808,8 +987,8 @@ class MeleeUploader(BaseWidget):
         try:
             self.__p1chars = self._p1char.value
             self.__p2chars = self._p2char.value
-            p1char = data.get('p1_char', "")
-            p2char = data.get('p2_char', "")
+            p1char = data.get("p1_char", "")
+            p2char = data.get("p2_char", "")
             if p1char == "Doctor Mario":
                 p1char = "Dr. Mario"
             if p2char == "Doctor Mario":
@@ -823,12 +1002,12 @@ class MeleeUploader(BaseWidget):
         except Exception as e:
             print(e)
         try:
-            self._p1.value = data.get('p1_name', self._p1.value)
-            self._p2.value = data.get('p2_name', self._p2.value)
+            self._p1.value = data.get("p1_name", self._p1.value)
+            self._p2.value = data.get("p2_name", self._p2.value)
         except Exception as e:
             print(e)
         try:
-            match = data.get('event_round', "")
+            match = data.get("event_round", "")
             if match:
                 for t in consts.match_types:
                     if t.lower() in match.lower() and match.find(t) != -1:
@@ -836,8 +1015,11 @@ class MeleeUploader(BaseWidget):
                         suffix = ""
                         sections = match.split(t)
                         suffix = sections[1].strip()
-                        prefix = data.get('event_bracket', "")
-                    elif t.lower() in data.get('event_bracket', "").lower() and data.get('event_bracket', "").find(t) != -1:
+                        prefix = data.get("event_bracket", "")
+                    elif (
+                        t.lower() in data.get("event_bracket", "").lower()
+                        and data.get("event_bracket", "").find(t) != -1
+                    ):
                         mtype = t
                         prefix = ""
                         suffix = ""
@@ -856,8 +1038,18 @@ class MeleeUploader(BaseWidget):
         try:
             self.__p1chars = self._p1char.value
             self.__p2chars = self._p2char.value
-            p1char = data.get('teams', [])[0].get('players', [])[0].get('character', {}).get('name')
-            p2char = data.get('teams', [])[1].get('players', [])[0].get('character', {}).get('name')
+            p1char = (
+                data.get("teams", [])[0]
+                .get("players", [])[0]
+                .get("character", {})
+                .get("name")
+            )
+            p2char = (
+                data.get("teams", [])[1]
+                .get("players", [])[0]
+                .get("character", {})
+                .get("name")
+            )
             if p1char not in self.__p1chars:
                 self.__p1chars.append(p1char)
             if p2char not in self.__p2chars:
@@ -867,12 +1059,22 @@ class MeleeUploader(BaseWidget):
         except Exception as e:
             print(e)
         try:
-            self._p1.value = data.get('teams', [])[0].get('players', [])[0].get('person', {}).get('name', self._p1.value)
-            self._p2.value = data.get('teams', [])[1].get('players', [])[0].get('person', {}).get('name', self._p2.value)
+            self._p1.value = (
+                data.get("teams", [])[0]
+                .get("players", [])[0]
+                .get("person", {})
+                .get("name", self._p1.value)
+            )
+            self._p2.value = (
+                data.get("teams", [])[1]
+                .get("players", [])[0]
+                .get("person", {})
+                .get("name", self._p2.value)
+            )
         except Exception as e:
             print(e)
         try:
-            match = data.get('rounds', [])[0].get('round', {}).get('name', "")
+            match = data.get("rounds", [])[0].get("round", {}).get("name", "")
             if match:
                 for t in consts.match_types:
                     if t.lower() in match.lower() and match.find(t) != -1:
@@ -887,4 +1089,6 @@ class MeleeUploader(BaseWidget):
             print(e)
 
     def __about_info(self):
-        self.info(f"v{consts.__version__}\nWritten by Nikhil Narayana\nhttps://github.com/NikhilNarayana/Melee-YouTube-Uploader")
+        self.info(
+            f"v{consts.__version__}\nWritten by Nikhil Narayana\nhttps://github.com/NikhilNarayana/Melee-YouTube-Uploader"
+        )

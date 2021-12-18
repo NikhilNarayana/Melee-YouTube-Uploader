@@ -25,11 +25,17 @@ from oauth2client.client import flow_from_clientsecrets
 
 httplib2.RETRIES = 1
 
-RETRIABLE_EXCEPTIONS = (httplib2.HttpLib2Error, IOError, httplib.NotConnected,
-                        httplib.IncompleteRead,
-                        httplib.ImproperConnectionState,
-                        httplib.CannotSendRequest, httplib.CannotSendHeader,
-                        httplib.ResponseNotReady, httplib.BadStatusLine)
+RETRIABLE_EXCEPTIONS = (
+    httplib2.HttpLib2Error,
+    IOError,
+    httplib.NotConnected,
+    httplib.IncompleteRead,
+    httplib.ImproperConnectionState,
+    httplib.CannotSendRequest,
+    httplib.CannotSendHeader,
+    httplib.ResponseNotReady,
+    httplib.BadStatusLine,
+)
 
 RETRIABLE_STATUS_CODES = [500, 502, 504]
 
@@ -37,8 +43,18 @@ YOUTUBE_UPLOAD_SCOPE = "https://www.googleapis.com/auth/youtube.upload https://w
 YOUTUBE_PARTNER_SCOPE = "https://www.googleapis.com/auth/youtubepartner"
 SPREADSHEETS_SCOPE = "https://www.googleapis.com/auth/spreadsheets"
 
-PREFIXES = (consts.smash_folder, sys.prefix, os.path.join(sys.prefix, "local"), "/usr", os.path.join("/usr", "local"))
-SUFFIXES = ("client_secrets.json", ".client_secrets.json", f"share/{consts.short_name}/client_secrets.json")
+PREFIXES = (
+    consts.smash_folder,
+    sys.prefix,
+    os.path.join(sys.prefix, "local"),
+    "/usr",
+    os.path.join("/usr", "local"),
+)
+SUFFIXES = (
+    "client_secrets.json",
+    ".client_secrets.json",
+    f"share/{consts.short_name}/client_secrets.json",
+)
 
 
 def upload(yt, body, file, notify=False):
@@ -50,59 +66,60 @@ def upload(yt, body, file, notify=False):
             part=",".join(body.keys()),
             body=body,
             notifySubscribers=notify,
-            media_body=MediaFileUpload(file,
-                                       chunksize=104857600,
-                                       resumable=True),)
+            media_body=MediaFileUpload(file, chunksize=104857600, resumable=True),
+        )
         ret, vid = upload_service(insert_request)
         retries += 1
     return ret, vid
 
 
 def upload_service(insert_request):
-        response = None
-        retry_exceptions = RETRIABLE_EXCEPTIONS
-        retry_status_codes = RETRIABLE_STATUS_CODES
-        ACCEPTABLE_ERRNO = (errno.EPIPE, errno.EINVAL, errno.ECONNRESET)
+    response = None
+    retry_exceptions = RETRIABLE_EXCEPTIONS
+    retry_status_codes = RETRIABLE_STATUS_CODES
+    ACCEPTABLE_ERRNO = (errno.EPIPE, errno.EINVAL, errno.ECONNRESET)
+    try:
+        ACCEPTABLE_ERRNO += (errno.WSAECONNABORTED,)
+    except AttributeError:
+        pass  # Not windows
+    while True:
         try:
-            ACCEPTABLE_ERRNO += (errno.WSAECONNABORTED,)
-        except AttributeError:
-            pass  # Not windows
-        while True:
-            try:
-                status, response = insert_request.next_chunk()
-                if status is not None:
-                    percent = Decimal(int(status.resumable_progress) / int(status.total_size))
-                    print(f"{round(100 * percent, 2)}% uploaded")
-            except HttpError as e:
-                if e.resp.status in retry_status_codes:
-                    print(f"A retriable HTTP error {e.resp.status} occurred:\n{e.content}")
-                elif b"503" in e.content:
-                    print("Backend Error: will attempt to retry upload")
-                    return False, None
-                elif b"uploadLimitExceeded" in e.content:
-                    print("You have exceeded the YouTube Upload Limit")
-                    print("Waiting 10 minutes before retrying to avoid the limit")
-                    sleep(600)
-                else:
-                    print(e)
-                    return False, None
-            except retry_exceptions as e:
-                print(f"A retriable error occurred: {e}")
+            status, response = insert_request.next_chunk()
+            if status is not None:
+                percent = Decimal(
+                    int(status.resumable_progress) / int(status.total_size)
+                )
+                print(f"{round(100 * percent, 2)}% uploaded")
+        except HttpError as e:
+            if e.resp.status in retry_status_codes:
+                print(f"A retriable HTTP error {e.resp.status} occurred:\n{e.content}")
+            elif b"503" in e.content:
+                print("Backend Error: will attempt to retry upload")
+                return False, None
+            elif b"uploadLimitExceeded" in e.content:
+                print("You have exceeded the YouTube Upload Limit")
+                print("Waiting 10 minutes before retrying to avoid the limit")
+                sleep(600)
+            else:
+                print(e)
+                return False, None
+        except retry_exceptions as e:
+            print(f"A retriable error occurred: {e}")
 
-            except Exception as e:
-                if e in ACCEPTABLE_ERRNO:
-                    print("Retriable Error occured, retrying now")
-                else:
-                    print(e)
-                pass
-            if response:
-                if "id" in response:
-                    print(f"Video link is https://www.youtube.com/watch?v={response['id']}")
-                    return True, response['id']
-                else:
-                    print(response)
-                    print(status)
-                    return False, None
+        except Exception as e:
+            if e in ACCEPTABLE_ERRNO:
+                print("Retriable Error occured, retrying now")
+            else:
+                print(e)
+            pass
+        if response:
+            if "id" in response:
+                print(f"Video link is https://www.youtube.com/watch?v={response['id']}")
+                return True, response["id"]
+            else:
+                print(response)
+                print(status)
+                return False, None
 
 
 def test_get_service(scope, oauth_file, secret=None):
@@ -114,21 +131,24 @@ def test_get_service(scope, oauth_file, secret=None):
 
     if not CLIENT_SECRETS_FILE:
         return None
-    
+
     flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRETS_FILE, scopes=scope)
 
     storage = Storage(oauth_file)
     credentials = storage.get()
 
     if credentials is None or credentials.invalid:
-        credentials = flow.run_local_server(host='localhost',
+        credentials = flow.run_local_server(
+            host="localhost",
             port=8080,
-            authorization_prompt_message='Please visit this URL: {url}',
-            success_message='The auth flow is complete; you may close this window.',
-            open_browser=True)
+            authorization_prompt_message="Please visit this URL: {url}",
+            success_message="The auth flow is complete; you may close this window.",
+            open_browser=True,
+        )
         storage.put(credentials)
-    
+
     return credentials
+
 
 def get_service(scope, oauth_file, secret=None):
     CLIENT_SECRETS_FILE = get_secrets(PREFIXES, SUFFIXES) if not secret else secret
@@ -156,7 +176,9 @@ def get_youtube_service():
 
     http = httplib2.Http()
     try:
-        http.redirect_codes = set(http.redirect_codes) - {308} # https://github.com/googleapis/google-api-python-client/issues/803
+        http.redirect_codes = set(http.redirect_codes) - {
+            308
+        }  # https://github.com/googleapis/google-api-python-client/issues/803
     except:
         pass
 
@@ -164,16 +186,22 @@ def get_youtube_service():
 
 
 def get_partner_service():
-    CLIENT_SECRETS_FILE = get_secrets((consts.smash_folder,), ("client_secrets.json", ".client_secrets.json"))
+    CLIENT_SECRETS_FILE = get_secrets(
+        (consts.smash_folder,), ("client_secrets.json", ".client_secrets.json")
+    )
 
-    credentials = get_service(YOUTUBE_PARTNER_SCOPE + YOUTUBE_UPLOAD_SCOPE, "partner", CLIENT_SECRETS_FILE)
+    credentials = get_service(
+        YOUTUBE_PARTNER_SCOPE + YOUTUBE_UPLOAD_SCOPE, "partner", CLIENT_SECRETS_FILE
+    )
 
     if not credentials:
         return None
 
     http = httplib2.Http()
     try:
-        http.redirect_codes = set(http.redirect_codes) - {308} # https://github.com/googleapis/google-api-python-client/issues/803
+        http.redirect_codes = set(http.redirect_codes) - {
+            308
+        }  # https://github.com/googleapis/google-api-python-client/issues/803
     except:
         pass
 
@@ -186,15 +214,22 @@ def get_spreadsheet_service():
     if not credentials:
         return None
 
-    discoveryUrl = ('https://sheets.googleapis.com/$discovery/rest?version=v4')
+    discoveryUrl = "https://sheets.googleapis.com/$discovery/rest?version=v4"
 
     http = httplib2.Http()
     try:
-        http.redirect_codes = set(http.redirect_codes) - {308} # https://github.com/googleapis/google-api-python-client/issues/803
+        http.redirect_codes = set(http.redirect_codes) - {
+            308
+        }  # https://github.com/googleapis/google-api-python-client/issues/803
     except:
         pass
 
-    return build('sheets', 'v4', http=credentials.authorize(http), discoveryServiceUrl=discoveryUrl)
+    return build(
+        "sheets",
+        "v4",
+        http=credentials.authorize(http),
+        discoveryServiceUrl=discoveryUrl,
+    )
 
 
 def add_to_playlist(pID, vID):
@@ -202,10 +237,9 @@ def add_to_playlist(pID, vID):
         part="snippet",
         body=dict(
             snippet=dict(
-                playlistId=pID,
-                resourceId=dict(
-                    kind='youtube#video',
-                    videoId=vID)))
+                playlistId=pID, resourceId=dict(kind="youtube#video", videoId=vID)
+            )
+        ),
     ).execute()
     print("Added to playlist")
 
@@ -227,5 +261,7 @@ def get_secrets(prefixes, relative_paths):
                     return path
                 paths_attempted.append(path)
         else:
-            print(f"Unable to find client_secrets.json. Checked in the following locations: {paths_attempted}")
+            print(
+                f"Unable to find client_secrets.json. Checked in the following locations: {paths_attempted}"
+            )
             return None

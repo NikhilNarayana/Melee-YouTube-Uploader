@@ -16,7 +16,7 @@ class SAWorker(QObject):
 
     def __init__(self, host, port):
         super().__init__()
-        self. host = host
+        self.host = host
         self.port = port
         self.addr = f"ws://{self.host}:{self.port}"
 
@@ -64,7 +64,7 @@ class OBSWorker(QObject):
 
     def closeobs(self):
         self.obs.disconnect()
-    
+
     @pyqtSlot()
     def recordingStart(self, data=None):
         self.sig.emit(True)
@@ -93,7 +93,7 @@ class SCWorker(QObject):
                 if not self.data:
                     self.data = ndata
                     self.send_update()
-            if self.data['timestamp'] != ndata['timestamp']:
+            if self.data["timestamp"] != ndata["timestamp"]:
                 self.data = ndata
                 self.send_update()
             sleep(5)
@@ -119,7 +119,7 @@ class StreametaWorker(QObject):
         try:
             while self._run:
                 resp = requests.get(self.addr).json()
-                if (resp != self.data):
+                if resp != self.data:
                     self.data = resp
                     self.send_update()
                 sleep(10)
