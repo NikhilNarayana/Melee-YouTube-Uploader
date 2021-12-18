@@ -822,8 +822,9 @@ class MeleeUploader(BaseWidget):
                 for options in self._queueref:
                     self.__add_to_qview(options)
                     self.__history.append(self.__save_form(options))
-            except Exception:
+            except Exception as e:
                 print("You need to save a queue before loading a queue")
+                print(e)
                 return
         if not consts.start_queue:
             resp = self.question(
@@ -856,7 +857,7 @@ class MeleeUploader(BaseWidget):
         data = {"game": deepcopy(consts.game)}
         if options:
             f = options.pID.find("PL")
-            if f == -1:
+            if f == -1 and options.pID:
                 options.pID = utils.create_playlist(options.pID)
             else:
                 options.pID = options.pID[f : f + 34]
@@ -879,7 +880,7 @@ class MeleeUploader(BaseWidget):
             data["streameta_url"] = deepcopy(self._smf.value)
         else:
             f = self._pID.value.find("PL")
-            if f == -1 and self._pID.value != "":
+            if f == -1 and self._pID.value:
                 self._pID.value = utils.create_playlist(self._pID.value)
             else:
                 self._pID.value = self._pID.value[f : f + 34]
