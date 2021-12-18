@@ -21,6 +21,7 @@ partner = None
 loadedQueue = False
 
 smash_folder = os.path.join(os.path.expanduser("~"), ".smashuploader")
+yt_accounts_folder = os.path.join(smash_folder, "accounts")
 os.makedirs(smash_folder, exist_ok=True)
 
 form_values = os.path.join(smash_folder, '.smash_form_values.json')

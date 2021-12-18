@@ -121,7 +121,7 @@ class YouTubeSelector(BaseWidget):
 
         self.formset = ["_youtubes", ("_ok", "_new")]
 
-        accounts = os.listdir(consts.smash_folder)
+        accounts = os.listdir(consts.yt_accounts_folder)
         for account in accounts:
             self._youtubes += (account.split(".")[0], account)
 
@@ -130,7 +130,7 @@ class YouTubeSelector(BaseWidget):
 
     def _ok_action(self):
         account = self._youtubes.value
-        shutil.copyfile(os.path.join(consts.smash_folder, account), consts.youtube_file)
+        shutil.copyfile(os.path.join(consts.yt_accounts_folder, account), consts.youtube_file)
         QtCore.QCoreApplication.instance().quit()
 
     def _new_action(self):
@@ -361,10 +361,10 @@ class MeleeUploader(BaseWidget):
             f.write(text)
 
     def __reset_yt_cred(self):
-        title = consts.youtube.channels().list(part='snippet', mine=True).execute().get('items', [])[0].get('snippet', {}).get('title')
-        resp = self.question(f"You are currently logged into {title}\nWould you like to log out?", title="MeleeUploader")
+        channel_name = consts.youtube.channels().list(part='snippet', mine=True).execute().get('items', [])[0].get('snippet', {}).get('title')
+        resp = self.question(f"You are currently logged into {channel_name}\nWould you like to log out?", title="MeleeUploader")
         if resp == "yes":
-            shutil.copyfile(consts.youtube_file, os.path.join(consts.smash_folder, f"{title}.json"))
+            shutil.copyfile(consts.youtube_file, os.path.join(consts.yt_accounts_folder, f"{channel_name}.json"))
             if consts.youtube:
                 os.remove(consts.youtube_file)
             sys.exit(0)
