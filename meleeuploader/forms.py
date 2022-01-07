@@ -138,7 +138,7 @@ class SCSetup(BaseWidget):
             self._mappings["msuffix"] = self._mprefix.value
             with open(consts.sc_form_values_file, "w") as f:
                 json.dump(data, f)
-            self.parent._MeleeUploader__hook_sc(self._file.value, self._mappings)
+            self.parent._MeleeUploader__hook_sc(self._mappings)
         else:
             self.warning("You must select a file")
 
