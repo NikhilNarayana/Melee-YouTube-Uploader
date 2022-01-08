@@ -465,10 +465,7 @@ class MeleeUploader(BaseWidget):
         options = Namespace()
         self.__history.append(self.__save_form())
         options.ename = self._ename.value
-        if self._ename_min.value:
-            options.ename_min = self._ename_min.value
-        else:
-            options.ename_min = options.ename
+        options.ename_min = self._ename_min.value or options.ename
         options.pID = self._pID.value
         options.mtype = self._mtype.value
         options.mmid = options.mtype
@@ -517,6 +514,7 @@ class MeleeUploader(BaseWidget):
         if self._timestamp_start is None:
             print("Timestamp is not recorded because OBS is not recording")
             return
+
         if len(self._timestamps) == 0:
             self._timestamps.append("Timestamps:")
             self._timestamps.append("0:00:00 - Intro")
@@ -530,8 +528,9 @@ class MeleeUploader(BaseWidget):
                 p2char="/".join(self._p2char.value),
             )
             self._timestamps.append(f"{tdelta} - {timestamp_info}")
-        else:
-            self._timestamps.append(f"{tdelta} - {self._p1.value} vs {self._p2.value}")
+            return
+
+        self._timestamps.append(f"{tdelta} - {self._p1.value} vs {self._p2.value}")
 
     def write_print(self, text):
         self._output.value += text
@@ -581,9 +580,8 @@ class MeleeUploader(BaseWidget):
                 self._file.value = ""
             self._mtype.value = "Pools"
             self._mprefix.value = ""
-        else:
-            if not isadir:
-                self._file.value = ""
+        elif not isadir:
+            self._file.value = ""
 
     def __reset_event(self):
         self._privacy.value = "public"
@@ -632,10 +630,11 @@ class MeleeUploader(BaseWidget):
             print("Unhooked from SA")
             self._sat.quit()
             self._sa = None
-        else:
-            self._sawin = SAHostPortInput()
-            self._sawin.parent = self
-            self._sawin.show()
+            return
+
+        self._sawin = SAHostPortInput()
+        self._sawin.parent = self
+        self._sawin.show()
 
     def __show_obs_form(self):
         if self._obs:
@@ -643,10 +642,11 @@ class MeleeUploader(BaseWidget):
             print("Unhooked from OBS")
             self._obst.quit()
             self._obs = None
-        else:
-            self._obswin = OBSHostPortInput()
-            self._obswin.parent = self
-            self._obswin.show()
+            return
+
+        self._obswin = OBSHostPortInput()
+        self._obswin.parent = self
+        self._obswin.show()
 
     def __show_sc_form(self):
         if self._sc:
@@ -654,15 +654,16 @@ class MeleeUploader(BaseWidget):
             print("Unhooked from SC")
             self._sct.quit()
             self._sc = None
-        else:
-            try:
-                with open(consts.sc_form_values_file, "r") as f:
-                    self.__sc_mapping = json.load(f)
-            except Exception:
-                pass
-            self._scwin = SCSetup(self.__sc_mapping)
-            self._scwin.parent = self
-            self._scwin.show()
+            return
+
+        try:
+            with open(consts.sc_form_values_file, "r") as f:
+                self.__sc_mapping = json.load(f)
+        except Exception:
+            pass
+        self._scwin = SCSetup(self.__sc_mapping)
+        self._scwin.parent = self
+        self._scwin.show()
 
     def __show_sm_form(self):
         if self._sm:
@@ -670,10 +671,11 @@ class MeleeUploader(BaseWidget):
             print("Unhooked from Streameta")
             self._smt.quit()
             self._sm = None
-        else:
-            self._smwin = SMurlInput(self._smf)
-            self._smwin.parent = self
-            self._smwin.show()
+            return
+
+        self._smwin = SMurlInput(self._smf)
+        self._smwin.parent = self
+        self._smwin.show()
 
     def __hook_sa(self, host, port):
         self._sawin.close()
@@ -703,13 +705,15 @@ class MeleeUploader(BaseWidget):
 
     def __handle_obs(self, recording):
         if recording:
+            # timestamps for the description will use this as 00:00
             self._timestamp_start = datetime.now()
-        else:
-            self._timestamp_start = None
-            if not consts.stop_updates:
-                self.__on_submit()
-            else:
-                consts.submitted = False
+            return
+
+        self._timestamp_start = None
+        if consts.stop_updates:
+            consts.submitted = False
+            return
+        self.__on_submit()
 
     def __hook_sc(self, mappings):
         self.__sc_mapping = mappings
@@ -791,10 +795,11 @@ class MeleeUploader(BaseWidget):
                     print("Saved Queue, you can now close the program")
                 else:
                     self.alert("Not saving queue", title="MeleeUploader")
-        else:
-            with open(consts.queue_values_file, "wb") as f:
-                pickle.dump(self._queueref, f)
-                print("Saved Queue, you can now close the program")
+            return
+
+        with open(consts.queue_values_file, "wb") as f:
+            pickle.dump(self._queueref, f)
+            print("Saved Queue, you can now close the program")
 
     def __load_queue(self):
         if self._queueref and not consts.start_queue:
