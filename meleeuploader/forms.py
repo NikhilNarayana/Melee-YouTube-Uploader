@@ -894,27 +894,30 @@ class MeleeUploader(BaseWidget):
         if values:
             self._hwin.close()
             for key, form in self._form_fields.items():
-                if isinstance(values[key], (list, dict)):
-                    form.load_form(dict(selected=values[key]))
-                elif values[key]:
-                    form.value = values[key]
+                value = values.get(key, None)
+                if isinstance(value, (list, dict)):
+                    form.load_form(dict(selected=value))
+                elif value is not None:
+                    form.value = value
             return
         try:
             with open(consts.form_values_file, "r") as f:
                 values = json.loads(f.read())
-                if values["game"] != consts.game and any(
-                    values["game"] == game for game in self.game_chars.keys()
+                saved_game = values.get("game", "")
+                if saved_game != consts.game and any(
+                    saved_game == game for game in self.game_chars.keys()
                 ):
                     ret = self.question(
-                        f"Last game used was {values['game']}, would you like to switch to it?"
+                        f"Last game used was {saved_game}, would you like to switch to it?"
                     )
                     if ret == "yes":
-                        self.game_chars[values["game"]]()
+                        self.game_chars[saved_game]()
                 for key, form in self._form_fields.items():
-                    if isinstance(values[key], (list, dict)):
-                        form.load_form(dict(selected=values[key]))
-                    elif values[key]:
-                        form.value = values[key]
+                    value = values.get(key, None)
+                    if isinstance(value, (list, dict)):
+                        form.load_form(dict(selected=value))
+                    elif value is not None:
+                        form.value = value
         except (IOError, OSError, StopIteration, json.decoder.JSONDecodeError):
             print(
                 f"No {os.path.basename(consts.form_values_file)} to read from, continuing with default values"
