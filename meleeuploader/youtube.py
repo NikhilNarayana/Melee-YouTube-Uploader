@@ -112,14 +112,13 @@ def upload_service(insert_request):
             else:
                 print(e)
             pass
-        if response:
-            if "id" in response:
-                print(f"Video link is https://www.youtube.com/watch?v={response['id']}")
-                return True, response["id"]
-            else:
-                print(response)
-                print(status)
-                return False, None
+        video_id = response.get("id", None)
+        if video_id is None:
+            print(response)
+            print(status)
+            return False, None
+        print(f"Video link is\nhttps://www.youtube.com/watch?v={video_id}")
+        return True, video_id
 
 
 def test_get_service(scope, oauth_file, secret=None):
