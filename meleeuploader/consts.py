@@ -126,6 +126,7 @@ sc_map_chars = {
     "Pokemon Trainer Girl": "Pokemon Trainer",
     "RosalinaLuma": "Rosalina & Luma",
     "Mr GameWatch": "Mr. Game & Watch",
+    "PyraMythra": "Pyra/Mythra",
 }
 
 ult_chars = (
