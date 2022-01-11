@@ -32,7 +32,7 @@ class obsws:
     For advanced usage, including events callback, see the 'samples' directory.
     """
 
-    def __init__(self, host='localhost', port=4444, password=''):
+    def __init__(self, host="localhost", port=4444, password=""):
         """
         Construct a new obsws wrapper
 
@@ -63,9 +63,9 @@ class obsws:
             self.port = port
 
         try:
-            self.ws = websocket.WebSocket()
             LOG.info("Connecting...")
-            self.ws.connect("ws://{}:{}".format(self.host, self.port))
+            self.ws = websocket.WebSocket()
+            self.ws.connect((f"ws://{self.host}:{self.port}"))
             LOG.info("Connected!")
             self._auth(self.password)
             self._run_threads()
@@ -113,20 +113,16 @@ class obsws:
         self.ws.send(json.dumps(auth_payload))
         result = json.loads(self.ws.recv())
 
-        if result['status'] != 'ok':
-            raise exceptions.ConnectionFailure(result['error'])
+        if result["status"] != "ok":
+            raise exceptions.ConnectionFailure(result["error"])
 
-        if result.get('authRequired'):
+        if result.get("authRequired"):
             secret = base64.b64encode(
-                hashlib.sha256(
-                    (password + result['salt']).encode('utf-8')
-                ).digest()
+                hashlib.sha256((password + result["salt"]).encode("utf-8")).digest()
             )
             auth = base64.b64encode(
-                hashlib.sha256(
-                    secret + result['challenge'].encode('utf-8')
-                ).digest()
-            ).decode('utf-8')
+                hashlib.sha256(secret + result["challenge"].encode("utf-8")).digest()
+            ).decode("utf-8")
 
             auth_payload = {
                 "request-type": "Authenticate",
@@ -136,8 +132,8 @@ class obsws:
             self.id += 1
             self.ws.send(json.dumps(auth_payload))
             result = json.loads(self.ws.recv())
-            if result['status'] != 'ok':
-                raise exceptions.ConnectionFailure(result['error'])
+            if result["status"] != "ok":
+                raise exceptions.ConnectionFailure(result["error"])
         pass
 
     def _run_threads(self):
@@ -156,8 +152,7 @@ class obsws:
         :return: Request object populated with response data.
         """
         if not isinstance(obj, base_classes.Baserequests):
-            raise exceptions.ObjectError(
-                "Call parameter is not a request object")
+            raise exceptions.ObjectError("Call parameter is not a request object")
         payload = obj.data()
         r = self.send(payload)
         obj.input(r)
@@ -174,7 +169,7 @@ class obsws:
         message_id = str(self.id)
         self.id += 1
         data["message-id"] = message_id
-        LOG.debug(u"Sending message id {}: {}".format(message_id, data))
+        LOG.debug(f"Sending message id {message_id}: {data}")
         self.ws.send(json.dumps(data))
         return self._wait_message(message_id)
 
@@ -184,8 +179,7 @@ class obsws:
             if message_id in self.answers:
                 return self.answers.pop(message_id)
             time.sleep(0.1)
-        raise exceptions.MessageTimeout(u"No answer for message {}".format(
-            message_id))
+        raise exceptions.MessageTimeout(f"No answer for message {message_id}")
 
     def register(self, func, event=None):
         """
@@ -212,7 +206,6 @@ class obsws:
 
 
 class RecvThread(threading.Thread):
-
     def __init__(self, core):
         self.core = core
         self.ws = core.ws
@@ -230,16 +223,15 @@ class RecvThread(threading.Thread):
                     continue
 
                 result = json.loads(message)
-                if 'update-type' in result:
-                    LOG.debug(u"Got message: {}".format(result))
+                if "update-type" in result:
+                    LOG.debug(f"Got message: {result}")
                     obj = self.build_event(result)
                     self.core.eventmanager.trigger(obj)
-                elif 'message-id' in result:
-                    LOG.debug(u"Got answer for id {}: {}".format(
-                        result['message-id'], result))
-                    self.core.answers[result['message-id']] = result
+                elif "message-id" in result:
+                    LOG.debug(f"Got answer for id {result['message-id']}: {result}")
+                    self.core.answers[result["message-id"]] = result
                 else:
-                    LOG.warning(u"Unknown message: {}".format(result))
+                    LOG.warning(f"Unknown message: {result}")
             except websocket.WebSocketConnectionClosedException:
                 if self.running:
                     self.core.reconnect()
@@ -247,7 +239,7 @@ class RecvThread(threading.Thread):
                 if self.running:
                     raise e
             except (ValueError, exceptions.ObjectError) as e:
-                LOG.warning(u"Invalid message: {} ({})".format(message, e))
+                LOG.warning(f"Invalid message: {message} ({e})")
         # end while
         LOG.debug("RecvThread ended.")
 
@@ -257,13 +249,12 @@ class RecvThread(threading.Thread):
         try:
             obj = getattr(events, name)()
         except AttributeError:
-            raise exceptions.ObjectError(u"Invalid event {}".format(name))
+            raise exceptions.ObjectError(f"Invalid event {name}")
         obj.input(data)
         return obj
 
 
 class EventManager:
-
     def __init__(self):
         self.functions = []
 
