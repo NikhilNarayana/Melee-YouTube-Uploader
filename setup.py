@@ -4,7 +4,7 @@ from codecs import open
 from os import path
 
 here = path.abspath(path.dirname(__file__))
-version = "1.21.4"
+version = "1.21.5"
 
 long_des = ""
 with open(path.join(here, "README.md")) as f:
@@ -46,7 +46,7 @@ setup(
         "oauth2client",
         "Pyforms-Lite",
         "urllib3==1.23",
-        "websocket-client",
+        "websocket-client==0.54.0",
     ],
     data_files=[("share/meleeuploader", ["meleeuploader/client_secrets.json"])],
     package_data={"meleeuploader": ["meleeuploader/client_secrets.json"]},
