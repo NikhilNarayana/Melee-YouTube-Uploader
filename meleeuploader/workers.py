@@ -23,8 +23,8 @@ class SAWorker(QObject):
     def startws(self):
         try:
             self.ws = websocket.WebSocketApp(self.addr, on_message=self.get_update)
+            print("Hooking into Scoreboard Assistant...")
             self.ws.run_forever()
-            print("Hooked into Scoreboard Assistant")
         except:
             print("Failed to hook into Scoreboard Assistant")
 
