@@ -46,7 +46,7 @@ setup(
         "oauth2client",
         "Pyforms-Lite",
         "urllib3==1.23",
-        "websocket-client==0.54.0",
+        "websocket-client==1.2.3",
     ],
     data_files=[("share/meleeuploader", ["meleeuploader/client_secrets.json"])],
     package_data={"meleeuploader": ["meleeuploader/client_secrets.json"]},
