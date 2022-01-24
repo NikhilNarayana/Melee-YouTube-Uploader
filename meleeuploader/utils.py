@@ -44,7 +44,7 @@ def pre_upload(opts):
                             print(f"Title Length: {len(title)}")
                             print("Killing this upload now\n\n")
                             return False
-    print(f"Uploading {title}")
+    print(f"Uploading {opts.file} as {title}")
     if opts.descrip:
         descrip = (
             f"Bracket: {opts.bracket}\n\n{opts.descrip}\n\n{opts.timestamps}\n\n{consts.credit}"
