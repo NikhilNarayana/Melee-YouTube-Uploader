@@ -994,12 +994,36 @@ class MeleeUploader(BaseWidget):
         self._p1char.load_form(dict(selected=p1))
         self._p2char.load_form(dict(selected=p2))
 
+    def __handle_players(self, p1_name, p2_name):
+        if all(
+            [
+                p1_name != "",
+                p2_name != "",
+                p1_name == self._p2.value,
+                p2_name == self._p1.value,
+            ]
+        ):
+            # the players have swapped sides so swap their characters
+            p1_chars = self._p1char.value
+            p2_chars = self._p2char.value
+            self._p1char.load_form(dict(selected=p2_chars))
+            self._p2char.load_form(dict(selected=p1_chars))
+
+        # no swap
+        self._p1.value = p1_name
+        self._p2.value = p2_name
+
     def __sa_update(self, data):
         if consts.stop_updates and not consts.submitted:
             return
         prefix = ""
         mtype = ""
         suffix = ""
+
+        self.__handle_players(
+            data.get("player1", self._p1.value), data.get("player2", self._p2.value)
+        )
+
         try:
             self.__p1chars = self._p1char.value
             self.__p2chars = self._p2char.value
@@ -1013,8 +1037,6 @@ class MeleeUploader(BaseWidget):
             self._p2char.load_form(dict(selected=self.__p2chars))
         except Exception as e:
             print(e)
-        self._p1.value = data.get("player1", self._p1.value)
-        self._p2.value = data.get("player2", self._p2.value)
         try:
             match = data.get("match", None)
             if match:
@@ -1044,6 +1066,15 @@ class MeleeUploader(BaseWidget):
         mtype = ""
         suffix = ""
         prefix = ""
+
+        try:
+            self.__handle_players(
+                data.get(self.__sc_mapping["p1_name"], self._p1.value),
+                data.get(self.__sc_mapping["p2_name"], self._p2.value),
+            )
+        except Exception as e:
+            print(e)
+
         try:
             self.__p1chars = self._p1char.value
             self.__p2chars = self._p2char.value
@@ -1059,11 +1090,7 @@ class MeleeUploader(BaseWidget):
             self._p2char.load_form(dict(selected=self.__p2chars))
         except Exception as e:
             print(e)
-        try:
-            self._p1.value = data.get(self.__sc_mapping["p1_name"], self._p1.value)
-            self._p2.value = data.get(self.__sc_mapping["p2_name"], self._p2.value)
-        except Exception as e:
-            print(e)
+
         try:
             self._p1_sponsor.value = data.get(
                 self.__sc_mapping["p1_sponsor"], self._p1_sponsor.value
@@ -1073,6 +1100,7 @@ class MeleeUploader(BaseWidget):
             )
         except Exception as e:
             print(e)
+
         try:
             match = data.get(self.__sc_mapping["mtype"], "")
             if match:
