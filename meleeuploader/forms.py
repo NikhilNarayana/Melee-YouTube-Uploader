@@ -126,7 +126,7 @@ class SCSetup(BaseWidget):
         self._button.value = self.__button_action
 
     def __button_action(self, data=None):
-        if self._file.value:
+        if self._file.value and os.path.exists(self._file.value):
             self._mappings["file"] = self._file.value
             self._mappings["p1_name"] = self._p1.value
             self._mappings["p2_name"] = self._p2.value
@@ -140,7 +140,7 @@ class SCSetup(BaseWidget):
                 json.dump(self._mappings, f)
             self.parent._MeleeUploader__hook_sc(self._mappings)
         else:
-            self.warning("You must select a file")
+            self.warning("You must select a file", "MeleeUploader")
 
 
 class SMurlInput(BaseWidget):
