@@ -520,7 +520,7 @@ class MeleeUploader(BaseWidget):
             self._timestamps.append("0:00:00 - Intro")
         tdelta = str(datetime.now() - self._timestamp_start).split(".")[0]
         timestamp_format = consts.timestamp_format[self._title_format.value]
-        if all(x for x in [self._p1char.value, self._p2char.value]):
+        if all([self._p1char.value, self._p2char.value]):
             timestamp_info = timestamp_format.format(
                 p1=self._p1.value,
                 p2=self._p2.value,
