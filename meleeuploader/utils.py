@@ -19,7 +19,7 @@ def pre_upload(opts):
         opts.mtype = " ".join((opts.mprefix, opts.mmid))
     elif opts.msuffix:
         opts.mtype = " ".join((opts.mmid, opts.msuffix))
-    chars_exist = all([opts.p1char, opts.p2char])
+    chars_exist = all((opts.p1char, opts.p2char))
     title = make_title(opts, chars_exist)
     if len(title) > 100:
         opts.p1char = minify_chars(opts.p1char)
