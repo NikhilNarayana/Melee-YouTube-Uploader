@@ -30,7 +30,6 @@ sc_form_values_file = os.path.join(smash_folder, "sc_form_values.json")
 log_file = os.path.join(smash_folder, "smash_log.txt")
 custom_list_file = os.path.join(smash_folder, "smash_custom_list.txt")
 youtube_oauth_file = os.path.join(smash_folder, "smash-oauth2-youtube.json")
-partner_oauth_file = os.path.join(smash_folder, "smash-oauth2-partner.json")
 
 abbrv = "smash"
 short_name = "meleeuploader"

@@ -150,86 +150,32 @@ def test_get_service(scope, oauth_file, secret=None):
     return credentials
 
 
-def get_service(scope, oauth_file, secret=None):
-    CLIENT_SECRETS_FILE = get_secrets(PREFIXES, SUFFIXES) if not secret else secret
+def get_youtube_service():
+    CLIENT_SECRETS_FILE = get_secrets(PREFIXES, SUFFIXES)
 
     if not CLIENT_SECRETS_FILE:
         return None
 
-    flow = flow_from_clientsecrets(CLIENT_SECRETS_FILE, scope=scope)
+    flow = flow_from_clientsecrets(CLIENT_SECRETS_FILE, scope=YOUTUBE_UPLOAD_SCOPE)
 
     flow.user_agent = consts.long_name
-    storage = Storage(oauth_file)
+    storage = Storage(consts.youtube_oauth_file)
     credentials = storage.get()
 
     if credentials is None or credentials.invalid:
         credentials = run_flow(flow, storage)
 
-    return credentials
-
-
-def get_youtube_service():
-    credentials = get_service(YOUTUBE_UPLOAD_SCOPE, consts.youtube_oauth_file)
-
     if not credentials:
         return None
 
     http = httplib2.Http()
     try:
-        http.redirect_codes = set(http.redirect_codes) - {
-            308
-        }  # https://github.com/googleapis/google-api-python-client/issues/803
+        # https://github.com/googleapis/google-api-python-client/issues/803
+        http.redirect_codes = set(http.redirect_codes) - {308}
     except:
         pass
 
     return build("youtube", "v3", http=credentials.authorize(http))
-
-
-def get_partner_service():
-    CLIENT_SECRETS_FILE = get_secrets(
-        (consts.smash_folder,), ("client_secrets.json", ".client_secrets.json")
-    )
-
-    credentials = get_service(
-        YOUTUBE_PARTNER_SCOPE + YOUTUBE_UPLOAD_SCOPE, "partner", CLIENT_SECRETS_FILE
-    )
-
-    if not credentials:
-        return None
-
-    http = httplib2.Http()
-    try:
-        http.redirect_codes = set(http.redirect_codes) - {
-            308
-        }  # https://github.com/googleapis/google-api-python-client/issues/803
-    except:
-        pass
-
-    return build("youtubePartner", "v1", http=credentials.authorize(http))
-
-
-def get_spreadsheet_service():
-    credentials = get_service(SPREADSHEETS_SCOPE, "spreadsheet")
-
-    if not credentials:
-        return None
-
-    discoveryUrl = "https://sheets.googleapis.com/$discovery/rest?version=v4"
-
-    http = httplib2.Http()
-    try:
-        http.redirect_codes = set(http.redirect_codes) - {
-            308
-        }  # https://github.com/googleapis/google-api-python-client/issues/803
-    except:
-        pass
-
-    return build(
-        "sheets",
-        "v4",
-        http=credentials.authorize(http),
-        discoveryServiceUrl=discoveryUrl,
-    )
 
 
 def add_to_playlist(pID, vID):
