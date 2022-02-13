@@ -549,7 +549,7 @@ class MeleeUploader(BaseWidget):
             consts.youtube.channels()
             .list(part="snippet", mine=True)
             .execute()
-            .get("items", [])[0]
+            .get("items", [{}])[0]
             .get("snippet", {})
             .get("title")
         )
