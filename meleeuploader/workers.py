@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import json
-import threading
 from time import sleep
 
 import requests

@@ -18,8 +18,6 @@ from . import workers
 from .viewers import *
 
 import requests
-import websocket
-import pyforms_lite
 from argparse import Namespace
 from PyQt5 import QtCore, QtGui
 from pyforms_lite import BaseWidget
