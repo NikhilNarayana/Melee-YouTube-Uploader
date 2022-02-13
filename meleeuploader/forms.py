@@ -164,7 +164,7 @@ class SMurlInput(BaseWidget):
 
 class YouTubeSelector(BaseWidget):
     def __init__(self):
-        super(YouTubeSelector, self).__init__("YouTubeSelector")
+        super(YouTubeSelector, self).__init__("YouTube Account Selector")
         self._youtubes = ControlCombo("Accounts")
         self._ok = ControlButton("Load")
         self._new = ControlButton("New Account")

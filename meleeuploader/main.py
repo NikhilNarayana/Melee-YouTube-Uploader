@@ -17,7 +17,7 @@ def main():
         ):
             consts.youtube = yt.get_youtube_service()
         elif len(os.listdir(consts.yt_accounts_folder)):
-            pyforms_lite.start_app(forms.YouTubeSelector, geometry=(200, 200, 1, 1))
+            pyforms_lite.start_app(forms.YouTubeSelector, geometry=(200, 200, 330, 100))
             consts.youtube = yt.get_youtube_service()
     except Exception as e:
         print(e)
