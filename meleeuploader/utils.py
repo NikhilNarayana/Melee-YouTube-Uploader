@@ -88,7 +88,7 @@ def minify_chars(pchars):
     for i in range(len(pchars)):
         if pchars[i] in consts.min_chars:
             pchars[i] = consts.min_chars[pchars[i]]
-    if all(("Fox", "Falco")):
+    if all(x in pchars for x in ("Fox", "Falco")):
         pchars.remove("Fox")
         pchars.remove("Falco")
         pchars.insert(0, "Spacies")
