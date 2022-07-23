@@ -130,6 +130,68 @@ class StreametaWorker(QObject):
     def send_update(self):
         self.sig.emit(self.data)
 
+class PiioWorker(QObject):
+    sig = pyqtSignal(object)
+    data = None
+
+    def __init__(self, host, port):
+        super().__init__()
+        self.addr = f"ws://{host}:{port}"
+
+    def startws(self):
+        try:
+            print("Hooking into Piio...")
+            self.ws = websocket.WebSocketApp(
+                url=self.addr, 
+                on_message=self.get_update, 
+                on_error=self.on_error,
+                on_open=self.on_open_ws
+            )
+            self.ws.run_forever()
+        except:
+            print("Failed to hook into Piio")
+
+    def on_open_ws(self, ws):
+        print("piio connection open")
+        self.ws.send('{"type":"subscribe","data":"scoreboard"}')
+
+
+    def closews(self):
+        self.ws.close()
+
+    def on_error(self, ws, error):
+        print(error)
+
+    def get_update(self, ws, message):
+        raw_data = json.loads(message)
+
+        player1 = raw_data["data"]["scoreboard"]["teams"]['1']['players'][0]
+        player2 = raw_data["data"]["scoreboard"]["teams"]['2']['players'][0]
+
+        indexedTeams = {}
+        for team in raw_data["data"]["dbEntries"]["team"]:
+            indexedTeams[team['_id']] = team
+
+        data = {
+            "player1": player1["name"],
+            "player2": player2["name"],
+            "round": raw_data["data"]["scoreboard"]["fields"]["round"]["value"],
+        }
+
+        if (len(player1["team"])):
+            data["player1_sponsor"] = indexedTeams[player1["team"][0]]["name"]
+        if (len(player2["team"])):
+            data["player2_sponsor"] = indexedTeams[player2["team"][0]]["name"]
+
+        self.data = data
+        self.send_update()
+
+    def stop(self):
+        self.ws.close()
+
+    @pyqtSlot()
+    def send_update(self):
+        self.sig.emit(self.data)
 
 class WriteWorker(QObject):
 

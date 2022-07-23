@@ -159,6 +159,31 @@ class SMurlInput(BaseWidget):
         else:
             self.warning("You must provide a URL")
 
+class PiioInput(BaseWidget):
+    def __init__(self):
+        super(PiioInput, self).__init__("Piio")
+        self._pi_host = ControlText("Piio Host")
+        self._pi_port = ControlText("Piio Port")
+        self._pi_host.form.lineEdit.setPlaceholderText(
+            "localhost"
+        )
+        self._pi_port.form.lineEdit.setPlaceholderText(
+            "80"
+        )
+
+
+        self._pi_host.value = "localhost"
+        self._pi_port.value = "80"
+
+        self._button = ControlButton("Submit")
+        self._button.value = self.__button_action
+
+    def __button_action(self, data=None):
+        if self._pi_host.value and self._pi_port.value:
+            self.parent._MeleeUploader__hook_pi(self._pi_host.value, self._pi_port.value)
+        else:
+            self.warning("You must provide a URL")
+
 
 class YouTubeSelector(BaseWidget):
     def __init__(self):
@@ -330,6 +355,7 @@ class MeleeUploader(BaseWidget):
                     {"Toggle SA Hook": self.__show_sa_form},
                     {"Toggle SC Hook": self.__show_sc_form},
                     {"Toggle Streameta Hook": self.__show_sm_form},
+                    {"Toggle Piio Hook": self.__show_piio_form},
                     {"About": self.__about_info},
                 ],
                 "Save/Clear": [
@@ -412,6 +438,12 @@ class MeleeUploader(BaseWidget):
         self._sm = None
         self._smf = ControlText()
         self._smf.value = ""
+
+        # Piio
+        self._piio_worker = None
+        self._piio_thread = None
+        self._pi_add = ControlText()
+        self._pi_add.value = ""
 
         # Define the mapping of the form values json to form fields
         self._form_fields = {
@@ -675,6 +707,18 @@ class MeleeUploader(BaseWidget):
         self._smwin.parent = self
         self._smwin.show()
 
+    def __show_piio_form(self):
+        if self._piio_worker:
+            self._piio_worker.stop()
+            print("Unhooked from Piio")
+            self._piio_thread.quit()
+            self._piio_worker = None
+            return
+            
+        self._piiowin = PiioInput()
+        self._piiowin.parent = self
+        self._piiowin.show()
+
     def __hook_sa(self, host, port):
         self._sawin.close()
         self.warning(
@@ -700,6 +744,54 @@ class MeleeUploader(BaseWidget):
         self._obs.sig.connect(self.__handle_obs)
         self._obst.started.connect(self._obs.startobs)
         self._obst.start()
+
+    def __hook_pi(self, host, port):
+        self._piiowin.close()
+        self.warning(
+            "Please make sure piio is open",
+            title="MeleeUploader",
+        )
+        self._piio_worker = workers.PiioWorker(host, port)
+        self._piio_thread = QtCore.QThread()
+        self._piio_worker.moveToThread(self._piio_thread)
+        self._piio_worker.sig.connect(self.__handle_piio_update)
+        self._piio_thread.started.connect(self._piio_worker.startws)
+        self._piio_thread.start()
+
+    def __handle_piio_update(self, data):
+        prefix = ""
+        mtype = ""
+        suffix = ""
+
+        self.__handle_players(
+            data.get("player1", self._p1.value), 
+            data.get("player2", self._p2.value),
+            data.get("player1_sponsor"), 
+            data.get("player2_sponsor"),
+        )
+
+        try:
+            match = data.get("round", None)
+            if match:
+                for t in consts.match_types:
+                    if t.lower() in match.lower():
+                        mtype = t
+                        prefix = ""
+                        suffix = ""
+                        if not match.find(t):
+                            sections = match.split(t)
+                            suffix = sections[1].strip()
+                        if match.find(t) == -1 and match.find(t.lower()) >= 0:
+                            pass
+                        else:
+                            sections = match.split(t)
+                            prefix = sections[0].strip()
+                            suffix = sections[1].strip()
+                self._mtype.value = mtype
+                self._mprefix.value = prefix
+                self._msuffix.value = suffix
+        except Exception as e:
+            print(e)
 
     def __handle_obs(self, recording):
         if recording:
@@ -992,7 +1084,7 @@ class MeleeUploader(BaseWidget):
         self._p1char.load_form(dict(selected=p1))
         self._p2char.load_form(dict(selected=p2))
 
-    def __handle_players(self, p1_name, p2_name):
+    def __handle_players(self, p1_name, p2_name, p1_sponsor, p2_sponsor):
         if all(
             (
                 p1_name != "",
@@ -1010,6 +1102,9 @@ class MeleeUploader(BaseWidget):
         # no swap
         self._p1.value = p1_name
         self._p2.value = p2_name
+
+        self._p1_sponsor.value = p1_sponsor if p1_sponsor else ""
+        self._p2_sponsor.value = p2_sponsor if p2_sponsor else ""
 
     def __sa_update(self, data):
         if consts.stop_updates and not consts.submitted:
