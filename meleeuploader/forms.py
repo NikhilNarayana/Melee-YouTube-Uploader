@@ -159,18 +159,14 @@ class SMurlInput(BaseWidget):
         else:
             self.warning("You must provide a URL")
 
+
 class PiioInput(BaseWidget):
     def __init__(self):
         super(PiioInput, self).__init__("Piio")
         self._pi_host = ControlText("Piio Host")
         self._pi_port = ControlText("Piio Port")
-        self._pi_host.form.lineEdit.setPlaceholderText(
-            "localhost"
-        )
-        self._pi_port.form.lineEdit.setPlaceholderText(
-            "80"
-        )
-
+        self._pi_host.form.lineEdit.setPlaceholderText("localhost")
+        self._pi_port.form.lineEdit.setPlaceholderText("80")
 
         self._pi_host.value = "localhost"
         self._pi_port.value = "80"
@@ -180,7 +176,9 @@ class PiioInput(BaseWidget):
 
     def __button_action(self, data=None):
         if self._pi_host.value and self._pi_port.value:
-            self.parent._MeleeUploader__hook_pi(self._pi_host.value, self._pi_port.value)
+            self.parent._MeleeUploader__hook_pi(
+                self._pi_host.value, self._pi_port.value
+            )
         else:
             self.warning("You must provide a URL")
 
@@ -714,7 +712,7 @@ class MeleeUploader(BaseWidget):
             self._piio_thread.quit()
             self._piio_worker = None
             return
-            
+
         self._piiowin = PiioInput()
         self._piiowin.parent = self
         self._piiowin.show()
@@ -764,10 +762,8 @@ class MeleeUploader(BaseWidget):
         suffix = ""
 
         self.__handle_players(
-            data.get("player1", self._p1.value), 
+            data.get("player1", self._p1.value),
             data.get("player2", self._p2.value),
-            data.get("player1_sponsor"), 
-            data.get("player2_sponsor"),
         )
 
         try:
@@ -1084,7 +1080,7 @@ class MeleeUploader(BaseWidget):
         self._p1char.load_form(dict(selected=p1))
         self._p2char.load_form(dict(selected=p2))
 
-    def __handle_players(self, p1_name, p2_name, p1_sponsor, p2_sponsor):
+    def __handle_players(self, p1_name, p2_name):
         if all(
             (
                 p1_name != "",
@@ -1102,9 +1098,6 @@ class MeleeUploader(BaseWidget):
         # no swap
         self._p1.value = p1_name
         self._p2.value = p2_name
-
-        self._p1_sponsor.value = p1_sponsor if p1_sponsor else ""
-        self._p2_sponsor.value = p2_sponsor if p2_sponsor else ""
 
     def __sa_update(self, data):
         if consts.stop_updates and not consts.submitted:

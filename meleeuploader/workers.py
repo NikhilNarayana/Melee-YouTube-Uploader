@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 
 import json
+import re
 from time import sleep
 
 import requests
 import websocket
-from .obswebsocket import obsws, events
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
+
+from .obswebsocket import events, obsws
 
 
 class SAWorker(QObject):
@@ -130,6 +132,7 @@ class StreametaWorker(QObject):
     def send_update(self):
         self.sig.emit(self.data)
 
+
 class PiioWorker(QObject):
     sig = pyqtSignal(object)
     data = None
@@ -142,10 +145,10 @@ class PiioWorker(QObject):
         try:
             print("Hooking into Piio...")
             self.ws = websocket.WebSocketApp(
-                url=self.addr, 
-                on_message=self.get_update, 
+                url=self.addr,
+                on_message=self.get_update,
                 on_error=self.on_error,
-                on_open=self.on_open_ws
+                on_open=self.on_open_ws,
             )
             self.ws.run_forever()
         except:
@@ -154,7 +157,6 @@ class PiioWorker(QObject):
     def on_open_ws(self, ws):
         print("piio connection open")
         self.ws.send('{"type":"subscribe","data":"scoreboard"}')
-
 
     def closews(self):
         self.ws.close()
@@ -165,23 +167,42 @@ class PiioWorker(QObject):
     def get_update(self, ws, message):
         raw_data = json.loads(message)
 
-        player1 = raw_data["data"]["scoreboard"]["teams"]['1']['players'][0]
-        player2 = raw_data["data"]["scoreboard"]["teams"]['2']['players'][0]
-
         indexedTeams = {}
         for team in raw_data["data"]["dbEntries"]["team"]:
-            indexedTeams[team['_id']] = team
+            indexedTeams[team["_id"]] = team
 
         data = {
-            "player1": player1["name"],
-            "player2": player2["name"],
             "round": raw_data["data"]["scoreboard"]["fields"]["round"]["value"],
         }
 
-        if (len(player1["team"])):
-            data["player1_sponsor"] = indexedTeams[player1["team"][0]]["name"]
-        if (len(player2["team"])):
-            data["player2_sponsor"] = indexedTeams[player2["team"][0]]["name"]
+        try:
+            for index, team in raw_data["data"]["scoreboard"]["teams"].items():
+                names = []
+                for player in team["players"]:
+                    name = player["name"]
+                    teams_no_regex = []
+
+                    for team_id in player["team"]:
+                        team = indexedTeams[team_id]
+
+                        if team["regex"]:
+                            name = re.sub(team["regex"], team["prefix"], name)
+                        else:
+                            teams_no_regex.append(team)
+
+                    if teams_no_regex:
+                        delimiter = teams_no_regex[-1]["delimiter"]
+                        team_names = map(lambda t: t["prefix"], teams_no_regex)
+                        whole_prefix = " ".join(team_names) + delimiter
+                        name = whole_prefix + name
+
+                    names.append(name)
+
+                data[f"player{index}"] = " & ".join(names)
+
+        except Exception as e:
+            print(e)
+            raise e
 
         self.data = data
         self.send_update()
@@ -192,6 +213,7 @@ class PiioWorker(QObject):
     @pyqtSlot()
     def send_update(self):
         self.sig.emit(self.data)
+
 
 class WriteWorker(QObject):
 
