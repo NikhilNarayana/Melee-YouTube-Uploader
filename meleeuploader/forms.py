@@ -771,33 +771,33 @@ class MeleeUploader(BaseWidget):
         self._qview -= job_num
 
     def __save_queue(self, silent=False):
-        if os.path.exists(consts.queue_values_file) and not silent:
-            resp = self.question(
-                f"A queue already exists would you like to overwrite it?\nIt was last modified on {datetime.utcfromtimestamp(int(os.path.getmtime(consts.queue_values_file))).strftime('%Y-%m-%d')}"
-            )
-            if resp == "yes":
-                with open(consts.queue_values_file, "wb") as f:
-                    pickle.dump(self._queueref, f)
-                print("Saved Queue, you can now close the program")
-            elif resp == "no":
-                resp = self.question(
-                    "Would you like to add onto the end of that queue?"
-                )
-                if resp == "yes":
-                    queueref = None
-                    with open(consts.queue_values_file, "rb") as f:
-                        queueref = pickle.load(f)
-                    queueref.extend(self._queueref)
-                    with open(consts.queue_values_file, "wb") as f:
-                        pickle.dump(queueref, f)
-                    print("Saved Queue, you can now close the program")
-                else:
-                    self.alert("Not saving queue", title="MeleeUploader")
+        if silent or not os.path.exists(consts.queue_values_file):
+            with open(consts.queue_values_file, "wb") as f:
+                pickle.dump(self._queueref, f)
+                print("Queue Saved")
+                return
+
+        resp = self.question(
+            f"A queue already exists would you like to overwrite it?\nIt was last modified on {datetime.utcfromtimestamp(int(os.path.getmtime(consts.queue_values_file))).strftime('%Y-%m-%d')}"
+        )
+        if resp == "yes":
+            with open(consts.queue_values_file, "wb") as f:
+                pickle.dump(self._queueref, f)
+            print("Queue Saved")
             return
 
+        resp = self.question("Would you like to add onto the end of that queue?")
+        if resp == "no":
+            self.alert("Not saving queue", title="MeleeUploader")
+            return
+
+        queueref = None
+        with open(consts.queue_values_file, "rb") as f:
+            queueref = pickle.load(f)
+        queueref.extend(self._queueref)
         with open(consts.queue_values_file, "wb") as f:
-            pickle.dump(self._queueref, f)
-            print("Saved Queue, you can now close the program")
+            pickle.dump(queueref, f)
+        print("Queue Saved")
 
     def __load_queue(self):
         if self._queueref and not consts.start_queue:
