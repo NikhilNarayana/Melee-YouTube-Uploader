@@ -615,10 +615,10 @@ class MeleeUploader(BaseWidget):
                     data["title_format"] = deepcopy(options.title_format)
                     with open(consts.form_values_file, "w") as f:
                         json.dump(data, f)
-                    if consts.save_on_submit:
-                        self.__save_queue(True)
                 self._queueref.pop(0)
                 self._qview -= 0
+                if consts.save_on_submit:
+                    self.__save_queue(True)
             self._queue.task_done()
         print("Stopping Upload Service")
 
