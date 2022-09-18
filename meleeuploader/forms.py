@@ -602,7 +602,7 @@ class MeleeUploader(BaseWidget):
             options = self._queue.get()
             if not options.ignore:
                 options.then = datetime.now()
-                if utils.pre_upload(options):
+                if utils.upload(options):
                     data = {"game": deepcopy(consts.game)}
                     data["ename"] = deepcopy(options.ename)
                     data["pID"] = deepcopy(options.pID)

@@ -6,7 +6,7 @@ from . import consts
 from . import youtube as yt
 
 
-def pre_upload(opts):
+def upload(opts):
     if opts.mmid == "Grand Finals" and any(
         x.lower() in opts.msuffix.lower() for x in ("Set 2", "Reset")
     ):
