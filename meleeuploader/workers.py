@@ -132,7 +132,6 @@ class StreametaWorker(QObject):
 
 
 class WriteWorker(QObject):
-
     textWritten = pyqtSignal(str)
 
     @pyqtSlot(str)
