@@ -45,7 +45,7 @@ setup(
         "google_auth_oauthlib",
         "oauth2client",
         "Pyforms-Lite",
-        "urllib3==1.26.15",
+        "urllib3==2.0.2",
         "websocket-client==0.54.0",
     ],
     data_files=[("share/meleeuploader", ["meleeuploader/client_secrets.json"])],
