@@ -180,6 +180,9 @@ In addition to enabling the settings you will need to update OBS with the websoc
 You can add your own custom character lists by putting comma separated names in a file called `.smash_custom_list.txt` in the smashuploader config folder which is in your root directory.  
 If you don't know where your root directory is, open the program and select `Characters -> Custom` and the program will make a blank text file where it is supposed to be.
 
+## Terms of Service
+This application is licensed under GPLv3, don't break the license. You must also abide by YouTube's Terms of Service.
+<https://github.com/NikhilNarayana/Melee-YouTube-Uploader/blob/master/LICENSE>
 
 ## Privacy Policy
 Melee YouTube Uploader is a local only application apart from the fact that it uplaods data to YouTube, which you should already expect. All other data is stored locally and nothing you do while using this app is shared back to me or any third party. Your data is your data, as it should be.
