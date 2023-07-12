@@ -185,4 +185,4 @@ This application is licensed under GPLv3, don't break the license. You must also
 <https://github.com/NikhilNarayana/Melee-YouTube-Uploader/blob/master/LICENSE>
 
 ## Privacy Policy
-Melee YouTube Uploader is a local only application apart from the fact that it uplaods data to YouTube, which you should already expect. All other data is stored locally and nothing you do while using this app is shared back to me or any third party. Your data is your data, as it should be.
+Melee YouTube Uploader is a local only application apart from the fact that it uploads data to YouTube, which you should already expect. All other data (profiles, saved upload queues, etc.) is stored locally and nothing you do while using this app is shared back to me or any third party. Your data is your data, as it should be.
