@@ -16,7 +16,9 @@ This application **DOES NOT/CANNOT** support enabling monetization due to YouTub
 
 ## Contributing
 
-PRs are appreciated and will be reviewed quickly, the only code quality standard I have is to follow PEP8 standard except for the line length. If you have trouble understanding my code just ask me.
+PRs are appreciated, but i have less time to focus on this project so reviews will be slow. plus, in the future i would like to RIIR
+
+the only code quality standard I have is to `black` for formatting. If you have trouble understanding my code just ask me.
 
 ## Questions and Support
 
